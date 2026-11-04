@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The domain has no dependency: no user interface, no database, no operating system API. -->
+
+</Project>

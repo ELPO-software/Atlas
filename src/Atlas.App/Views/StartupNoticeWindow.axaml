@@ -1,0 +1,18 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:res="using:Atlas.App.Resources"
+        x:Class="Atlas.App.Views.StartupNoticeWindow"
+        Title="{x:Static res:Strings.AppName}"
+        Width="520"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterScreen">
+    <StackPanel Margin="24" Spacing="16">
+        <TextBlock x:Name="NoticeTitle" FontSize="20" TextWrapping="Wrap" />
+        <SelectableTextBlock x:Name="NoticeMessage" TextWrapping="Wrap" />
+        <Button x:Name="CloseButton"
+                Content="{x:Static res:Strings.Close}"
+                HorizontalAlignment="Right"
+                Click="OnCloseClick" />
+    </StackPanel>
+</Window>

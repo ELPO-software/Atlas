@@ -1,0 +1,39 @@
+<Project>
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup Label="Interface">
+    <PackageVersion Include="Avalonia" Version="12.1.5" />
+    <PackageVersion Include="Avalonia.Desktop" Version="12.1.5" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.1.5" />
+    <PackageVersion Include="Avalonia.Fonts.Inter" Version="12.1.5" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <!-- Referenced only to exclude its build-time telemetry: see Directory.Build.props. -->
+    <PackageVersion Include="Avalonia.BuildServices" Version="11.3.2" />
+  </ItemGroup>
+
+  <ItemGroup Label="Composition and logging">
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.14" />
+    <PackageVersion Include="Serilog" Version="4.4.0" />
+    <PackageVersion Include="Serilog.Extensions.Logging" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Storage">
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.14" />
+  </ItemGroup>
+
+  <ItemGroup Label="Tests">
+    <!-- Avalonia.Headless.XUnit 12.1.5 is built against xunit.v3 3.2.2 and fails discovery on 4.x. -->
+    <PackageVersion Include="xunit.v3" Version="3.2.2" />
+    <PackageVersion Include="Avalonia.Headless.XUnit" Version="12.1.5" />
+    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.11.0" />
+    <!-- Referenced only to exclude their telemetry: see tests/Directory.Build.props. They follow xunit.v3. -->
+    <PackageVersion Include="Microsoft.Testing.Extensions.Telemetry" Version="1.9.1" />
+    <PackageVersion Include="Microsoft.ApplicationInsights" Version="2.23.0" />
+  </ItemGroup>
+
+</Project>

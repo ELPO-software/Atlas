@@ -1,0 +1,21 @@
+<Project>
+
+  <!--
+    Guard for the telemetry exclusions declared in Directory.Build.props and tests/Directory.Build.props.
+    NuGet lists the build logic of each restored package in these generated files, so a telemetry
+    package can only take effect if its file name appears there.
+  -->
+  <Target Name="AtlasRefuseToolTelemetry" BeforeTargets="BeforeBuild">
+    <PropertyGroup>
+      <_AtlasNuGetProps>$(MSBuildProjectExtensionsPath)$(MSBuildProjectFile).nuget.g.props</_AtlasNuGetProps>
+      <_AtlasNuGetTargets>$(MSBuildProjectExtensionsPath)$(MSBuildProjectFile).nuget.g.targets</_AtlasNuGetTargets>
+    </PropertyGroup>
+    <Error
+      Condition="Exists('$(_AtlasNuGetTargets)') And $([System.IO.File]::ReadAllText('$(_AtlasNuGetTargets)').Contains('Avalonia.BuildServices.targets'))"
+      Text="Avalonia.BuildServices is active in $(MSBuildProjectName). Atlas must build without telemetry: restore the exclusion in Directory.Build.props." />
+    <Error
+      Condition="Exists('$(_AtlasNuGetProps)') And $([System.IO.File]::ReadAllText('$(_AtlasNuGetProps)').Contains('Microsoft.Testing.Extensions.Telemetry.props'))"
+      Text="Microsoft.Testing.Extensions.Telemetry is active in $(MSBuildProjectName). Atlas must be tested without telemetry: restore the exclusion in tests/Directory.Build.props." />
+  </Target>
+
+</Project>

@@ -1,0 +1,47 @@
+<Project>
+
+  <!--
+    Product identity: the single source of truth for name, version, author, URL and license.
+    Do not duplicate these values anywhere else in the code base.
+  -->
+  <PropertyGroup Label="Product identity">
+    <Product>ELPO Atlas</Product>
+    <Version>0.1.0-alpha.1</Version>
+    <Authors>ELPO software</Authors>
+    <Company>$(Authors)</Company>
+    <Copyright>Copyright (c) 2026 $(Authors)</Copyright>
+    <Description>A local-first workspace manager to organize and restore your working environments.</Description>
+    <AtlasProjectUrl>https://github.com/ELPO-software/Atlas</AtlasProjectUrl>
+    <AtlasLicense>MIT</AtlasLicense>
+    <NeutralLanguage>fr</NeutralLanguage>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+
+  <ItemGroup Label="Product identity metadata">
+    <AssemblyMetadata Include="Atlas.ProjectUrl" Value="$(AtlasProjectUrl)" />
+    <AssemblyMetadata Include="Atlas.License" Value="$(AtlasLicense)" />
+    <AssemblyMetadata Include="Atlas.Authors" Value="$(Authors)" />
+  </ItemGroup>
+
+  <PropertyGroup Label="Build">
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!--
+    Avalonia pulls in Avalonia.BuildServices, which reports telemetry while compiling.
+    Atlas promises no telemetry, so every project excludes it. Directory.Build.targets
+    fails the build if this exclusion ever stops working.
+  -->
+  <ItemGroup Label="No build telemetry">
+    <PackageReference Include="Avalonia.BuildServices" ExcludeAssets="all" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

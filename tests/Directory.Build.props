@@ -1,0 +1,27 @@
+<Project>
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup Label="Test projects">
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <!--
+    xunit.v3 pulls in this extension, which reports usage data to Microsoft on every test run,
+    along with the library it sends the data through. Atlas promises no telemetry, so test
+    projects exclude both. Directory.Build.targets fails the build if the extension becomes
+    active again, and ArchitectureTests checks that neither library reaches the test output.
+  -->
+  <ItemGroup Label="No test telemetry">
+    <PackageReference Include="Microsoft.Testing.Extensions.Telemetry" ExcludeAssets="all" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.ApplicationInsights" ExcludeAssets="all" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

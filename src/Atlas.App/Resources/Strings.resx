@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="AppName" xml:space="preserve">
+    <value>ELPO Atlas</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Fermer</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Chargement…</value>
+  </data>
+
+  <data name="WorkspaceCountOne" xml:space="preserve">
+    <value>{0} espace de travail</value>
+  </data>
+  <data name="WorkspaceCountMany" xml:space="preserve">
+    <value>{0} espaces de travail</value>
+  </data>
+  <data name="WorkspaceCountFailed" xml:space="preserve">
+    <value>Impossible de lire les espaces de travail. Le détail se trouve dans le journal : {0}</value>
+  </data>
+
+  <data name="AlreadyRunningTitle" xml:space="preserve">
+    <value>Atlas est déjà ouvert</value>
+  </data>
+  <data name="AlreadyRunningMessage" xml:space="preserve">
+    <value>Une fenêtre d'Atlas est déjà ouverte sur cette session. Utilisez-la pour continuer.</value>
+  </data>
+
+  <data name="StartupFailedTitle" xml:space="preserve">
+    <value>Atlas n'a pas pu démarrer</value>
+  </data>
+  <data name="DatabaseTooNewMessage" xml:space="preserve">
+    <value>Ces données ont été créées par une version plus récente d'Atlas. Installez cette version pour les ouvrir. Atlas n'a rien modifié.
+
+Fichier : {0}</value>
+  </data>
+  <data name="ForeignDatabaseMessage" xml:space="preserve">
+    <value>Ce fichier appartient à un autre programme : Atlas ne l'a pas modifié. Déplacez-le ou renommez-le pour qu'Atlas puisse créer sa propre base de données.
+
+Fichier : {0}</value>
+  </data>
+  <data name="DatabaseUnreadableMessage" xml:space="preserve">
+    <value>Le fichier de données est endommagé ou inaccessible. Atlas ne l'a ni modifié ni supprimé.
+
+Fichier : {0}</value>
+  </data>
+  <data name="DatabaseMigrationFailedMessage" xml:space="preserve">
+    <value>La mise à jour des données a échoué et a été annulée. Vos données sont intactes et une copie de sauvegarde se trouve à côté du fichier.
+
+Fichier : {0}</value>
+  </data>
+  <data name="DataFolderUnavailableMessage" xml:space="preserve">
+    <value>Atlas ne peut pas accéder à son dossier de données. Vérifiez qu'il existe et que vous avez le droit d'y écrire.
+
+Dossier : {0}</value>
+  </data>
+</root>
