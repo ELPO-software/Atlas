@@ -13,6 +13,11 @@ public interface IFilePicker
     Task<string?> PickFileAsync();
 
     Task<string?> PickFolderAsync();
+
+    Task<string?> PickImportFileAsync();
+
+    /// <returns>Where to write the exported file, or null if the user cancelled.</returns>
+    Task<string?> PickExportFileAsync(string suggestedName);
 }
 
 internal sealed class StorageFilePicker(Func<TopLevel?> owner) : IFilePicker
@@ -34,6 +39,26 @@ internal sealed class StorageFilePicker(Func<TopLevel?> owner) : IFilePicker
         });
 
         return folders.Count > 0 ? folders[0].TryGetLocalPath() : null;
+    }
+
+    public Task<string?> PickImportFileAsync() =>
+        PickAsync(Strings.ImportTitle, [new FilePickerFileType(Strings.ExportFileType) { Patterns = ["*.json"] }]);
+
+    public async Task<string?> PickExportFileAsync(string suggestedName)
+    {
+        if (owner()?.StorageProvider is not { CanSave: true } storage)
+            return null;
+
+        var file = await storage.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = Strings.ExportTitle,
+            SuggestedFileName = suggestedName,
+            DefaultExtension = "json",
+            ShowOverwritePrompt = true,
+            FileTypeChoices = [new FilePickerFileType(Strings.ExportFileType) { Patterns = ["*.json"] }],
+        });
+
+        return file?.TryGetLocalPath();
     }
 
     private async Task<string?> PickAsync(string title, IReadOnlyList<FilePickerFileType>? filters)

@@ -1,8 +1,10 @@
 using Atlas.App.Services;
 using Atlas.App.ViewModels;
+using Atlas.Core.History;
 using Atlas.Core.Resources;
 using Atlas.Core.Restoration;
 using Atlas.Core.Settings;
+using Atlas.Core.Versions;
 using Atlas.Core.Workspaces;
 using Atlas.Infrastructure.Logging;
 using Atlas.Infrastructure.Persistence;
@@ -30,8 +32,11 @@ internal static class AppComposition
         services.AddSingleton(_ => new SqliteDatabase(paths.DatabasePath));
         services.AddSingleton<DatabaseMigrator>();
         services.AddSingleton<IWorkspaceRepository, SqliteWorkspaceRepository>();
+        services.AddSingleton<IVersionRepository, SqliteVersionRepository>();
+        services.AddSingleton<IHistoryRepository, SqliteHistoryRepository>();
         services.AddSingleton<ISettingsStore, SqliteSettingsStore>();
         services.AddSingleton<WorkspaceService>();
+        services.AddSingleton<VersionService>();
         services.AddSingleton<SettingsService>();
         services.AddSingleton<RestorationService>();
 
@@ -51,6 +56,8 @@ internal static class AppComposition
         services.AddSingleton<IDialogService, WindowDialogService>();
         services.AddSingleton<IThemeController, ApplicationThemeController>();
         services.AddSingleton<IFolderOpener, LauncherFolderOpener>();
+        services.AddSingleton<IFilePicker>(provider =>
+            new StorageFilePicker(() => provider.GetRequiredService<MainWindowHost>().Window));
 
         services.AddSingleton<PageServices>();
         services.AddTransient<MainWindowViewModel>();

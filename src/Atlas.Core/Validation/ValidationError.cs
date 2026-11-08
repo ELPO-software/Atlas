@@ -8,6 +8,7 @@ public enum ValidationField
     WorkspaceNotes,
     ResourceDisplayName,
     ResourceTarget,
+    VersionName,
 }
 
 public enum ValidationCode

@@ -18,6 +18,27 @@ internal static class DateText
             : UiText.Format(Strings.ModifiedOn, Day(local));
     }
 
+    /// <summary>"Aujourd'hui à 14:32", "Hier à 09:05" or "4 novembre 2026 à 10:05".</summary>
+    public static string At(DateTimeOffset value, TimeProvider time)
+    {
+        var local = TimeZoneInfo.ConvertTime(value, time.LocalTimeZone);
+        var today = TimeZoneInfo.ConvertTime(time.GetUtcNow(), time.LocalTimeZone).Date;
+
+        if (local.Date == today)
+            return UiText.Format(Strings.DateAtToday, Hour(local));
+
+        return local.Date == today.AddDays(-1)
+            ? UiText.Format(Strings.DateAtYesterday, Hour(local))
+            : UiText.Format(Strings.DateAt, Day(local), Hour(local));
+    }
+
+    /// <summary>"8 novembre 2026 à 11:39", for a name that must stay meaningful later.</summary>
+    public static string Full(DateTimeOffset value, TimeProvider time)
+    {
+        var local = TimeZoneInfo.ConvertTime(value, time.LocalTimeZone);
+        return UiText.Format(Strings.DateAt, Day(local), Hour(local));
+    }
+
     public static string Created(DateTimeOffset value, TimeProvider time) =>
         UiText.Format(Strings.CreatedOn, Day(TimeZoneInfo.ConvertTime(value, time.LocalTimeZone)));
 

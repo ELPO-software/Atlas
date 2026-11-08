@@ -23,6 +23,9 @@ internal sealed class WindowDialogService(
     public Task<Workspace?> EditWorkspaceAsync(WorkspaceEditorRequest request) =>
         new WorkspaceEditorWindow(new WorkspaceEditorViewModel(request, paths, workspaceEditorLogger)).ShowDialog<Workspace?>(Owner);
 
+    public Task<bool> ConfirmImportAsync(ImportPreviewViewModel preview) =>
+        new ImportPreviewWindow(preview).ShowDialog<bool>(Owner);
+
     public Task<Workspace?> EditResourceAsync(ResourceEditorRequest request)
     {
         // The pickers open over the form, which exists only once the view model is built.

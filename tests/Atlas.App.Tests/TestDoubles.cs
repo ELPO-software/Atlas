@@ -1,8 +1,10 @@
 using Atlas.App.Services;
 using Atlas.App.ViewModels;
+using Atlas.Core.History;
 using Atlas.Core.Resources;
 using Atlas.Core.Restoration;
 using Atlas.Core.Settings;
+using Atlas.Core.Versions;
 using Atlas.Core.Workspaces;
 using Atlas.Infrastructure.Storage;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -23,6 +25,9 @@ internal sealed class FakeWorkspaceRepository : IWorkspaceRepository
     public Task? WriteGate { get; set; }
 
     public int WriteCount { get; private set; }
+
+    /// <summary>The history written with the changes, shared with <see cref="FakeHistoryRepository"/>.</summary>
+    public List<HistoryEntry> History { get; } = [];
 
     public Task<IReadOnlyList<WorkspaceSummary>> ListAsync(CancellationToken cancellationToken = default)
     {
@@ -46,14 +51,15 @@ internal sealed class FakeWorkspaceRepository : IWorkspaceRepository
         return Task.FromResult(_workspaces.TryGetValue(id, out var workspace) ? Copy(workspace) : null);
     }
 
-    public async Task AddAsync(Workspace workspace, CancellationToken cancellationToken = default)
+    public async Task AddAsync(Workspace workspace, HistoryEntry? record = null, CancellationToken cancellationToken = default)
     {
         await PassThroughGateAsync();
         WriteCount++;
         _workspaces.Add(workspace.Id, Copy(workspace));
+        Record(record);
     }
 
-    public async Task<bool> UpdateAsync(Workspace workspace, CancellationToken cancellationToken = default)
+    public async Task<bool> UpdateAsync(Workspace workspace, HistoryEntry? record = null, CancellationToken cancellationToken = default)
     {
         await PassThroughGateAsync();
         if (!_workspaces.ContainsKey(workspace.Id))
@@ -61,14 +67,25 @@ internal sealed class FakeWorkspaceRepository : IWorkspaceRepository
 
         WriteCount++;
         _workspaces[workspace.Id] = Copy(workspace);
+        Record(record);
         return true;
     }
 
-    public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteAsync(Guid id, HistoryEntry? record = null, CancellationToken cancellationToken = default)
     {
         await PassThroughGateAsync();
         WriteCount++;
-        return _workspaces.Remove(id);
+        var removed = _workspaces.Remove(id);
+        if (removed)
+            Record(record);
+
+        return removed;
+    }
+
+    private void Record(HistoryEntry? record)
+    {
+        if (record is not null)
+            History.Add(record);
     }
 
     /// <summary>Stores a workspace directly, without counting as a write made by the code under test.</summary>
@@ -92,6 +109,65 @@ internal sealed class FakeWorkspaceRepository : IWorkspaceRepository
 
     private static Workspace Copy(Workspace w) =>
         Workspace.Restore(w.Id, w.Name, w.Description, w.Notes, w.CreatedAt, w.UpdatedAt, w.LastUsedAt, w.Resources);
+}
+
+internal sealed class FakeVersionRepository(FakeWorkspaceRepository workspaces) : IVersionRepository
+{
+    public List<WorkspaceVersion> Versions { get; } = [];
+
+    public Exception? Failure { get; set; }
+
+    public Task<IReadOnlyList<VersionSummary>> ListAsync(Guid workspaceId, CancellationToken cancellationToken = default)
+    {
+        ThrowIfFailing();
+        return Task.FromResult<IReadOnlyList<VersionSummary>>(Versions
+            .Where(v => v.WorkspaceId == workspaceId)
+            .OrderByDescending(v => v.SavedAt)
+            .Select(v => new VersionSummary(v.Id, v.WorkspaceId, v.Name, v.SavedAt, v.IsAutomatic, v.ResourceCount))
+            .ToList());
+    }
+
+    public Task<int> CountAsync(Guid workspaceId, CancellationToken cancellationToken = default)
+    {
+        ThrowIfFailing();
+        return Task.FromResult(Versions.Count(v => v.WorkspaceId == workspaceId));
+    }
+
+    public Task<WorkspaceVersion?> GetAsync(Guid versionId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Versions.FirstOrDefault(v => v.Id == versionId));
+
+    public Task AddAsync(WorkspaceVersion version, HistoryEntry record, CancellationToken cancellationToken = default)
+    {
+        ThrowIfFailing();
+        Versions.Add(version);
+        workspaces.History.Add(record);
+        return Task.CompletedTask;
+    }
+
+    private void ThrowIfFailing()
+    {
+        if (Failure is not null)
+            throw Failure;
+    }
+}
+
+internal sealed class FakeHistoryRepository(FakeWorkspaceRepository workspaces) : IHistoryRepository
+{
+    public Exception? Failure { get; set; }
+
+    public Task<IReadOnlyList<HistoryEntry>> ListAsync(int limit, CancellationToken cancellationToken = default) =>
+        Failure is null
+            ? Task.FromResult<IReadOnlyList<HistoryEntry>>(workspaces.History.OrderByDescending(e => e.OccurredAt).Take(limit).ToList())
+            : Task.FromException<IReadOnlyList<HistoryEntry>>(Failure);
+
+    public Task RecordAsync(HistoryEntry entry, CancellationToken cancellationToken = default)
+    {
+        if (Failure is not null)
+            return Task.FromException(Failure);
+
+        workspaces.History.Add(entry);
+        return Task.CompletedTask;
+    }
 }
 
 internal sealed class FakeSettingsStore : ISettingsStore
@@ -150,6 +226,17 @@ internal sealed class FakeDialogService(AtlasDataPaths paths) : IDialogService
         return Task.FromResult(Decide?.Invoke(request) ?? ConfirmAnswer);
     }
 
+    /// <summary>The answer to the import preview.</summary>
+    public bool ImportAnswer { get; set; }
+
+    public List<ImportPreviewViewModel> ImportPreviews { get; } = [];
+
+    public Task<bool> ConfirmImportAsync(ImportPreviewViewModel preview)
+    {
+        ImportPreviews.Add(preview);
+        return Task.FromResult(ImportAnswer);
+    }
+
     public async Task<Workspace?> EditResourceAsync(ResourceEditorRequest request)
     {
         ResourceEditors.Add(request);
@@ -190,6 +277,16 @@ internal sealed class FakeFilePicker : IFilePicker
     public Task<string?> PickFileAsync() => Pick("file");
 
     public Task<string?> PickFolderAsync() => Pick("folder");
+
+    public Task<string?> PickImportFileAsync() => Pick("import");
+
+    public Task<string?> PickExportFileAsync(string suggestedName)
+    {
+        SuggestedNames.Add(suggestedName);
+        return Pick("export");
+    }
+
+    public List<string> SuggestedNames { get; } = [];
 
     private Task<string?> Pick(string what)
     {
@@ -296,11 +393,16 @@ internal sealed class TestServices
         Paths = new AtlasDataPaths(Path.Combine(Path.GetTempPath(), LogsMarker));
         Dialogs = new FakeDialogService(Paths);
         Workspaces = new WorkspaceService(Repository, Clock);
+        Versions = new FakeVersionRepository(Repository);
+        History = new FakeHistoryRepository(Repository);
         Pages = new PageServices(
             Workspaces,
+            new VersionService(Workspaces, Versions, Clock),
+            History,
             new SettingsService(SettingsStore),
             new RestorationService(Opener, Clock),
             Dialogs,
+            Files,
             Theme,
             Folders,
             Paths,
@@ -311,6 +413,13 @@ internal sealed class TestServices
     public FakeWorkspaceRepository Repository { get; } = new();
 
     public FakeResourceOpener Opener { get; } = new();
+
+    public FakeVersionRepository Versions { get; }
+
+    public FakeHistoryRepository History { get; }
+
+    /// <summary>The pickers the pages use, as opposed to those of the resource form.</summary>
+    public FakeFilePicker Files { get; } = new();
 
     public FakeSettingsStore SettingsStore { get; } = new();
 

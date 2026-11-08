@@ -22,6 +22,18 @@ Prepare a test folder with a text file, a subfolder whose name has spaces and ac
 | Add a program that asks for administrator rights, then refuse the prompt | The report says Windows refused to open it | Not yet verified |
 | Stop a restoration while it runs | What was opened stays open; the rest is reported as skipped | Covered by automated tests only |
 
+## Versions, history, import and export
+
+| Check | Expected | Last verified |
+|---|---|---|
+| Save a version | Its suggested name is dated; it appears in the list | 2026-11-08 |
+| Change the notes, then go back to the version | The notes come back; an automatic version keeps the changed state | 2026-11-08 |
+| Export a workspace whose paths contain your user name | A warning names it before the Save dialog opens | 2026-11-08 |
+| Export, then import the file | The preview lists every resource before anything is created; a new workspace opens | 2026-11-08 |
+| Import a file that is not a workspace | The preview explains why and offers no Import button | Covered by automated tests only |
+| Import a workspace with an application | The application is marked "À approuver" and skipped by a restoration until approved | Covered by automated tests only |
+| Open the history | Every action above is listed, most recent first, including deleted workspaces | 2026-11-08 |
+
 ## Interface
 
 | Check | Expected | Last verified |

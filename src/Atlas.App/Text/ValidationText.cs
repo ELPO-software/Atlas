@@ -25,6 +25,9 @@ internal static class ValidationText
         (ValidationField.ResourceTarget, ValidationCode.UnsupportedLink) => Strings.TargetUnsupportedLink,
         (ValidationField.ResourceTarget, ValidationCode.ExecutableFile) => Strings.TargetExecutableFile,
         (ValidationField.ResourceTarget, ValidationCode.NotAnApplication) => Strings.TargetNotAnApplication,
+        (ValidationField.VersionName, ValidationCode.Required) => Strings.VersionNameRequired,
+        (ValidationField.VersionName, ValidationCode.TooLong) => UiText.Format(Strings.NameTooLong, Atlas.Core.Versions.VersionRules.NameMaxLength),
+        (ValidationField.VersionName, ValidationCode.ControlCharacters) => Strings.NameInvalidCharacters,
         _ => Strings.ValueRefused,
     };
 

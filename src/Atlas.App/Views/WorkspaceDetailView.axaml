@@ -49,6 +49,7 @@
                                 IsEnabled="{Binding CanRestore}" />
                         <Button x:Name="EditWorkspace" Content="{x:Static res:Strings.Edit}" Command="{Binding EditCommand}" IsEnabled="{Binding CanChange}" />
                         <Button x:Name="DuplicateWorkspace" Content="{x:Static res:Strings.Duplicate}" Command="{Binding DuplicateCommand}" IsEnabled="{Binding CanChange}" />
+                        <Button x:Name="ExportWorkspace" Content="{x:Static res:Strings.Export}" Command="{Binding ExportCommand}" IsEnabled="{Binding CanChange}" />
                         <Button x:Name="DeleteWorkspace" Classes="danger-text" Content="{x:Static res:Strings.Delete}" Command="{Binding DeleteCommand}" IsEnabled="{Binding CanChange}" />
                     </StackPanel>
 
@@ -56,6 +57,11 @@
                                          Classes="error"
                                          Text="{Binding ActionError}"
                                          IsVisible="{Binding ActionError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+                    <SelectableTextBlock x:Name="ActionInfo"
+                                         Classes="secondary"
+                                         Text="{Binding ActionInfo}"
+                                         IsVisible="{Binding ActionInfo, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
 
                     <Border x:Name="RestoreProgress" Classes="surface" IsVisible="{Binding IsRestoring}">
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
@@ -151,6 +157,11 @@
                                                                        ToolTip.Tip="{Binding Target}" />
                                                         </StackPanel>
                                                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                            <Button Content="{x:Static res:Strings.Approve}"
+                                                                    Command="{Binding ApproveCommand}"
+                                                                    IsVisible="{Binding NeedsApproval}"
+                                                                    IsEnabled="{Binding $parent[UserControl].((vm:WorkspaceDetailViewModel)DataContext).CanChange}"
+                                                                    AutomationProperties.Name="{Binding ApproveLabel}" />
                                                             <Button Classes="quiet"
                                                                     Content="{x:Static res:Strings.Edit}"
                                                                     Command="{Binding EditCommand}"
@@ -192,6 +203,53 @@
                         <SelectableTextBlock x:Name="NotesError" Classes="error" Text="{Binding NotesError}" />
                         <Button Content="{x:Static res:Strings.Retry}" Command="{Binding RetrySaveNotesCommand}" />
                     </StackPanel>
+
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,16,0,0">
+                        <TextBlock Classes="section-title" VerticalAlignment="Center" Text="{x:Static res:Strings.VersionsTitle}" />
+                        <Button x:Name="SaveVersion"
+                                Grid.Column="1"
+                                Content="{x:Static res:Strings.SaveVersion}"
+                                Command="{Binding SaveVersionCommand}"
+                                IsEnabled="{Binding CanChange}" />
+                    </Grid>
+                    <TextBlock x:Name="NoVersions"
+                               Classes="secondary"
+                               Text="{x:Static res:Strings.VersionsEmpty}"
+                               IsVisible="{Binding HasNoVersions}" />
+                    <SelectableTextBlock x:Name="VersionsError"
+                                         Classes="error"
+                                         Text="{Binding VersionsError}"
+                                         IsVisible="{Binding VersionsError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    <Border Classes="surface" IsVisible="{Binding !HasNoVersions}">
+                        <ItemsControl x:Name="Versions" ItemsSource="{Binding Versions}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Spacing="10" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:VersionItemViewModel">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}" />
+                                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                                <TextBlock Classes="caption" Text="{Binding SavedText}" />
+                                                <TextBlock Classes="caption" Text="{Binding ResourceCountText}" />
+                                                <TextBlock Classes="caption" Text="{x:Static res:Strings.AutomaticVersion}" IsVisible="{Binding IsAutomatic}" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <Button Grid.Column="1"
+                                                Classes="quiet"
+                                                VerticalAlignment="Center"
+                                                Content="{x:Static res:Strings.RestoreVersion}"
+                                                Command="{Binding RestoreCommand}"
+                                                IsEnabled="{Binding $parent[UserControl].((vm:WorkspaceDetailViewModel)DataContext).CanChange}"
+                                                AutomationProperties.Name="{Binding RestoreLabel}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
                 </StackPanel>
             </StackPanel>
         </Grid>

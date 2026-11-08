@@ -68,6 +68,17 @@
                             <TextBlock Grid.Column="2" Text="{x:Static res:Strings.NavWorkspaces}" VerticalAlignment="Center" />
                         </Grid>
                     </Button>
+                    <Button x:Name="NavHistory"
+                            Classes="nav"
+                            Classes.selected="{Binding IsHistorySelected}"
+                            Command="{Binding OpenHistoryCommand}"
+                            AutomationProperties.Name="{x:Static res:Strings.NavHistory}">
+                        <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10">
+                            <Border Classes="nav-indicator" />
+                            <Path Grid.Column="1" Classes="icon" Data="{StaticResource IconHistory}" />
+                            <TextBlock Grid.Column="2" Text="{x:Static res:Strings.NavHistory}" VerticalAlignment="Center" />
+                        </Grid>
+                    </Button>
                 </StackPanel>
             </DockPanel>
         </Border>
@@ -97,6 +108,9 @@
                     </DataTemplate>
                     <DataTemplate DataType="vm:WorkspaceDetailViewModel">
                         <views:WorkspaceDetailView />
+                    </DataTemplate>
+                    <DataTemplate DataType="vm:HistoryPageViewModel">
+                        <views:HistoryPageView />
                     </DataTemplate>
                     <DataTemplate DataType="vm:SettingsPageViewModel">
                         <views:SettingsPageView />

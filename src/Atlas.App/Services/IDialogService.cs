@@ -1,3 +1,4 @@
+using Atlas.App.ViewModels;
 using Atlas.Core.Resources;
 using Atlas.Core.Workspaces;
 
@@ -49,4 +50,8 @@ public interface IDialogService
 
     /// <returns>The workspace with the saved resource, or null if the user cancelled.</returns>
     Task<Workspace?> EditResourceAsync(ResourceEditorRequest request);
+
+    /// <summary>Shows what a file holds, or why it cannot be imported.</summary>
+    /// <returns>True only if the user chose to import it.</returns>
+    Task<bool> ConfirmImportAsync(ImportPreviewViewModel preview);
 }

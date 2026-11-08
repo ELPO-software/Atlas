@@ -1,6 +1,8 @@
 using Atlas.App.Services;
+using Atlas.Core.History;
 using Atlas.Core.Restoration;
 using Atlas.Core.Settings;
+using Atlas.Core.Versions;
 using Atlas.Core.Workspaces;
 using Atlas.Infrastructure.Storage;
 using Microsoft.Extensions.Logging;
@@ -10,9 +12,12 @@ namespace Atlas.App.ViewModels;
 /// <summary>What pages need from the rest of the application.</summary>
 public sealed record PageServices(
     WorkspaceService Workspaces,
+    VersionService Versions,
+    IHistoryRepository History,
     SettingsService Settings,
     RestorationService Restoration,
     IDialogService Dialogs,
+    IFilePicker Files,
     IThemeController Theme,
     IFolderOpener Folders,
     AtlasDataPaths Paths,

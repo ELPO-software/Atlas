@@ -1,4 +1,5 @@
 using System.Globalization;
+using Atlas.Core.History;
 using Atlas.Core.Resources;
 using Atlas.Core.Workspaces;
 using Microsoft.Data.Sqlite;
@@ -77,7 +78,7 @@ public sealed class SqliteWorkspaceRepository(SqliteDatabase database) : IWorksp
             },
             cancellationToken);
 
-    public Task AddAsync(Workspace workspace, CancellationToken cancellationToken = default) =>
+    public Task AddAsync(Workspace workspace, HistoryEntry? record = null, CancellationToken cancellationToken = default) =>
         database.RunAsync(
             connection =>
             {
@@ -96,12 +97,13 @@ public sealed class SqliteWorkspaceRepository(SqliteDatabase database) : IWorksp
                 }
 
                 InsertResources(connection, transaction, workspace);
+                WriteHistory(connection, transaction, record);
                 transaction.Commit();
                 return true;
             },
             cancellationToken);
 
-    public Task<bool> UpdateAsync(Workspace workspace, CancellationToken cancellationToken = default) =>
+    public Task<bool> UpdateAsync(Workspace workspace, HistoryEntry? record = null, CancellationToken cancellationToken = default) =>
         database.RunAsync(
             connection =>
             {
@@ -130,21 +132,37 @@ public sealed class SqliteWorkspaceRepository(SqliteDatabase database) : IWorksp
                 }
 
                 InsertResources(connection, transaction, workspace);
+                WriteHistory(connection, transaction, record);
                 transaction.Commit();
                 return true;
             },
             cancellationToken);
 
-    public Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default) =>
+    public Task<bool> DeleteAsync(Guid id, HistoryEntry? record = null, CancellationToken cancellationToken = default) =>
         database.RunAsync(
             connection =>
             {
-                using var command = connection.CreateCommand();
-                command.CommandText = "DELETE FROM workspaces WHERE id = $id";
-                command.Parameters.AddWithValue("$id", ToText(id));
-                return command.ExecuteNonQuery() > 0;
+                using var transaction = connection.BeginTransaction();
+                using (var command = connection.CreateCommand())
+                {
+                    command.Transaction = transaction;
+                    command.CommandText = "DELETE FROM workspaces WHERE id = $id";
+                    command.Parameters.AddWithValue("$id", ToText(id));
+                    if (command.ExecuteNonQuery() == 0)
+                        return false;
+                }
+
+                WriteHistory(connection, transaction, record);
+                transaction.Commit();
+                return true;
             },
             cancellationToken);
+
+    private static void WriteHistory(SqliteConnection connection, SqliteTransaction transaction, HistoryEntry? record)
+    {
+        if (record is not null)
+            HistoryTable.Write(connection, transaction, record);
+    }
 
     private static List<Resource> ReadResources(SqliteConnection connection, Guid workspaceId)
     {

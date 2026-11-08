@@ -1,3 +1,4 @@
+using Atlas.Core.Exchange;
 using Atlas.Core.Resources;
 using Atlas.Core.Validation;
 
@@ -66,6 +67,30 @@ public sealed class Workspace
         IEnumerable<Resource> resources) =>
         new(id, name, description, notes, createdAt, updatedAt, lastUsedAt, resources);
 
+    /// <summary>
+    /// Creates a new workspace from an imported file. Everything gets new identifiers and today's date, and resources
+    /// the plan refused are left out.
+    /// </summary>
+    public static Workspace Import(ImportPlan plan, DateTimeOffset now)
+    {
+        ThrowIfInvalid(plan.WorkspaceErrors);
+
+        var resources = plan.Resources
+            .Where(r => r.Note != ImportNote.Refused)
+            .Select((r, index) => new Resource(
+                Guid.NewGuid(),
+                r.Kind!.Value,
+                r.Source.Name.Trim(),
+                r.Source.Target.Trim(),
+                index,
+                RequiresReview: r.Note != ImportNote.None,
+                now,
+                now));
+
+        var content = plan.Content;
+        return new Workspace(Guid.NewGuid(), content.Name.Trim(), content.Description, content.Notes, now, now, null, resources);
+    }
+
     public void UpdateDetails(string? name, string? description, DateTimeOffset now)
     {
         ThrowIfInvalid(WorkspaceRules.ValidateDetails(name, description));
@@ -112,6 +137,40 @@ public sealed class Workspace
         _resources[index] = updated;
         UpdatedAt = now;
         return updated;
+    }
+
+    public Resource ApproveResource(Guid resourceId, DateTimeOffset now)
+    {
+        var index = IndexOfResource(resourceId);
+        var approved = _resources[index] with { RequiresReview = false, UpdatedAt = now };
+        _resources[index] = approved;
+        UpdatedAt = now;
+        return approved;
+    }
+
+    /// <summary>
+    /// Goes back to a saved version: its details, notes and resources replace the current ones. Resources keep the
+    /// approval state they had in that version.
+    /// </summary>
+    public void RevertTo(DocumentContent version, DateTimeOffset now)
+    {
+        ThrowIfInvalid(WorkspaceRules.ValidateDetails(version.Name, version.Description));
+        ThrowIfInvalid(WorkspaceRules.ValidateNotes(version.Notes));
+
+        var resources = new List<Resource>();
+        foreach (var saved in version.Resources)
+        {
+            // A version holds Atlas's own data; a type it can no longer name is kept out rather than invented.
+            if (ResourceKind.TryParse(saved.Kind, out var kind))
+                resources.Add(new Resource(Guid.NewGuid(), kind, saved.Name, saved.Target, resources.Count, saved.RequiresReview, now, now));
+        }
+
+        Name = version.Name.Trim();
+        Description = version.Description;
+        Notes = version.Notes;
+        _resources.Clear();
+        _resources.AddRange(resources);
+        UpdatedAt = now;
     }
 
     public void RemoveResource(Guid resourceId, DateTimeOffset now)

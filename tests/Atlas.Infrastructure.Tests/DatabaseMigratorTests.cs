@@ -151,7 +151,7 @@ public sealed class DatabaseMigratorTests : IDisposable
         new DatabaseMigrator(database, _clock, NullLogger<DatabaseMigrator>.Instance, firstVersion).Migrate();
         var repository = new SqliteWorkspaceRepository(database);
         var workspace = Atlas.Core.Workspaces.Workspace.Create("Études d'été", "Avant la mise à jour", _clock.GetUtcNow());
-        await repository.AddAsync(workspace, TestContext.Current.CancellationToken);
+        await repository.AddAsync(workspace, cancellationToken: TestContext.Current.CancellationToken);
 
         var backup = new DatabaseMigrator(database, _clock, NullLogger<DatabaseMigrator>.Instance).Migrate();
 

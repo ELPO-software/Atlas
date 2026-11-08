@@ -1,10 +1,12 @@
+using Atlas.Core.Exchange;
+using Atlas.Core.History;
 using Atlas.Core.Resources;
 
 namespace Atlas.Core.Workspaces;
 
 /// <summary>
-/// The operations the application performs on workspaces. Asking the user to confirm a deletion is the
-/// interface's job; once this class is called, the decision has been made.
+/// The operations the application performs on workspaces. Each change is stored together with its line of history.
+/// Asking the user to confirm a deletion is the interface's job; once this class is called, the decision has been made.
 /// </summary>
 public sealed class WorkspaceService(IWorkspaceRepository repository, TimeProvider timeProvider)
 {
@@ -24,33 +26,80 @@ public sealed class WorkspaceService(IWorkspaceRepository repository, TimeProvid
     public async Task<Workspace> CreateAsync(
         string? name, string? description, CancellationToken cancellationToken = default)
     {
-        var workspace = Workspace.Create(name, description, timeProvider.GetUtcNow());
-        await repository.AddAsync(workspace, cancellationToken);
+        var now = timeProvider.GetUtcNow();
+        var workspace = Workspace.Create(name, description, now);
+        await repository.AddAsync(workspace, Record(now, HistoryAction.WorkspaceCreated, workspace), cancellationToken);
+        return workspace;
+    }
+
+    /// <param name="source">Where the workspace comes from, such as the file name, for the history.</param>
+    public async Task<Workspace> ImportAsync(ImportPlan plan, string source, CancellationToken cancellationToken = default)
+    {
+        var now = timeProvider.GetUtcNow();
+        var workspace = Workspace.Import(plan, now);
+        await repository.AddAsync(workspace, Record(now, HistoryAction.WorkspaceImported, workspace, source), cancellationToken);
         return workspace;
     }
 
     public Task<Workspace> UpdateDetailsAsync(
         Guid id, string? name, string? description, CancellationToken cancellationToken = default) =>
-        ChangeAsync(id, (workspace, now) => workspace.UpdateDetails(name, description, now), cancellationToken);
+        ChangeAsync(id, HistoryAction.WorkspaceEdited, (workspace, now) =>
+        {
+            workspace.UpdateDetails(name, description, now);
+            return string.Empty;
+        }, cancellationToken);
 
     public Task<Workspace> UpdateNotesAsync(
         Guid id, string? notes, CancellationToken cancellationToken = default) =>
-        ChangeAsync(id, (workspace, now) => workspace.UpdateNotes(notes, now), cancellationToken);
+        ChangeAsync(id, HistoryAction.NotesEdited, (workspace, now) =>
+        {
+            workspace.UpdateNotes(notes, now);
+            return string.Empty;
+        }, cancellationToken);
 
     public Task<Workspace> AddResourceAsync(
         Guid id, ResourceKind kind, string? displayName, string? target, CancellationToken cancellationToken = default) =>
-        ChangeAsync(id, (workspace, now) => workspace.AddResource(kind, displayName, target, now), cancellationToken);
+        ChangeAsync(id, HistoryAction.ResourceAdded, (workspace, now) =>
+            workspace.AddResource(kind, displayName, target, now).DisplayName, cancellationToken);
 
     public Task<Workspace> UpdateResourceAsync(
         Guid id, Guid resourceId, string? displayName, string? target, CancellationToken cancellationToken = default) =>
-        ChangeAsync(id, (workspace, now) => workspace.UpdateResource(resourceId, displayName, target, now), cancellationToken);
+        ChangeAsync(id, HistoryAction.ResourceEdited, (workspace, now) =>
+            workspace.UpdateResource(resourceId, displayName, target, now).DisplayName, cancellationToken);
 
     public Task<Workspace> RemoveResourceAsync(Guid id, Guid resourceId, CancellationToken cancellationToken = default) =>
-        ChangeAsync(id, (workspace, now) => workspace.RemoveResource(resourceId, now), cancellationToken);
+        ChangeAsync(id, HistoryAction.ResourceRemoved, (workspace, now) =>
+        {
+            var name = workspace.Resources.FirstOrDefault(r => r.Id == resourceId)?.DisplayName ?? string.Empty;
+            workspace.RemoveResource(resourceId, now);
+            return name;
+        }, cancellationToken);
 
-    /// <summary>Records that the workspace was restored. Its modification date does not move.</summary>
-    public Task<Workspace> MarkUsedAsync(Guid id, CancellationToken cancellationToken = default) =>
-        ChangeAsync(id, (workspace, now) => workspace.MarkUsed(now), cancellationToken);
+    /// <summary>The user allows Atlas to open a resource that came from an imported file.</summary>
+    public Task<Workspace> ApproveResourceAsync(Guid id, Guid resourceId, CancellationToken cancellationToken = default) =>
+        ChangeAsync(id, HistoryAction.ResourceApproved, (workspace, now) =>
+            workspace.ApproveResource(resourceId, now).DisplayName, cancellationToken);
+
+    /// <summary>Records a restoration and what happened to the resources. The modification date does not move.</summary>
+    public Task<Workspace> MarkUsedAsync(Guid id, RestoreCounts counts, CancellationToken cancellationToken = default) =>
+        ChangeAsync(
+            id,
+            HistoryAction.WorkspaceRestored,
+            (workspace, now) =>
+            {
+                workspace.MarkUsed(now);
+                return string.Empty;
+            },
+            cancellationToken,
+            counts);
+
+    /// <summary>Puts back the content of a saved version. The caller saves the current state first.</summary>
+    public Task<Workspace> RevertAsync(Guid id, DocumentContent version, string versionName, CancellationToken cancellationToken = default) =>
+        ChangeAsync(id, HistoryAction.VersionRestored, (workspace, now) =>
+        {
+            workspace.RevertTo(version, now);
+            return versionName;
+        }, cancellationToken);
 
     public async Task<Workspace> DuplicateAsync(
         Guid id, string? newName, CancellationToken cancellationToken = default)
@@ -59,8 +108,9 @@ public sealed class WorkspaceService(IWorkspaceRepository repository, TimeProvid
         try
         {
             var source = await GetAsync(id, cancellationToken);
-            var copy = source.Duplicate(newName, timeProvider.GetUtcNow());
-            await repository.AddAsync(copy, cancellationToken);
+            var now = timeProvider.GetUtcNow();
+            var copy = source.Duplicate(newName, now);
+            await repository.AddAsync(copy, Record(now, HistoryAction.WorkspaceDuplicated, copy, source.Name), cancellationToken);
             return copy;
         }
         finally
@@ -74,7 +124,10 @@ public sealed class WorkspaceService(IWorkspaceRepository repository, TimeProvid
         await _changeGate.WaitAsync(cancellationToken);
         try
         {
-            if (!await repository.DeleteAsync(id, cancellationToken))
+            var workspace = await GetAsync(id, cancellationToken);
+            var record = Record(timeProvider.GetUtcNow(), HistoryAction.WorkspaceDeleted, workspace);
+
+            if (!await repository.DeleteAsync(id, record, cancellationToken))
                 throw new WorkspaceNotFoundException(id);
         }
         finally
@@ -83,16 +136,22 @@ public sealed class WorkspaceService(IWorkspaceRepository repository, TimeProvid
         }
     }
 
+    /// <param name="change">Applies the change and returns the detail of its history line.</param>
     private async Task<Workspace> ChangeAsync(
-        Guid id, Action<Workspace, DateTimeOffset> change, CancellationToken cancellationToken)
+        Guid id,
+        HistoryAction action,
+        Func<Workspace, DateTimeOffset, string> change,
+        CancellationToken cancellationToken,
+        RestoreCounts? counts = null)
     {
         await _changeGate.WaitAsync(cancellationToken);
         try
         {
             var workspace = await GetAsync(id, cancellationToken);
-            change(workspace, timeProvider.GetUtcNow());
+            var now = timeProvider.GetUtcNow();
+            var detail = change(workspace, now);
 
-            if (!await repository.UpdateAsync(workspace, cancellationToken))
+            if (!await repository.UpdateAsync(workspace, Record(now, action, workspace, detail, counts), cancellationToken))
                 throw new WorkspaceNotFoundException(id);
 
             return workspace;
@@ -102,4 +161,8 @@ public sealed class WorkspaceService(IWorkspaceRepository repository, TimeProvid
             _changeGate.Release();
         }
     }
+
+    private static HistoryEntry Record(
+        DateTimeOffset now, HistoryAction action, Workspace workspace, string detail = "", RestoreCounts? counts = null) =>
+        new(now, action, workspace.Id, workspace.Name, detail, counts);
 }

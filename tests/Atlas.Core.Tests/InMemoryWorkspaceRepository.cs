@@ -1,3 +1,4 @@
+using Atlas.Core.History;
 using Atlas.Core.Workspaces;
 
 namespace Atlas.Core.Tests;
@@ -11,6 +12,8 @@ internal sealed class InMemoryWorkspaceRepository : IWorkspaceRepository
     private readonly Dictionary<Guid, Workspace> _workspaces = [];
 
     public int WriteCount { get; private set; }
+
+    public List<HistoryEntry> History { get; } = [];
 
     /// <summary>Simulates another operation deleting the workspace just before the next update.</summary>
     public bool LoseWorkspaceBeforeUpdate { get; set; }
@@ -38,14 +41,15 @@ internal sealed class InMemoryWorkspaceRepository : IWorkspaceRepository
         return workspace;
     }
 
-    public Task AddAsync(Workspace workspace, CancellationToken cancellationToken = default)
+    public Task AddAsync(Workspace workspace, HistoryEntry? record = null, CancellationToken cancellationToken = default)
     {
         WriteCount++;
         _workspaces.Add(workspace.Id, Copy(workspace));
+        Record(record);
         return Task.CompletedTask;
     }
 
-    public Task<bool> UpdateAsync(Workspace workspace, CancellationToken cancellationToken = default)
+    public Task<bool> UpdateAsync(Workspace workspace, HistoryEntry? record = null, CancellationToken cancellationToken = default)
     {
         if (LoseWorkspaceBeforeUpdate)
             _workspaces.Remove(workspace.Id);
@@ -55,13 +59,24 @@ internal sealed class InMemoryWorkspaceRepository : IWorkspaceRepository
 
         WriteCount++;
         _workspaces[workspace.Id] = Copy(workspace);
+        Record(record);
         return Task.FromResult(true);
     }
 
-    public Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    public Task<bool> DeleteAsync(Guid id, HistoryEntry? record = null, CancellationToken cancellationToken = default)
     {
         WriteCount++;
-        return Task.FromResult(_workspaces.Remove(id));
+        var removed = _workspaces.Remove(id);
+        if (removed)
+            Record(record);
+
+        return Task.FromResult(removed);
+    }
+
+    private void Record(HistoryEntry? record)
+    {
+        if (record is not null)
+            History.Add(record);
     }
 
     private static Workspace Copy(Workspace w) =>

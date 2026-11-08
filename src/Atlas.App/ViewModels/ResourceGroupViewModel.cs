@@ -5,7 +5,8 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace Atlas.App.ViewModels;
 
-public sealed class ResourceItemViewModel(Resource resource, Func<Resource, Task> edit, Func<Resource, Task> remove)
+public sealed class ResourceItemViewModel(
+    Resource resource, Func<Resource, Task> edit, Func<Resource, Task> remove, Func<Resource, Task> approve)
 {
     public Guid Id => resource.Id;
 
@@ -19,6 +20,11 @@ public sealed class ResourceItemViewModel(Resource resource, Func<Resource, Task
 
     public string RemoveLabel { get; } = UiText.Format(Strings.RemoveResourceLabel, resource.DisplayName);
 
+    public string ApproveLabel { get; } = UiText.Format(Strings.ApproveResourceLabel, resource.DisplayName);
+
+    public IAsyncRelayCommand ApproveCommand { get; } =
+        new AsyncRelayCommand(() => approve(resource), AsyncRelayCommandOptions.AllowConcurrentExecutions);
+
     public IAsyncRelayCommand EditCommand { get; } =
         new AsyncRelayCommand(() => edit(resource), AsyncRelayCommandOptions.AllowConcurrentExecutions);
 
@@ -30,13 +36,13 @@ public sealed class ResourceItemViewModel(Resource resource, Func<Resource, Task
 public sealed record ResourceGroupViewModel(string Title, IReadOnlyList<ResourceItemViewModel> Items)
 {
     public static IReadOnlyList<ResourceGroupViewModel> From(
-        IEnumerable<Resource> resources, Func<Resource, Task> edit, Func<Resource, Task> remove) =>
+        IEnumerable<Resource> resources, Func<Resource, Task> edit, Func<Resource, Task> remove, Func<Resource, Task> approve) =>
         resources
             .GroupBy(r => CategoryOf(r.Kind))
             .OrderBy(group => group.Key)
             .Select(group => new ResourceGroupViewModel(
                 TitleOf(group.Key),
-                group.Select(r => new ResourceItemViewModel(r, edit, remove)).ToList()))
+                group.Select(r => new ResourceItemViewModel(r, edit, remove, approve)).ToList()))
             .ToList();
 
     private static int CategoryOf(ResourceKind kind)

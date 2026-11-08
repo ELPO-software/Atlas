@@ -6,7 +6,7 @@ Atlas is part of the ELPO software suite. It saves the applications, files, fold
 
 ## Status
 
-Atlas is in early development. The first Alpha is being built in stages. You can already gather applications, files, folders and links in workspaces, keep notes in them and restore them on Windows. Versions, history and import and export come next.
+Atlas is in early development. The first Alpha is being built in stages. You can gather applications, files, folders and links in workspaces, keep notes in them and restore them on Windows, save versions and go back to them, follow the history, and exchange workspaces as files.
 
 ## Principles
 
@@ -28,7 +28,7 @@ Atlas keeps its data and logs in `%LOCALAPPDATA%\ELPO\Atlas`.
 
 The .NET CLI has its own telemetry, which a repository cannot turn off. To disable it on your computer, set the environment variable `DOTNET_CLI_TELEMETRY_OPTOUT` to `1`.
 
-See [docs/architecture.md](docs/architecture.md) for how the code is organized, and [docs/manual-tests.md](docs/manual-tests.md) for the checks that need a real Windows session.
+See [docs/architecture.md](docs/architecture.md) for how the code is organized, [docs/file-format.md](docs/file-format.md) for the workspace file format, and [docs/manual-tests.md](docs/manual-tests.md) for the checks that need a real Windows session.
 
 ## License
 

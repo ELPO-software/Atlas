@@ -9,6 +9,7 @@ public enum AppSection
 {
     Home,
     Workspaces,
+    History,
     Settings,
 }
 
@@ -20,7 +21,7 @@ public sealed partial class MainWindowViewModel(PageServices services) : ViewMod
     public partial PageViewModel? CurrentPage { get; private set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsHomeSelected), nameof(IsWorkspacesSelected), nameof(IsSettingsSelected))]
+    [NotifyPropertyChangedFor(nameof(IsHomeSelected), nameof(IsWorkspacesSelected), nameof(IsHistorySelected), nameof(IsSettingsSelected))]
     public partial AppSection Section { get; private set; }
 
     [ObservableProperty]
@@ -29,6 +30,8 @@ public sealed partial class MainWindowViewModel(PageServices services) : ViewMod
     public bool IsHomeSelected => Section == AppSection.Home;
 
     public bool IsWorkspacesSelected => Section == AppSection.Workspaces;
+
+    public bool IsHistorySelected => Section == AppSection.History;
 
     public bool IsSettingsSelected => Section == AppSection.Settings;
 
@@ -46,6 +49,10 @@ public sealed partial class MainWindowViewModel(PageServices services) : ViewMod
 
     public Task OpenWorkspaceAsync(Guid workspaceId) =>
         GoToAsync(new WorkspaceDetailViewModel(workspaceId, services, this), AppSection.Workspaces);
+
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    public Task OpenHistoryAsync() =>
+        GoToAsync(new HistoryPageViewModel(services), AppSection.History);
 
     [RelayCommand(AllowConcurrentExecutions = true)]
     public Task OpenSettingsAsync() =>

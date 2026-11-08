@@ -425,6 +425,85 @@ public sealed class WindowTests
         Assert.False(await answer);
     }
 
+    [AvaloniaFact]
+    public async Task History_ShowsWhatWasDoneIncludingDeletedWorkspaces()
+    {
+        await using var app = await RunningApp.StartAsync(async services =>
+        {
+            var workspaces = services.GetRequiredService<WorkspaceService>();
+            var workspace = await workspaces.CreateAsync("Études d'été", null);
+            await workspaces.DeleteAsync(workspace.Id);
+        });
+
+        app.Click("NavHistory");
+        await app.SettleAsync();
+
+        Assert.Contains("selected", app.Find<Button>("NavHistory").Classes);
+        var texts = app.Find<ItemsControl>("HistoryItems").GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text).ToList();
+        Assert.Contains("Espace «\u00A0Études d'été\u00A0» supprimé", texts);
+        Assert.Contains("Espace «\u00A0Études d'été\u00A0» créé", texts);
+    }
+
+    [AvaloniaFact]
+    public async Task Versions_SavedFromTheViewAppearInIt()
+    {
+        await using var app = await RunningApp.StartAsync(services =>
+            services.GetRequiredService<WorkspaceService>().CreateAsync("Études", null));
+        var id = (await app.Workspaces.ListAsync()).Single().Id;
+        await app.ViewModel.OpenWorkspaceAsync(id);
+        await app.SettleAsync();
+        Assert.True(app.Find<TextBlock>("NoVersions").IsVisible);
+
+        app.Click("SaveVersion");
+        var dialog = await app.WaitForDialogAsync<WorkspaceEditorWindow>();
+        dialog.FindControl<TextBox>("NameBox")!.Text = "Avant les révisions";
+        dialog.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        await app.WaitUntilAsync(() => !app.Find<TextBlock>("NoVersions").IsVisible);
+
+        var texts = app.Find<ItemsControl>("Versions").GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text).ToList();
+        Assert.Contains("Avant les révisions", texts);
+    }
+
+    [AvaloniaFact]
+    public async Task ImportPreview_ShowsAProblemWithoutAnImportButton()
+    {
+        await using var app = await RunningApp.StartAsync();
+        var dialogs = app.Services.GetRequiredService<IDialogService>();
+
+        var answer = dialogs.ConfirmImportAsync(new ImportPreviewViewModel(
+            "partagé.json", null, new Atlas.Core.Exchange.DocumentError(Atlas.Core.Exchange.DocumentProblem.NotAnAtlasFile)));
+        var dialog = await app.WaitForDialogAsync<ImportPreviewWindow>();
+
+        Assert.Equal(Strings.FileProblemNotAnAtlasFile, dialog.FindControl<SelectableTextBlock>("Problem")!.Text);
+        Assert.False(dialog.FindControl<Button>("ImportButton")!.IsEffectivelyVisible);
+        Assert.True(dialog.FindControl<Button>("CancelButton")!.IsFocused);
+
+        dialog.KeyPressQwerty(PhysicalKey.Escape, RawInputModifiers.None);
+        Assert.False(await answer);
+    }
+
+    [AvaloniaFact]
+    public async Task ImportPreview_ListsTheResourcesAndImportsOnRequest()
+    {
+        await using var app = await RunningApp.StartAsync();
+        var dialogs = app.Services.GetRequiredService<IDialogService>();
+        var plan = Atlas.Core.Exchange.ImportPlan.From(new Atlas.Core.Exchange.DocumentContent(
+            "Espace partagé",
+            string.Empty,
+            string.Empty,
+            [new Atlas.Core.Exchange.DocumentResource("application", "Outil", @"C:\Outils\outil.exe", false)]));
+
+        var answer = dialogs.ConfirmImportAsync(new ImportPreviewViewModel("partagé.json", plan, null));
+        var dialog = await app.WaitForDialogAsync<ImportPreviewWindow>();
+
+        var texts = dialog.FindControl<ItemsControl>("Items")!.GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text).ToList();
+        Assert.Contains("Outil", texts);
+        Assert.Contains(Strings.ImportNoteNeedsApproval, texts);
+        dialog.FindControl<Button>("ImportButton")!.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+        Assert.True(await answer);
+    }
+
     [AvaloniaTheory]
     [InlineData(280, 1)]
     [InlineData(571, 1)]

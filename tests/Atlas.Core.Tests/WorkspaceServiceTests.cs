@@ -171,7 +171,7 @@ public sealed class WorkspaceServiceTests
     {
         var workspace = Workspace.Create("Nom", null, _clock.GetUtcNow());
         var resource = workspace.AddResource(ResourceKind.Url, "Lien", "https://example.org", _clock.GetUtcNow());
-        await _repository.AddAsync(workspace, Token);
+        await _repository.AddAsync(workspace, cancellationToken: Token);
 
         await _service.UpdateDetailsAsync(workspace.Id, "Nouveau nom", null, Token);
 

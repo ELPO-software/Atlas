@@ -1,10 +1,14 @@
 using Atlas.App.Resources;
 using Atlas.App.Services;
 using Atlas.App.Text;
+using Atlas.Core.Exchange;
+using Atlas.Core.History;
 using Atlas.Core.Resources;
 using Atlas.Core.Restoration;
 using Atlas.Core.Validation;
+using Atlas.Core.Versions;
 using Atlas.Core.Workspaces;
+using Atlas.Infrastructure.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -32,6 +36,7 @@ public sealed partial class WorkspaceDetailViewModel(
     private bool _isDeleted;
     private bool _isPreparingRestore;
     private int _resourceCount;
+    private int _versionCount;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanRestore))]
@@ -85,6 +90,19 @@ public sealed partial class WorkspaceDetailViewModel(
     [NotifyPropertyChangedFor(nameof(HasReport))]
     public partial RestoreReportViewModel? Report { get; private set; }
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNoVersions))]
+    public partial IReadOnlyList<VersionItemViewModel> Versions { get; private set; } = [];
+
+    [ObservableProperty]
+    public partial string? VersionsError { get; private set; }
+
+    /// <summary>A confirmation of what an action did, such as where a file was exported.</summary>
+    [ObservableProperty]
+    public partial string? ActionInfo { get; private set; }
+
+    public bool HasNoVersions => Versions.Count == 0;
+
     public bool HasNoResources => ResourceGroups.Count == 0;
 
     public bool CanRestore => IsLoaded && !HasNoResources && !IsRestoring;
@@ -114,9 +132,7 @@ public sealed partial class WorkspaceDetailViewModel(
             ShowResources(workspace);
 
             _savedNotes = workspace.Notes;
-            _isLoadingNotes = true;
-            Notes = workspace.Notes;
-            _isLoadingNotes = false;
+            ShowNotes(workspace);
 
             IsLoaded = true;
         }
@@ -128,7 +144,11 @@ public sealed partial class WorkspaceDetailViewModel(
         {
             _logger.LogError(ex, "The workspace {WorkspaceId} could not be read", workspaceId);
             LoadError = UiText.Format(Strings.WorkspaceReadFailed, services.Paths.LogsDirectory);
+            return;
         }
+
+        if (IsLoaded)
+            await LoadVersionsAsync();
     }
 
     public override async Task<bool> TryLeaveAsync()
@@ -256,11 +276,11 @@ public sealed partial class WorkspaceDetailViewModel(
     private async Task DeleteAsync()
     {
         ActionError = null;
+        var message = _versionCount == 0
+            ? UiText.Format(Strings.DeleteWorkspaceMessage, Name, UiText.ResourceCount(_resourceCount))
+            : UiText.Format(Strings.DeleteWorkspaceMessageWithVersions, Name, UiText.ResourceCount(_resourceCount), VersionCount(_versionCount));
         var confirmed = await services.Dialogs.ConfirmAsync(new ConfirmationRequest(
-            Strings.DeleteWorkspaceTitle,
-            UiText.Format(Strings.DeleteWorkspaceMessage, Name, UiText.ResourceCount(_resourceCount)),
-            Strings.Delete,
-            Strings.Cancel));
+            Strings.DeleteWorkspaceTitle, message, Strings.Delete, Strings.Cancel));
 
         if (!confirmed)
             return;
@@ -293,6 +313,158 @@ public sealed partial class WorkspaceDetailViewModel(
 
     [RelayCommand(AllowConcurrentExecutions = true)]
     private Task RetrySaveNotesAsync() => SaveNotesAsync();
+
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    private async Task SaveVersionAsync()
+    {
+        ActionError = null;
+        var saved = await services.Dialogs.EditWorkspaceAsync(new WorkspaceEditorRequest(
+            Strings.SaveVersionDialogTitle,
+            Strings.Save,
+            UiText.Format(Strings.DefaultVersionName, DateText.Full(services.Time.GetUtcNow(), services.Time)),
+            string.Empty,
+            ShowDescription: false,
+            async (name, _) =>
+            {
+                // A version saved right after typing must contain what was just typed.
+                CancelNotesDelay();
+                await SaveNotesAsync();
+                await services.Versions.SaveAsync(workspaceId, name);
+                return await services.Workspaces.GetAsync(workspaceId);
+            }));
+
+        if (saved is not null)
+            await LoadVersionsAsync();
+    }
+
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    private async Task ExportAsync()
+    {
+        ActionError = null;
+        ActionInfo = null;
+        try
+        {
+            CancelNotesDelay();
+            await SaveNotesAsync();
+            var workspace = await services.Workspaces.GetAsync(workspaceId);
+
+            if (ExportPrivacy.RevealedUserName(
+                    workspace.Resources.Select(r => r.Target),
+                    Environment.UserName,
+                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)) is { } userName
+                && !await services.Dialogs.ConfirmAsync(new ConfirmationRequest(
+                    Strings.ExportUserNameTitle,
+                    UiText.Format(Strings.ExportUserNameMessage, userName),
+                    Strings.ExportAnyway,
+                    Strings.Cancel) { IsDestructive = false }))
+            {
+                return;
+            }
+
+            if (await services.Files.PickExportFileAsync(ExportPrivacy.FileNameFor(workspace.Name)) is not { } path)
+                return;
+
+            var now = services.Time.GetUtcNow();
+            await WorkspaceFiles.WriteAsync(path, WorkspaceDocument.Write(workspace, now));
+            ActionInfo = UiText.Format(Strings.ExportDone, path);
+            await RecordAsync(new HistoryEntry(now, HistoryAction.WorkspaceExported, workspace.Id, workspace.Name, Path.GetFileName(path)));
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _logger.LogError(ex, "The workspace {WorkspaceId} could not be exported", workspaceId);
+            ActionError = UiText.Format(Strings.ExportFailed, services.Paths.LogsDirectory);
+        }
+    }
+
+    private async Task RestoreVersionAsync(VersionSummary version)
+    {
+        ActionError = null;
+        var confirmed = await services.Dialogs.ConfirmAsync(new ConfirmationRequest(
+            UiText.Format(Strings.RestoreVersionTitle, version.Name),
+            Strings.RestoreVersionMessage,
+            Strings.RestoreVersion,
+            Strings.Cancel) { IsDestructive = false });
+
+        if (!confirmed)
+            return;
+
+        try
+        {
+            // The current state, saved first as a version, must include what was just typed.
+            CancelNotesDelay();
+            await SaveNotesAsync();
+            var workspace = await services.Versions.RestoreAsync(version.Id, UiText.Format(Strings.SafetyVersionName, version.Name));
+
+            ShowDetails(workspace);
+            ShowResources(workspace);
+            ShowNotes(workspace);
+            NotesStatus = null;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _logger.LogError(ex, "The version {VersionId} could not be restored", version.Id);
+            ActionError = UiText.Format(Strings.VersionRestoreFailed, services.Paths.LogsDirectory);
+        }
+
+        await LoadVersionsAsync();
+    }
+
+    private async Task ApproveResourceAsync(Resource resource)
+    {
+        ActionError = null;
+        var confirmed = await services.Dialogs.ConfirmAsync(
+            new ConfirmationRequest(
+                UiText.Format(Strings.ApproveResourceTitle, resource.DisplayName),
+                Strings.ApproveResourceMessage,
+                Strings.Approve,
+                Strings.Cancel)
+            {
+                Details = [new ConfirmationDetail(resource.DisplayName, resource.Target)],
+                IsDestructive = false,
+            });
+
+        if (!confirmed)
+            return;
+
+        try
+        {
+            ShowChange(await services.Workspaces.ApproveResourceAsync(workspaceId, resource.Id));
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _logger.LogError(ex, "The resource {ResourceId} could not be approved", resource.Id);
+            ActionError = UiText.Format(Strings.SaveFailed, services.Paths.LogsDirectory);
+        }
+    }
+
+    private async Task LoadVersionsAsync()
+    {
+        VersionsError = null;
+        try
+        {
+            var versions = await services.Versions.ListAsync(workspaceId);
+            Versions = versions.Select(v => new VersionItemViewModel(v, services.Time, RestoreVersionAsync)).ToList();
+            _versionCount = versions.Count;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _logger.LogError(ex, "The versions of workspace {WorkspaceId} could not be read", workspaceId);
+            VersionsError = UiText.Format(Strings.VersionsReadFailed, services.Paths.LogsDirectory);
+        }
+    }
+
+    /// <summary>A failure to record history never undoes or hides what was done.</summary>
+    private async Task RecordAsync(HistoryEntry entry)
+    {
+        try
+        {
+            await services.History.RecordAsync(entry);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _logger.LogWarning(ex, "The history line for workspace {WorkspaceId} could not be written", workspaceId);
+        }
+    }
 
     partial void OnNotesChanged(string value)
     {
@@ -370,7 +542,7 @@ public sealed partial class WorkspaceDetailViewModel(
         {
             var report = await services.Restoration.RunAsync(plan, progress, _restoreStop.Token);
             Report = RestoreReportViewModel.From(report);
-            await RecordUseAsync();
+            await RecordUseAsync(report);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -386,11 +558,17 @@ public sealed partial class WorkspaceDetailViewModel(
     }
 
     /// <summary>Puts the workspace among the recent ones. Failing to record it does not change what was restored.</summary>
-    private async Task RecordUseAsync()
+    private async Task RecordUseAsync(RestoreReport report)
     {
         try
         {
-            await services.Workspaces.MarkUsedAsync(workspaceId);
+            await services.Workspaces.MarkUsedAsync(
+                workspaceId,
+                new RestoreCounts(
+                    report.Count(RestoreStatus.Restored),
+                    report.Count(RestoreStatus.Missing),
+                    report.Count(RestoreStatus.Failed),
+                    report.Count(RestoreStatus.Skipped)));
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -500,9 +678,21 @@ public sealed partial class WorkspaceDetailViewModel(
 
     private void ShowResources(Workspace workspace)
     {
-        ResourceGroups = ResourceGroupViewModel.From(workspace.Resources, EditResourceAsync, RemoveResourceAsync);
+        ResourceGroups = ResourceGroupViewModel.From(workspace.Resources, EditResourceAsync, RemoveResourceAsync, ApproveResourceAsync);
         _resourceCount = workspace.Resources.Count;
     }
+
+    /// <summary>Shows stored notes without counting them as typed.</summary>
+    private void ShowNotes(Workspace workspace)
+    {
+        _savedNotes = workspace.Notes;
+        _isLoadingNotes = true;
+        Notes = workspace.Notes;
+        _isLoadingNotes = false;
+    }
+
+    private static string VersionCount(int count) =>
+        UiText.Format(count == 1 ? Strings.VersionCountOne : Strings.VersionCountMany, count);
 
     private static string SuggestCopyName(string name)
     {

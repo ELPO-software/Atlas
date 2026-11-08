@@ -37,6 +37,11 @@ Atlas never repairs, replaces or deletes a data file on its own. A failure at st
 
 Preferences are named text values in the `settings` table. `SettingsService` turns them into typed values. A value it does not recognize, such as one written by a newer version, falls back to the default and stays in the file until the user changes that setting.
 
+### Versions and history
+
+- **Versions** keep the whole state of a workspace in the format of [file-format.md](file-format.md). Going back to a version first saves the current state as an automatic version, in its own transaction: if going back fails, nothing is lost. Versions are deleted with their workspace, which the deletion confirmation says.
+- **History** lines are written in the same transaction as the change they describe, so a change and its line apply together or not at all. The history has no foreign key and outlives deleted workspaces. Notes saved within 30 minutes of each other share one line. Lines written by a newer version stay in the file and are not shown.
+
 ### Concurrent changes
 
 A change reads a workspace and writes it back whole. `WorkspaceService` runs changes one at a time, so the automatic save of the notes cannot overwrite a rename that lands between its read and its write. The single-instance guard means no other process writes to the file.
@@ -91,6 +96,10 @@ A folder is opened with a final separator, so that a file with the same name can
 ### Other systems
 
 Only Windows can open resources for now. Elsewhere, `UnsupportedResourceOpener` reports every resource as failed instead of pretending.
+
+## Import and export
+
+`WorkspaceDocument` writes and reads the file format; its reader refuses anything unexpected and never throws for bad input. `ImportPlan` decides from the file alone what each resource becomes: imported, held for approval, kept as an unknown type, or left out with the rule it breaks. `WorkspaceFiles` refuses a file larger than 2 MB from its size, before reading it, and writes exports to a temporary file that then replaces the destination. [file-format.md](file-format.md) describes the format and the rules.
 
 ## Adding a resource type
 

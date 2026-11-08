@@ -35,13 +35,20 @@ internal static class RestoreText
         _ => Strings.ReasonCancelled,
     };
 
-    public static string Summary(RestoreReport report)
+    public static string Summary(RestoreReport report) =>
+        Summary(
+            report.Count(RestoreStatus.Restored),
+            report.Count(RestoreStatus.Missing),
+            report.Count(RestoreStatus.Failed),
+            report.Count(RestoreStatus.Skipped));
+
+    public static string Summary(int restored, int missing, int failed, int skipped)
     {
         var parts = new List<string>();
-        Add(parts, report.Count(RestoreStatus.Restored), Strings.CountRestoredOne, Strings.CountRestoredMany);
-        Add(parts, report.Count(RestoreStatus.Missing), Strings.CountMissingOne, Strings.CountMissingMany);
-        Add(parts, report.Count(RestoreStatus.Failed), Strings.CountFailedOne, Strings.CountFailedMany);
-        Add(parts, report.Count(RestoreStatus.Skipped), Strings.CountSkippedOne, Strings.CountSkippedMany);
+        Add(parts, restored, Strings.CountRestoredOne, Strings.CountRestoredMany);
+        Add(parts, missing, Strings.CountMissingOne, Strings.CountMissingMany);
+        Add(parts, failed, Strings.CountFailedOne, Strings.CountFailedMany);
+        Add(parts, skipped, Strings.CountSkippedOne, Strings.CountSkippedMany);
         return string.Join(", ", parts);
     }
 

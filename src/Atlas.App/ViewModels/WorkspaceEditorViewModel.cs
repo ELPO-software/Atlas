@@ -62,7 +62,8 @@ public sealed partial class WorkspaceEditorViewModel(
         }
         catch (AtlasValidationException ex)
         {
-            NameError = FirstMessageFor(ex, ValidationField.WorkspaceName);
+            // The same form names versions too.
+            NameError = FirstMessageFor(ex, ValidationField.WorkspaceName) ?? FirstMessageFor(ex, ValidationField.VersionName);
             DescriptionError = FirstMessageFor(ex, ValidationField.WorkspaceDescription);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)

@@ -540,6 +540,236 @@
     <value>La restauration a été arrêtée avant cette ressource.</value>
   </data>
 
+  <data name="NavHistory" xml:space="preserve">
+    <value>Historique</value>
+  </data>
+  <data name="HistoryTitle" xml:space="preserve">
+    <value>Historique</value>
+  </data>
+  <data name="HistoryIntro" xml:space="preserve">
+    <value>Ce qui a été fait dans Atlas, du plus récent au plus ancien. L'historique reste sur cet ordinateur et garde la trace des espaces supprimés.</value>
+  </data>
+  <data name="HistoryEmpty" xml:space="preserve">
+    <value>Aucune action pour l'instant.</value>
+  </data>
+  <data name="HistoryReadFailed" xml:space="preserve">
+    <value>Impossible de lire l'historique. Le détail se trouve dans le journal&#160;: {0}</value>
+  </data>
+  <data name="HistoryWorkspaceCreated" xml:space="preserve">
+    <value>Espace «&#160;{0}&#160;» créé</value>
+  </data>
+  <data name="HistoryWorkspaceDuplicated" xml:space="preserve">
+    <value>Espace «&#160;{0}&#160;» créé en dupliquant «&#160;{1}&#160;»</value>
+  </data>
+  <data name="HistoryWorkspaceImported" xml:space="preserve">
+    <value>Espace «&#160;{0}&#160;» importé depuis {1}</value>
+  </data>
+  <data name="HistoryWorkspaceEdited" xml:space="preserve">
+    <value>Espace «&#160;{0}&#160;» modifié</value>
+  </data>
+  <data name="HistoryNotesEdited" xml:space="preserve">
+    <value>Notes de «&#160;{0}&#160;» modifiées</value>
+  </data>
+  <data name="HistoryResourceAdded" xml:space="preserve">
+    <value>Ressource «&#160;{1}&#160;» ajoutée à «&#160;{0}&#160;»</value>
+  </data>
+  <data name="HistoryResourceEdited" xml:space="preserve">
+    <value>Ressource «&#160;{1}&#160;» de «&#160;{0}&#160;» modifiée</value>
+  </data>
+  <data name="HistoryResourceRemoved" xml:space="preserve">
+    <value>Ressource «&#160;{1}&#160;» retirée de «&#160;{0}&#160;»</value>
+  </data>
+  <data name="HistoryResourceApproved" xml:space="preserve">
+    <value>Ressource «&#160;{1}&#160;» de «&#160;{0}&#160;» approuvée</value>
+  </data>
+  <data name="HistoryWorkspaceDeleted" xml:space="preserve">
+    <value>Espace «&#160;{0}&#160;» supprimé</value>
+  </data>
+  <data name="HistoryVersionSaved" xml:space="preserve">
+    <value>Version «&#160;{1}&#160;» de «&#160;{0}&#160;» enregistrée</value>
+  </data>
+  <data name="HistoryVersionRestored" xml:space="preserve">
+    <value>«&#160;{0}&#160;» rétabli à la version «&#160;{1}&#160;»</value>
+  </data>
+  <data name="HistoryWorkspaceRestored" xml:space="preserve">
+    <value>«&#160;{0}&#160;» restauré&#160;: {1}</value>
+  </data>
+  <data name="HistoryWorkspaceExported" xml:space="preserve">
+    <value>«&#160;{0}&#160;» exporté vers {1}</value>
+  </data>
+  <data name="DateAtToday" xml:space="preserve">
+    <value>Aujourd'hui à {0}</value>
+  </data>
+  <data name="DateAtYesterday" xml:space="preserve">
+    <value>Hier à {0}</value>
+  </data>
+  <data name="DateAt" xml:space="preserve">
+    <value>{0} à {1}</value>
+  </data>
+
+  <data name="VersionsTitle" xml:space="preserve">
+    <value>Versions enregistrées</value>
+  </data>
+  <data name="VersionsEmpty" xml:space="preserve">
+    <value>Une version garde l'état de l'espace, avec ses ressources, ses notes et sa description, pour pouvoir y revenir plus tard.</value>
+  </data>
+  <data name="SaveVersion" xml:space="preserve">
+    <value>Enregistrer une version</value>
+  </data>
+  <data name="SaveVersionDialogTitle" xml:space="preserve">
+    <value>Enregistrer une version</value>
+  </data>
+  <data name="DefaultVersionName" xml:space="preserve">
+    <value>Version du {0}</value>
+  </data>
+  <data name="SafetyVersionName" xml:space="preserve">
+    <value>Avant le retour à «&#160;{0}&#160;»</value>
+  </data>
+  <data name="AutomaticVersion" xml:space="preserve">
+    <value>Enregistrée automatiquement</value>
+  </data>
+  <data name="RestoreVersion" xml:space="preserve">
+    <value>Rétablir cette version</value>
+  </data>
+  <data name="RestoreVersionLabel" xml:space="preserve">
+    <value>Rétablir la version {0}</value>
+  </data>
+  <data name="RestoreVersionTitle" xml:space="preserve">
+    <value>Rétablir «&#160;{0}&#160;»&#160;?</value>
+  </data>
+  <data name="RestoreVersionMessage" xml:space="preserve">
+    <value>L'espace reprendra la description, les notes et les ressources de cette version. Son état actuel est d'abord enregistré comme une version, pour pouvoir y revenir.</value>
+  </data>
+  <data name="VersionsReadFailed" xml:space="preserve">
+    <value>Impossible de lire les versions enregistrées. Le détail se trouve dans le journal&#160;: {0}</value>
+  </data>
+  <data name="VersionRestoreFailed" xml:space="preserve">
+    <value>Le retour à cette version a échoué. L'espace n'a pas changé. Le détail se trouve dans le journal&#160;: {0}</value>
+  </data>
+  <data name="VersionNameRequired" xml:space="preserve">
+    <value>Donnez un nom à cette version.</value>
+  </data>
+  <data name="DeleteWorkspaceMessageWithVersions" xml:space="preserve">
+    <value>«&#160;{0}&#160;» ({1}, {2}) et ses notes seront définitivement supprimés d'Atlas. Vos fichiers, vos dossiers et vos applications ne sont pas touchés. L'historique garde la trace de la suppression.</value>
+  </data>
+  <data name="VersionCountOne" xml:space="preserve">
+    <value>{0} version enregistrée</value>
+  </data>
+  <data name="VersionCountMany" xml:space="preserve">
+    <value>{0} versions enregistrées</value>
+  </data>
+
+  <data name="Approve" xml:space="preserve">
+    <value>Approuver</value>
+  </data>
+  <data name="ApproveResourceLabel" xml:space="preserve">
+    <value>Approuver {0}</value>
+  </data>
+  <data name="ApproveResourceTitle" xml:space="preserve">
+    <value>Approuver «&#160;{0}&#160;»&#160;?</value>
+  </data>
+  <data name="ApproveResourceMessage" xml:space="preserve">
+    <value>Cette ressource vient d'un fichier importé. Une fois approuvée, Atlas l'ouvrira lors des restaurations. Vérifiez qu'elle pointe bien où vous l'attendez.</value>
+  </data>
+
+  <data name="Export" xml:space="preserve">
+    <value>Exporter</value>
+  </data>
+  <data name="ExportFileType" xml:space="preserve">
+    <value>Espace de travail Atlas</value>
+  </data>
+  <data name="ExportTitle" xml:space="preserve">
+    <value>Exporter l'espace de travail</value>
+  </data>
+  <data name="ExportUserNameTitle" xml:space="preserve">
+    <value>Votre nom d'utilisateur sera visible</value>
+  </data>
+  <data name="ExportUserNameMessage" xml:space="preserve">
+    <value>Certains emplacements de cet espace contiennent votre nom d'utilisateur Windows («&#160;{0}&#160;»). Toute personne qui recevra le fichier pourra le lire.</value>
+  </data>
+  <data name="ExportAnyway" xml:space="preserve">
+    <value>Exporter quand même</value>
+  </data>
+  <data name="ExportDone" xml:space="preserve">
+    <value>Espace exporté dans {0}</value>
+  </data>
+  <data name="ExportFailed" xml:space="preserve">
+    <value>L'export a échoué et aucun fichier n'a été écrit. Le détail se trouve dans le journal&#160;: {0}</value>
+  </data>
+
+  <data name="Import" xml:space="preserve">
+    <value>Importer</value>
+  </data>
+  <data name="ImportTitle" xml:space="preserve">
+    <value>Importer un espace de travail</value>
+  </data>
+  <data name="ImportIntro" xml:space="preserve">
+    <value>Atlas n'ouvre rien pendant l'import et crée toujours un nouvel espace. Les applications et les emplacements réseau devront être approuvés avant d'être ouverts.</value>
+  </data>
+  <data name="ImportNothingImported" xml:space="preserve">
+    <value>Rien n'a été importé.</value>
+  </data>
+  <data name="ImportCount" xml:space="preserve">
+    <value>{0} sur {1} seront importées.</value>
+  </data>
+  <data name="ImportNoteNeedsApproval" xml:space="preserve">
+    <value>À approuver avant d'être ouverte</value>
+  </data>
+  <data name="ImportNoteUnknownKind" xml:space="preserve">
+    <value>Type inconnu&#160;: conservée, mais jamais ouverte</value>
+  </data>
+  <data name="ImportNoteRefused" xml:space="preserve">
+    <value>Ne sera pas importée&#160;: {0}</value>
+  </data>
+  <data name="ImportRefusedUnreadableKind" xml:space="preserve">
+    <value>son type est illisible.</value>
+  </data>
+  <data name="ImportFailed" xml:space="preserve">
+    <value>L'import a échoué et rien n'a été créé. Le détail se trouve dans le journal&#160;: {0}</value>
+  </data>
+  <data name="FileProblemFileNotFound" xml:space="preserve">
+    <value>Ce fichier n'existe plus.</value>
+  </data>
+  <data name="FileProblemUnreadable" xml:space="preserve">
+    <value>Impossible de lire ce fichier.</value>
+  </data>
+  <data name="FileProblemTooLarge" xml:space="preserve">
+    <value>Ce fichier dépasse 2&#160;Mo&#160;: ce n'est pas un espace de travail exporté par Atlas.</value>
+  </data>
+  <data name="FileProblemNotText" xml:space="preserve">
+    <value>Ce fichier n'est pas un fichier texte.</value>
+  </data>
+  <data name="FileProblemInvalidJson" xml:space="preserve">
+    <value>Ce fichier n'est pas un JSON valide.</value>
+  </data>
+  <data name="FileProblemInvalidJsonAtLine" xml:space="preserve">
+    <value>Ce fichier n'est pas un JSON valide (ligne {0}).</value>
+  </data>
+  <data name="FileProblemDuplicateProperty" xml:space="preserve">
+    <value>Le champ «&#160;{0}&#160;» apparaît deux fois.</value>
+  </data>
+  <data name="FileProblemNotAnAtlasFile" xml:space="preserve">
+    <value>Ce fichier n'est pas un espace de travail exporté par Atlas.</value>
+  </data>
+  <data name="FileProblemNewerVersion" xml:space="preserve">
+    <value>Ce fichier vient d'une version plus récente d'Atlas. Installez cette version pour l'importer.</value>
+  </data>
+  <data name="FileProblemUnsupportedVersion" xml:space="preserve">
+    <value>Cette version du format n'est pas prise en charge.</value>
+  </data>
+  <data name="FileProblemUnexpectedProperty" xml:space="preserve">
+    <value>Le champ «&#160;{0}&#160;» n'existe pas dans ce format.</value>
+  </data>
+  <data name="FileProblemMissingProperty" xml:space="preserve">
+    <value>Le champ «&#160;{0}&#160;» manque.</value>
+  </data>
+  <data name="FileProblemWrongType" xml:space="preserve">
+    <value>Le champ «&#160;{0}&#160;» n'a pas le bon type de valeur.</value>
+  </data>
+  <data name="FileProblemTooManyResources" xml:space="preserve">
+    <value>Ce fichier contient plus de 1&#160;000 ressources.</value>
+  </data>
+
   <data name="AlreadyRunningTitle" xml:space="preserve">
     <value>Atlas est déjà ouvert</value>
   </data>
