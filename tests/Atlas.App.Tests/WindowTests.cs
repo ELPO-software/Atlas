@@ -5,6 +5,7 @@ using Atlas.App.Services;
 using Atlas.App.ViewModels;
 using Atlas.App.Views;
 using Atlas.Core.Resources;
+using Atlas.Core.Restoration;
 using Atlas.Core.Settings;
 using Atlas.Core.Workspaces;
 using Avalonia;
@@ -302,6 +303,128 @@ public sealed class WindowTests
         Assert.Null(await answer);
     }
 
+    [AvaloniaFact]
+    public async Task Restore_FromTheViewOpensTheResourcesAndShowsTheReport()
+    {
+        await using var app = await RunningApp.StartAsync(async services =>
+        {
+            var workspaces = services.GetRequiredService<WorkspaceService>();
+            var workspace = await workspaces.CreateAsync("Études d'été", null);
+            await workspaces.AddResourceAsync(workspace.Id, ResourceKind.Url, "Bibliothèque", "https://example.org");
+            await workspaces.AddResourceAsync(workspace.Id, ResourceKind.File, "Absent", @"C:\Données d'été\absent.txt");
+        });
+        app.Opener.Answers[@"C:\Données d'été\absent.txt"] = OpenResult.NotFound();
+        await app.ViewModel.OpenWorkspaceAsync((await app.Workspaces.ListAsync()).Single().Id);
+        await app.SettleAsync();
+        var restore = app.Find<Button>("RestoreWorkspace");
+        Assert.True(restore.IsEffectivelyEnabled);
+
+        restore.Command!.Execute(null);
+        await app.WaitUntilAsync(() => app.Find<Border>("RestoreReport").IsVisible);
+
+        Assert.Equal("1 restaurée, 1 introuvable", app.Find<TextBlock>("ReportSummary").Text);
+        var texts = app.Find<ItemsControl>("ReportLines").GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text).ToList();
+        Assert.Contains("Introuvable", texts);
+        Assert.Contains("Ouverte", texts);
+        Assert.Equal([@"C:\Données d'été\absent.txt", "https://example.org"], app.Opener.Opened);
+    }
+
+    [AvaloniaFact]
+    public async Task Restore_IsDisabledInTheViewWithoutResources()
+    {
+        await using var app = await RunningApp.StartAsync(services =>
+            services.GetRequiredService<WorkspaceService>().CreateAsync("Vide", null));
+        await app.ViewModel.OpenWorkspaceAsync((await app.Workspaces.ListAsync()).Single().Id);
+        await app.SettleAsync();
+
+        Assert.False(app.Find<Button>("RestoreWorkspace").IsEffectivelyEnabled);
+        Assert.True(app.Find<TextBlock>("NoResources").IsVisible);
+    }
+
+    [AvaloniaFact]
+    public async Task ResourceEditor_AddsALinkTypedInTheForm()
+    {
+        await using var app = await RunningApp.StartAsync(services =>
+            services.GetRequiredService<WorkspaceService>().CreateAsync("Études", null));
+        var id = (await app.Workspaces.ListAsync()).Single().Id;
+        var dialogs = app.Services.GetRequiredService<IDialogService>();
+
+        var answer = dialogs.EditResourceAsync(new ResourceEditorRequest(
+            Strings.AddResourceDialogTitle,
+            Strings.Add,
+            FixedKind: null,
+            string.Empty,
+            string.Empty,
+            (kind, name, target) => app.Workspaces.AddResourceAsync(id, kind, name, target)));
+        var dialog = await app.WaitForDialogAsync<ResourceEditorWindow>();
+        Assert.True(dialog.FindControl<RadioButton>("KindApplication")!.IsEffectivelyVisible);
+        Assert.True(dialog.FindControl<TextBox>("TargetBox")!.IsFocused);
+
+        dialog.FindControl<RadioButton>("KindLink")!.IsChecked = true;
+        dialog.FindControl<TextBox>("TargetBox")!.Text = "https://example.org/été";
+        dialog.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        var saved = await answer;
+
+        var resource = Assert.Single(saved!.Resources);
+        Assert.Equal((ResourceKind.Url, "example.org"), (resource.Kind, resource.DisplayName));
+        Assert.Single((await app.Workspaces.GetAsync(id)).Resources);
+    }
+
+    [AvaloniaFact]
+    public async Task ResourceEditor_ShowsWhyAFileThatRunsCodeIsRefused()
+    {
+        await using var app = await RunningApp.StartAsync(services =>
+            services.GetRequiredService<WorkspaceService>().CreateAsync("Études", null));
+        var id = (await app.Workspaces.ListAsync()).Single().Id;
+        var dialogs = app.Services.GetRequiredService<IDialogService>();
+
+        var answer = dialogs.EditResourceAsync(new ResourceEditorRequest(
+            Strings.EditResourceDialogTitle,
+            Strings.Save,
+            ResourceKind.File,
+            "Script",
+            string.Empty,
+            (kind, name, target) => app.Workspaces.AddResourceAsync(id, kind, name, target)));
+        var dialog = await app.WaitForDialogAsync<ResourceEditorWindow>();
+        Assert.False(dialog.FindControl<RadioButton>("KindApplication")!.IsEffectivelyVisible);
+        Assert.False(dialog.FindControl<Button>("ChooseInstalledApplication")!.IsEffectivelyVisible);
+
+        dialog.FindControl<TextBox>("TargetBox")!.Text = @"C:\Outils\lancer.bat";
+        dialog.FindControl<Button>("ConfirmButton")!.Command!.Execute(null);
+        await app.SettleAsync();
+
+        var error = dialog.FindControl<TextBlock>("TargetError")!;
+        Assert.True(error.IsVisible);
+        Assert.Equal(Strings.TargetExecutableFile, error.Text);
+        dialog.Close();
+        Assert.Null(await answer);
+        Assert.Empty((await app.Workspaces.GetAsync(id)).Resources);
+    }
+
+    [AvaloniaFact]
+    public async Task Confirmation_ListsWhatItIsAboutAndUsesTheMainActionStyleWhenNothingIsDestroyed()
+    {
+        await using var app = await RunningApp.StartAsync();
+        var dialogs = app.Services.GetRequiredService<IDialogService>();
+
+        var answer = dialogs.ConfirmAsync(new ConfirmationRequest("Lancer 2 applications ?", "Message", "Lancer et ouvrir", "Annuler")
+        {
+            Details = [new ConfirmationDetail("Éditeur", @"C:\Programmes\Éditeur.exe"), new ConfirmationDetail("Calculatrice", "Application installée")],
+            IsDestructive = false,
+        });
+        var dialog = await app.WaitForDialogAsync<ConfirmationWindow>();
+
+        var texts = dialog.FindControl<ItemsControl>("ConfirmationDetails")!.GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text).ToList();
+        Assert.Equal(["Éditeur", @"C:\Programmes\Éditeur.exe", "Calculatrice", "Application installée"], texts);
+        var confirm = dialog.FindControl<Button>("ConfirmButton")!;
+        Assert.Contains("primary", confirm.Classes);
+        Assert.DoesNotContain("danger", confirm.Classes);
+        Assert.True(dialog.FindControl<Button>("CancelButton")!.IsFocused);
+
+        dialog.Close();
+        Assert.False(await answer);
+    }
+
     [AvaloniaTheory]
     [InlineData(280, 1)]
     [InlineData(571, 1)]
@@ -376,10 +499,22 @@ public sealed class WindowTests
 
         public WorkspaceService Workspaces => Services.GetRequiredService<WorkspaceService>();
 
+        public FakeResourceOpener Opener { get; private init; } = new();
+
+        public FakeApplicationCatalog Catalog { get; private init; } = new();
+
         public static async Task<RunningApp> StartAsync(Func<ServiceProvider, Task>? seed = null)
         {
             var folder = new TemporaryDataFolder();
-            var services = AppStartup.Run(folder.Paths).Services ?? throw new InvalidOperationException("Atlas did not start.");
+            var opener = new FakeResourceOpener();
+            var catalog = new FakeApplicationCatalog();
+
+            // Nothing a test does may open a file, a folder, a link or a program on this computer.
+            var services = AppStartup.Run(folder.Paths, replace =>
+            {
+                replace.AddSingleton<IResourceOpener>(opener);
+                replace.AddSingleton<IApplicationCatalog>(catalog);
+            }).Services ?? throw new InvalidOperationException("Atlas did not start.");
 
             if (seed is not null)
                 await seed(services);
@@ -389,7 +524,7 @@ public sealed class WindowTests
             services.GetRequiredService<MainWindowHost>().Window = window;
             window.Show();
 
-            var app = new RunningApp(folder, services, viewModel, window);
+            var app = new RunningApp(folder, services, viewModel, window) { Opener = opener, Catalog = catalog };
             await viewModel.InitializeAsync();
             await app.SettleAsync();
             return app;

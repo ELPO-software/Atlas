@@ -89,7 +89,7 @@ public sealed class Workspace
         if (kind == default)
             throw new ArgumentException("A resource must have a type.", nameof(kind));
 
-        ThrowIfInvalid(ResourceRules.Validate(displayName, target));
+        ThrowIfInvalid(ResourceRules.Validate(kind, displayName, target));
 
         var sortOrder = _resources.Count == 0 ? 0 : _resources.Max(r => r.SortOrder) + 1;
         var resource = new Resource(Guid.NewGuid(), kind, displayName!.Trim(), target!.Trim(), sortOrder, false, now, now);
@@ -101,7 +101,7 @@ public sealed class Workspace
     public Resource UpdateResource(Guid resourceId, string? displayName, string? target, DateTimeOffset now)
     {
         var index = IndexOfResource(resourceId);
-        ThrowIfInvalid(ResourceRules.Validate(displayName, target));
+        ThrowIfInvalid(ResourceRules.Validate(_resources[index].Kind, displayName, target));
 
         var updated = _resources[index] with
         {

@@ -162,8 +162,8 @@ public sealed class WorkspaceTests
     }
 
     [Theory]
-    [InlineData(null, "cible", ValidationField.ResourceDisplayName)]
-    [InlineData(" ", "cible", ValidationField.ResourceDisplayName)]
+    [InlineData(null, @"C:\cible.txt", ValidationField.ResourceDisplayName)]
+    [InlineData(" ", @"C:\cible.txt", ValidationField.ResourceDisplayName)]
     [InlineData("Nom", null, ValidationField.ResourceTarget)]
     [InlineData("Nom", " ", ValidationField.ResourceTarget)]
     public void AddResource_RefusesMissingValues(string? displayName, string? target, ValidationField field)
@@ -192,11 +192,11 @@ public sealed class WorkspaceTests
     public void AddResource_NeverReusesASortOrderAfterARemoval()
     {
         var workspace = Workspace.Create("Nom", null, Created);
-        var first = workspace.AddResource(ResourceKind.Url, "A", "a", Later);
-        var second = workspace.AddResource(ResourceKind.Url, "B", "b", Later);
+        var first = workspace.AddResource(ResourceKind.Url, "A", "https://example.org/a", Later);
+        var second = workspace.AddResource(ResourceKind.Url, "B", "https://example.org/b", Later);
         workspace.RemoveResource(first.Id, Later);
 
-        var third = workspace.AddResource(ResourceKind.Url, "C", "c", Later);
+        var third = workspace.AddResource(ResourceKind.Url, "C", "https://example.org/c", Later);
 
         Assert.True(third.SortOrder > second.SortOrder);
     }
@@ -205,13 +205,13 @@ public sealed class WorkspaceTests
     public void UpdateResource_ChangesOnlyTheNamedResource()
     {
         var workspace = Workspace.Create("Nom", null, Created);
-        var kept = workspace.AddResource(ResourceKind.Url, "A", "a", Created);
-        var changed = workspace.AddResource(ResourceKind.Url, "B", "b", Created);
+        var kept = workspace.AddResource(ResourceKind.Url, "A", "https://example.org/a", Created);
+        var changed = workspace.AddResource(ResourceKind.Url, "B", "https://example.org/b", Created);
 
-        var updated = workspace.UpdateResource(changed.Id, "B2", "b2", Later);
+        var updated = workspace.UpdateResource(changed.Id, "B2", "https://example.org/b2", Later);
 
         Assert.Equal("B2", updated.DisplayName);
-        Assert.Equal("b2", updated.Target);
+        Assert.Equal("https://example.org/b2", updated.Target);
         Assert.Equal(changed.Id, updated.Id);
         Assert.Equal(Created, updated.CreatedAt);
         Assert.Equal(Later, updated.UpdatedAt);
@@ -222,7 +222,7 @@ public sealed class WorkspaceTests
     public void UpdateResource_LeavesTheResourceUntouchedWhenRefused()
     {
         var workspace = Workspace.Create("Nom", null, Created);
-        var resource = workspace.AddResource(ResourceKind.Url, "A", "a", Created);
+        var resource = workspace.AddResource(ResourceKind.Url, "A", "https://example.org/a", Created);
 
         Assert.Throws<AtlasValidationException>(() => workspace.UpdateResource(resource.Id, "B", " ", Later));
 

@@ -61,8 +61,8 @@ public sealed class WorkspaceDetailViewModelTests
             ["Applications", "Fichiers", "Dossiers", "Liens", "Autres types"],
             page.ResourceGroups.Select(g => g.Title));
         Assert.Equal(
-            [new ResourceItemViewModel("Mémoire", @"C:\Données d'été\mémoire.docx"), new ResourceItemViewModel("Annexes", @"C:\Données d'été\annexes.pdf")],
-            page.ResourceGroups[1].Items);
+            [("Mémoire", @"C:\Données d'été\mémoire.docx"), ("Annexes", @"C:\Données d'été\annexes.pdf")],
+            page.ResourceGroups[1].Items.Select(i => (i.Name, i.Target)));
     }
 
     [Fact]

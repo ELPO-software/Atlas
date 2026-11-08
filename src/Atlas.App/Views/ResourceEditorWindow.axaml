@@ -1,0 +1,104 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:res="using:Atlas.App.Resources"
+        xmlns:resources="using:Atlas.Core.Resources"
+        xmlns:vm="using:Atlas.App.ViewModels"
+        x:Class="Atlas.App.Views.ResourceEditorWindow"
+        x:DataType="vm:ResourceEditorViewModel"
+        Title="{Binding Title}"
+        Icon="/Assets/atlas.ico"
+        Background="{DynamicResource AtlasBackgroundBrush}"
+        Width="560"
+        SizeToContent="Height"
+        CanResize="False"
+        CanMinimize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+    <StackPanel Margin="24" Spacing="16">
+        <TextBlock Classes="section-title" Text="{Binding Title}" />
+
+        <StackPanel Spacing="6" IsVisible="{Binding CanChooseKind}">
+            <TextBlock Text="{x:Static res:Strings.ResourceKindLabel}" />
+            <StackPanel Orientation="Horizontal" Spacing="16">
+                <RadioButton x:Name="KindApplication" GroupName="Kind" Content="{x:Static res:Strings.KindApplication}" IsChecked="{Binding IsApplication}" />
+                <RadioButton x:Name="KindFile" GroupName="Kind" Content="{x:Static res:Strings.KindFile}" IsChecked="{Binding IsFile}" />
+                <RadioButton x:Name="KindFolder" GroupName="Kind" Content="{x:Static res:Strings.KindFolder}" IsChecked="{Binding IsFolder}" />
+                <RadioButton x:Name="KindLink" GroupName="Kind" Content="{x:Static res:Strings.KindLink}" IsChecked="{Binding IsLink}" />
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+            <Label Target="{Binding #TargetBox}" Content="{Binding TargetLabel}" Padding="0" />
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <TextBox x:Name="TargetBox"
+                         Text="{Binding Target}"
+                         PlaceholderText="{Binding TargetPlaceholder}"
+                         AutomationProperties.Name="{Binding TargetLabel}" />
+                <Button x:Name="BrowseButton"
+                        Grid.Column="1"
+                        Content="{x:Static res:Strings.Browse}"
+                        Command="{Binding BrowseCommand}"
+                        IsVisible="{Binding CanBrowse}" />
+            </Grid>
+            <TextBlock x:Name="TargetError"
+                       Classes="error"
+                       Text="{Binding TargetError}"
+                       IsVisible="{Binding TargetError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+            <Button x:Name="ChooseInstalledApplication"
+                    HorizontalAlignment="Left"
+                    Content="{x:Static res:Strings.ChooseInstalledApplication}"
+                    Command="{Binding ChooseInstalledApplicationCommand}"
+                    IsVisible="{Binding IsApplication}" />
+
+            <StackPanel Spacing="8" IsVisible="{Binding IsChoosingApplication}">
+                <TextBox x:Name="SearchBox"
+                         Text="{Binding SearchText}"
+                         PlaceholderText="{x:Static res:Strings.SearchApplications}"
+                         AutomationProperties.Name="{x:Static res:Strings.SearchApplications}" />
+                <TextBlock Classes="secondary" Text="{x:Static res:Strings.Loading}" IsVisible="{Binding IsLoadingApplications}" />
+                <SelectableTextBlock Classes="error"
+                                     Text="{Binding ApplicationsError}"
+                                     IsVisible="{Binding ApplicationsError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                <TextBlock Classes="secondary" Text="{x:Static res:Strings.NoMatchingApplication}" IsVisible="{Binding HasNoMatchingApplication}" />
+                <ListBox x:Name="Applications"
+                         MaxHeight="240"
+                         ItemsSource="{Binding MatchingApplications}"
+                         SelectedItem="{Binding SelectedApplication}"
+                         AutomationProperties.Name="{x:Static res:Strings.ChooseInstalledApplication}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="resources:InstalledApplication">
+                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+            <Label Target="{Binding #NameBox}" Content="{x:Static res:Strings.ResourceNameLabel}" Padding="0" />
+            <TextBox x:Name="NameBox" Text="{Binding DisplayName}" AutomationProperties.Name="{x:Static res:Strings.ResourceNameLabel}" />
+            <TextBlock x:Name="NameError"
+                       Classes="error"
+                       Text="{Binding DisplayNameError}"
+                       IsVisible="{Binding DisplayNameError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        </StackPanel>
+
+        <SelectableTextBlock x:Name="SaveError"
+                             Classes="error"
+                             Text="{Binding SaveError}"
+                             IsVisible="{Binding SaveError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button x:Name="CancelButton"
+                    Content="{x:Static res:Strings.Cancel}"
+                    IsCancel="True"
+                    Click="OnCancelClick" />
+            <Button x:Name="ConfirmButton"
+                    Classes="primary"
+                    Content="{Binding ConfirmLabel}"
+                    IsDefault="True"
+                    Command="{Binding SubmitCommand}" />
+        </StackPanel>
+    </StackPanel>
+</Window>

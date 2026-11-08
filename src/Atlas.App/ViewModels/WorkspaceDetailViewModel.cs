@@ -1,6 +1,8 @@
 using Atlas.App.Resources;
 using Atlas.App.Services;
 using Atlas.App.Text;
+using Atlas.Core.Resources;
+using Atlas.Core.Restoration;
 using Atlas.Core.Validation;
 using Atlas.Core.Workspaces;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -17,16 +19,22 @@ public sealed partial class WorkspaceDetailViewModel(
     /// <summary>Notes are saved after this pause in typing.</summary>
     internal static readonly TimeSpan NotesSaveDelay = TimeSpan.FromSeconds(1);
 
+    /// <summary>From this number of programs, the user confirms before they start.</summary>
+    internal const int ApplicationsNeedingConfirmation = 2;
+
     private readonly ILogger _logger = services.Loggers.CreateLogger<WorkspaceDetailViewModel>();
     private readonly SemaphoreSlim _notesSaveGate = new(1, 1);
 
     private CancellationTokenSource? _notesDelay;
+    private CancellationTokenSource? _restoreStop;
     private string _savedNotes = string.Empty;
     private bool _isLoadingNotes;
     private bool _isDeleted;
+    private bool _isPreparingRestore;
     private int _resourceCount;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanRestore))]
     public partial bool IsLoaded { get; private set; }
 
     [ObservableProperty]
@@ -45,7 +53,7 @@ public sealed partial class WorkspaceDetailViewModel(
     public partial string ModifiedText { get; private set; } = string.Empty;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasNoResources))]
+    [NotifyPropertyChangedFor(nameof(HasNoResources), nameof(CanRestore))]
     public partial IReadOnlyList<ResourceGroupViewModel> ResourceGroups { get; private set; } = [];
 
     [ObservableProperty]
@@ -60,12 +68,40 @@ public sealed partial class WorkspaceDetailViewModel(
     [ObservableProperty]
     public partial string? ActionError { get; private set; }
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanRestore), nameof(CanChange))]
+    public partial bool IsRestoring { get; private set; }
+
+    [ObservableProperty]
+    public partial string RestoreProgressText { get; private set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial int RestoreCompleted { get; private set; }
+
+    [ObservableProperty]
+    public partial int RestoreTotal { get; private set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasReport))]
+    public partial RestoreReportViewModel? Report { get; private set; }
+
     public bool HasNoResources => ResourceGroups.Count == 0;
 
-    public override bool HasUnsavedChanges => !_isDeleted && !string.Equals(_savedNotes, Notes, StringComparison.Ordinal);
+    public bool CanRestore => IsLoaded && !HasNoResources && !IsRestoring;
+
+    /// <summary>The workspace cannot change while it is being restored.</summary>
+    public bool CanChange => !IsRestoring;
+
+    public bool HasReport => Report is not null;
+
+    public override bool HasUnsavedChanges =>
+        IsRestoring || (!_isDeleted && !string.Equals(_savedNotes, Notes, StringComparison.Ordinal));
 
     /// <summary>The automatic save in progress, if any. Lets tests wait for it.</summary>
     internal Task PendingNotesSave { get; private set; } = Task.CompletedTask;
+
+    /// <summary>The restoration in progress, if any.</summary>
+    internal Task PendingRestore { get; private set; } = Task.CompletedTask;
 
     public override async Task LoadAsync()
     {
@@ -75,8 +111,7 @@ public sealed partial class WorkspaceDetailViewModel(
             var workspace = await services.Workspaces.GetAsync(workspaceId);
 
             ShowDetails(workspace);
-            ResourceGroups = ResourceGroupViewModel.From(workspace.Resources);
-            _resourceCount = workspace.Resources.Count;
+            ShowResources(workspace);
 
             _savedNotes = workspace.Notes;
             _isLoadingNotes = true;
@@ -101,6 +136,17 @@ public sealed partial class WorkspaceDetailViewModel(
         if (!IsLoaded || _isDeleted)
             return true;
 
+        if (IsRestoring)
+        {
+            var stop = await services.Dialogs.ConfirmAsync(new ConfirmationRequest(
+                Strings.StopRestoreTitle, Strings.StopRestoreMessage, Strings.StopAndLeave, Strings.Stay));
+            if (!stop)
+                return false;
+
+            _restoreStop?.Cancel();
+            await PendingRestore;
+        }
+
         CancelNotesDelay();
         if (await SaveNotesAsync())
             return true;
@@ -114,6 +160,65 @@ public sealed partial class WorkspaceDetailViewModel(
 
     [RelayCommand(AllowConcurrentExecutions = true)]
     private Task BackAsync() => navigator.OpenWorkspacesAsync();
+
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    private async Task RestoreAsync()
+    {
+        // A second click while the first one is still preparing must not start a second restoration.
+        if (!CanRestore || _isPreparingRestore)
+            return;
+
+        _isPreparingRestore = true;
+        try
+        {
+            ActionError = null;
+            RestorePlan plan;
+            try
+            {
+                plan = RestorePlan.For(await services.Workspaces.GetAsync(workspaceId));
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogError(ex, "The workspace {WorkspaceId} could not be read before restoring it", workspaceId);
+                ActionError = UiText.Format(Strings.RestoreFailed, services.Paths.LogsDirectory);
+                return;
+            }
+
+            var applications = plan.ApplicationsToLaunch;
+            if (applications.Count >= ApplicationsNeedingConfirmation && !await ConfirmLaunchAsync(applications))
+                return;
+
+            PendingRestore = RunRestorationAsync(plan, applications.Count > 0);
+        }
+        finally
+        {
+            _isPreparingRestore = false;
+        }
+
+        await PendingRestore;
+    }
+
+    [RelayCommand]
+    private void StopRestore() => _restoreStop?.Cancel();
+
+    [RelayCommand]
+    private void CloseReport() => Report = null;
+
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    private async Task AddResourceAsync()
+    {
+        ActionError = null;
+        var updated = await services.Dialogs.EditResourceAsync(new ResourceEditorRequest(
+            Strings.AddResourceDialogTitle,
+            Strings.Add,
+            FixedKind: null,
+            DisplayName: string.Empty,
+            Target: string.Empty,
+            (kind, name, target) => services.Workspaces.AddResourceAsync(workspaceId, kind, name, target)));
+
+        if (updated is not null)
+            ShowChange(updated);
+    }
 
     [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task EditAsync()
@@ -193,6 +298,104 @@ public sealed partial class WorkspaceDetailViewModel(
     {
         if (!_isLoadingNotes)
             ScheduleNotesSave();
+    }
+
+    private async Task EditResourceAsync(Resource resource)
+    {
+        ActionError = null;
+        var updated = await services.Dialogs.EditResourceAsync(new ResourceEditorRequest(
+            Strings.EditResourceDialogTitle,
+            Strings.Save,
+            resource.Kind,
+            resource.DisplayName,
+            resource.Target,
+            (_, name, target) => services.Workspaces.UpdateResourceAsync(workspaceId, resource.Id, name, target)));
+
+        if (updated is not null)
+            ShowChange(updated);
+    }
+
+    private async Task RemoveResourceAsync(Resource resource)
+    {
+        ActionError = null;
+        var confirmed = await services.Dialogs.ConfirmAsync(new ConfirmationRequest(
+            Strings.RemoveResourceTitle,
+            UiText.Format(Strings.RemoveResourceMessage, resource.DisplayName),
+            Strings.Remove,
+            Strings.Cancel));
+
+        if (!confirmed)
+            return;
+
+        try
+        {
+            ShowChange(await services.Workspaces.RemoveResourceAsync(workspaceId, resource.Id));
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _logger.LogError(ex, "The resource {ResourceId} could not be removed", resource.Id);
+            ActionError = UiText.Format(Strings.SaveFailed, services.Paths.LogsDirectory);
+        }
+    }
+
+    private async Task<bool> ConfirmLaunchAsync(IReadOnlyList<Resource> applications) =>
+        await services.Dialogs.ConfirmAsync(
+            new ConfirmationRequest(
+                UiText.Format(Strings.LaunchApplicationsTitle, applications.Count),
+                Strings.LaunchApplicationsMessage,
+                Strings.LaunchAndOpen,
+                Strings.Cancel)
+            {
+                Details = applications.Select(a => new ConfirmationDetail(a.DisplayName, RestoreText.Target(a))).ToList(),
+                IsDestructive = false,
+            });
+
+    private async Task RunRestorationAsync(RestorePlan plan, bool startsApplications)
+    {
+        Report = null;
+        IsRestoring = true;
+        RestoreCompleted = 0;
+        RestoreTotal = plan.Steps.Count;
+        _restoreStop = new CancellationTokenSource();
+
+        var progress = new Progress<RestoreProgress>(p =>
+        {
+            RestoreCompleted = p.Completed;
+            RestoreProgressText = p.Current is { } current
+                ? UiText.Format(Strings.RestoringProgress, p.Completed + 1, p.Total, current.DisplayName)
+                : startsApplications ? Strings.CheckingApplications : RestoreProgressText;
+        });
+
+        try
+        {
+            var report = await services.Restoration.RunAsync(plan, progress, _restoreStop.Token);
+            Report = RestoreReportViewModel.From(report);
+            await RecordUseAsync();
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _logger.LogError(ex, "The restoration of workspace {WorkspaceId} stopped unexpectedly", workspaceId);
+            ActionError = UiText.Format(Strings.RestoreFailed, services.Paths.LogsDirectory);
+        }
+        finally
+        {
+            IsRestoring = false;
+            _restoreStop.Dispose();
+            _restoreStop = null;
+        }
+    }
+
+    /// <summary>Puts the workspace among the recent ones. Failing to record it does not change what was restored.</summary>
+    private async Task RecordUseAsync()
+    {
+        try
+        {
+            await services.Workspaces.MarkUsedAsync(workspaceId);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _logger.LogWarning(ex, "The restoration of workspace {WorkspaceId} could not be recorded", workspaceId);
+        }
     }
 
     private void ScheduleNotesSave()
@@ -281,12 +484,24 @@ public sealed partial class WorkspaceDetailViewModel(
         return await services.Workspaces.DuplicateAsync(workspaceId, name);
     }
 
+    private void ShowChange(Workspace workspace)
+    {
+        ShowResources(workspace);
+        ModifiedText = DateText.Modified(workspace.UpdatedAt, services.Time);
+    }
+
     private void ShowDetails(Workspace workspace)
     {
         Name = workspace.Name;
         Description = workspace.Description;
         CreatedText = DateText.Created(workspace.CreatedAt, services.Time);
         ModifiedText = DateText.Modified(workspace.UpdatedAt, services.Time);
+    }
+
+    private void ShowResources(Workspace workspace)
+    {
+        ResourceGroups = ResourceGroupViewModel.From(workspace.Resources, EditResourceAsync, RemoveResourceAsync);
+        _resourceCount = workspace.Resources.Count;
     }
 
     private static string SuggestCopyName(string name)

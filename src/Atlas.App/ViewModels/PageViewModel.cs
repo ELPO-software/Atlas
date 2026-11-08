@@ -1,4 +1,5 @@
 using Atlas.App.Services;
+using Atlas.Core.Restoration;
 using Atlas.Core.Settings;
 using Atlas.Core.Workspaces;
 using Atlas.Infrastructure.Storage;
@@ -10,6 +11,7 @@ namespace Atlas.App.ViewModels;
 public sealed record PageServices(
     WorkspaceService Workspaces,
     SettingsService Settings,
+    RestorationService Restoration,
     IDialogService Dialogs,
     IThemeController Theme,
     IFolderOpener Folders,
@@ -19,7 +21,7 @@ public sealed record PageServices(
 
 public abstract class PageViewModel : ViewModelBase
 {
-    /// <summary>True while the page holds changes that are not stored yet.</summary>
+    /// <summary>True while the page holds changes that are not stored yet, or work that has not finished.</summary>
     public virtual bool HasUnsavedChanges => false;
 
     public abstract Task LoadAsync();

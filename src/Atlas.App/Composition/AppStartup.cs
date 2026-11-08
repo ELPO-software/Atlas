@@ -29,13 +29,13 @@ internal static class AppStartup
         }
     }
 
-    public static StartupOutcome Run(AtlasDataPaths paths)
+    public static StartupOutcome Run(AtlasDataPaths paths, Action<IServiceCollection>? replace = null)
     {
         ServiceProvider? services = null;
         try
         {
             Directory.CreateDirectory(paths.DataDirectory);
-            services = AppComposition.Build(paths);
+            services = AppComposition.Build(paths, replace);
             services.GetRequiredService<DatabaseMigrator>().Migrate();
             return new StartupOutcome(services, null);
         }

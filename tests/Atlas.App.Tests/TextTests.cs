@@ -70,7 +70,7 @@ public sealed class TextTests
     public void Validation_StillSaysSomethingForACombinationWithoutItsOwnMessage() =>
         Assert.Equal(
             "Cette valeur n'est pas acceptée.",
-            ValidationText.Describe(new ValidationError(ValidationField.ResourceTarget, ValidationCode.Required)));
+            ValidationText.Describe(new ValidationError(ValidationField.WorkspaceName, ValidationCode.InvalidPath)));
 
     private static FakeTimeProvider Clock() => new(Noon);
 }

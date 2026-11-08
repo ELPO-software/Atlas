@@ -1,5 +1,7 @@
 using Atlas.App.Services;
 using Atlas.App.ViewModels;
+using Atlas.Core.Resources;
+using Atlas.Core.Restoration;
 using Atlas.Core.Settings;
 using Atlas.Core.Workspaces;
 using Atlas.Infrastructure.Storage;
@@ -128,10 +130,38 @@ internal sealed class FakeDialogService(AtlasDataPaths paths) : IDialogService
     /// <summary>The last form shown, to inspect what it displays after the user acted.</summary>
     public WorkspaceEditorViewModel? LastEditor { get; private set; }
 
+    /// <summary>Answers each confirmation differently when set; otherwise every answer is <see cref="ConfirmAnswer"/>.</summary>
+    public Func<ConfirmationRequest, bool>? Decide { get; set; }
+
+    /// <summary>Plays the part of the user in the resource form. Null means the user cancels.</summary>
+    public Action<ResourceEditorViewModel>? FillResourceEditor { get; set; }
+
+    public List<ResourceEditorRequest> ResourceEditors { get; } = [];
+
+    public ResourceEditorViewModel? LastResourceEditor { get; private set; }
+
+    public FakeFilePicker Picker { get; } = new();
+
+    public FakeApplicationCatalog Applications { get; } = new();
+
     public Task<bool> ConfirmAsync(ConfirmationRequest request)
     {
         Confirmations.Add(request);
-        return Task.FromResult(ConfirmAnswer);
+        return Task.FromResult(Decide?.Invoke(request) ?? ConfirmAnswer);
+    }
+
+    public async Task<Workspace?> EditResourceAsync(ResourceEditorRequest request)
+    {
+        ResourceEditors.Add(request);
+        LastResourceEditor = new ResourceEditorViewModel(
+            request, Picker, Applications, paths, NullLogger<ResourceEditorViewModel>.Instance);
+
+        if (FillResourceEditor is null)
+            return null;
+
+        FillResourceEditor(LastResourceEditor);
+        await LastResourceEditor.SubmitCommand.ExecuteAsync(null);
+        return LastResourceEditor.Result;
     }
 
     public async Task<Workspace?> EditWorkspaceAsync(WorkspaceEditorRequest request)
@@ -145,6 +175,75 @@ internal sealed class FakeDialogService(AtlasDataPaths paths) : IDialogService
         FillEditor(LastEditor);
         await LastEditor.SubmitCommand.ExecuteAsync(null);
         return LastEditor.Result;
+    }
+}
+
+internal sealed class FakeFilePicker : IFilePicker
+{
+    /// <summary>What the user picks; null means they cancel.</summary>
+    public string? NextPath { get; set; }
+
+    public List<string> Requests { get; } = [];
+
+    public Task<string?> PickProgramAsync() => Pick("program");
+
+    public Task<string?> PickFileAsync() => Pick("file");
+
+    public Task<string?> PickFolderAsync() => Pick("folder");
+
+    private Task<string?> Pick(string what)
+    {
+        Requests.Add(what);
+        return Task.FromResult(NextPath);
+    }
+}
+
+internal sealed class FakeApplicationCatalog : IApplicationCatalog
+{
+    public List<InstalledApplication> Installed { get; } = [];
+
+    public Exception? Failure { get; set; }
+
+    public int Reads { get; private set; }
+
+    public Task<IReadOnlyList<InstalledApplication>> ListAsync(CancellationToken cancellationToken = default)
+    {
+        Reads++;
+        return Failure is null
+            ? Task.FromResult<IReadOnlyList<InstalledApplication>>(Installed.ToList())
+            : Task.FromException<IReadOnlyList<InstalledApplication>>(Failure);
+    }
+}
+
+/// <summary>Records what would have been opened; nothing is ever opened for real.</summary>
+internal sealed class FakeResourceOpener : IResourceOpener
+{
+    private readonly object _gate = new();
+    private readonly List<string> _opened = [];
+
+    public Dictionary<string, OpenResult> Answers { get; } = [];
+
+    /// <summary>While set, every opening waits for it, which keeps a restoration in progress.</summary>
+    public Task? Hold { get; set; }
+
+    public IReadOnlyList<string> Opened
+    {
+        get
+        {
+            lock (_gate)
+                return _opened.ToList();
+        }
+    }
+
+    public async Task<OpenResult> OpenAsync(ResourceKind kind, string target)
+    {
+        lock (_gate)
+            _opened.Add(target);
+
+        if (Hold is { } hold)
+            await hold;
+
+        return Answers.GetValueOrDefault(target) ?? (kind == ResourceKind.Application ? OpenResult.Launched() : OpenResult.Opened());
     }
 }
 
@@ -200,6 +299,7 @@ internal sealed class TestServices
         Pages = new PageServices(
             Workspaces,
             new SettingsService(SettingsStore),
+            new RestorationService(Opener, Clock),
             Dialogs,
             Theme,
             Folders,
@@ -209,6 +309,8 @@ internal sealed class TestServices
     }
 
     public FakeWorkspaceRepository Repository { get; } = new();
+
+    public FakeResourceOpener Opener { get; } = new();
 
     public FakeSettingsStore SettingsStore { get; } = new();
 

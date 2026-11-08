@@ -67,9 +67,34 @@ The title bar stays the one drawn by the system, which keeps its buttons and win
 
 `ThirdPartyComponents` lists what ships with Atlas, shown in the settings. `ThirdPartyComponentsTests` fails if a package in the application has no entry. Licenses come from each package's own metadata, except for the Inter font, whose OFL-1.1 license is separate from the MIT license of the package that carries it.
 
+## Restoration
+
+A restoration has two parts, kept apart so that the decisions can be tested without opening anything.
+
+- **`RestorePlan`** (Core) decides before anything opens: applications first, then files and folders, then links. It skips, with a reason, resources waiting for approval, files that would run code, targets that break the rules and types Atlas does not know. A resource waiting for approval is skipped before its path is even looked at, so a network path from an imported file never contacts its server.
+- **`RestorationService`** (Core) opens the plan's resources one after the other. A resource that fails never stops the others. Each one has 15 seconds to answer; past that, the report says Windows did not answer and the restoration moves on. Stopping takes effect before the next resource, so every result in the report is true.
+- **`IResourceOpener`** (Platform) does the opening. On Windows, `WindowsResourceOpener` checks that the resource is there, then asks the system to open it as a double-click would. It never passes command-line arguments. Programs that stop with an error within 1.5 seconds are reported as failed; all programs get those 1.5 seconds at the same time, at the end.
+
+The user confirms before two or more applications start, with each one listed. Atlas never closes anything.
+
+"Restored" means that Windows accepted to open the resource. For a packaged application, Windows does not even report a process to watch. The report says so.
+
+### What Atlas refuses to open
+
+- **Files that run code** (`ResourceTargets.RunsCode`): executables, scripts, shortcuts, installers and the like, including names Windows would read the same way, such as `lancer.bat.`. Windows' own list of dangerous types (`AssocIsDangerous`) is checked as well when opening. Programs are added as applications instead.
+- **Paths that Windows would read differently:** relative paths, device paths (`\\?\`, `\\.\`), wildcards and alternate data streams (`notes.txt:hidden.exe`).
+- **Links other than `http` and `https`**, such as `file:`, `javascript:` or `ms-settings:`.
+- **Applications that are not programs:** an application is either a `.exe` file or an entry of the Windows application list (`shell:AppsFolder`). Entries of that list that are web shortcuts or documents are left out.
+
+A folder is opened with a final separator, so that a file with the same name can never answer instead.
+
+### Other systems
+
+Only Windows can open resources for now. Elsewhere, `UnsupportedResourceOpener` reports every resource as failed instead of pretending.
+
 ## Adding a resource type
 
-A resource type is a text value (`ResourceKind`). Adding one does not change the database schema. Values Atlas does not know are preserved, so they can be reported and never silently lost.
+A resource type is a text value (`ResourceKind`). Adding one does not change the database schema: it needs its rules in `ResourceRules`, its place in `RestorePlan` and its opener. Values Atlas does not know are preserved, so they can be reported and never silently lost.
 
 ## Conventions
 

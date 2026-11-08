@@ -1,3 +1,5 @@
+using Atlas.Core.Resources;
+
 namespace Atlas.Core.Workspaces;
 
 /// <summary>
@@ -34,6 +36,21 @@ public sealed class WorkspaceService(IWorkspaceRepository repository, TimeProvid
     public Task<Workspace> UpdateNotesAsync(
         Guid id, string? notes, CancellationToken cancellationToken = default) =>
         ChangeAsync(id, (workspace, now) => workspace.UpdateNotes(notes, now), cancellationToken);
+
+    public Task<Workspace> AddResourceAsync(
+        Guid id, ResourceKind kind, string? displayName, string? target, CancellationToken cancellationToken = default) =>
+        ChangeAsync(id, (workspace, now) => workspace.AddResource(kind, displayName, target, now), cancellationToken);
+
+    public Task<Workspace> UpdateResourceAsync(
+        Guid id, Guid resourceId, string? displayName, string? target, CancellationToken cancellationToken = default) =>
+        ChangeAsync(id, (workspace, now) => workspace.UpdateResource(resourceId, displayName, target, now), cancellationToken);
+
+    public Task<Workspace> RemoveResourceAsync(Guid id, Guid resourceId, CancellationToken cancellationToken = default) =>
+        ChangeAsync(id, (workspace, now) => workspace.RemoveResource(resourceId, now), cancellationToken);
+
+    /// <summary>Records that the workspace was restored. Its modification date does not move.</summary>
+    public Task<Workspace> MarkUsedAsync(Guid id, CancellationToken cancellationToken = default) =>
+        ChangeAsync(id, (workspace, now) => workspace.MarkUsed(now), cancellationToken);
 
     public async Task<Workspace> DuplicateAsync(
         Guid id, string? newName, CancellationToken cancellationToken = default)

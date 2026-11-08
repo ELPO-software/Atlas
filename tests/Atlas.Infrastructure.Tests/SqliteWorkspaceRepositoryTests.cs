@@ -117,8 +117,8 @@ public sealed class SqliteWorkspaceRepositoryTests : IDisposable
     public async Task List_ReturnsSummariesMostRecentlyModifiedFirst()
     {
         var older = Workspace.Create("Ancien", "Description", Created);
-        older.AddResource(ResourceKind.Url, "A", "a", Created);
-        older.AddResource(ResourceKind.Url, "B", "b", Created);
+        older.AddResource(ResourceKind.Url, "A", "https://example.org/a", Created);
+        older.AddResource(ResourceKind.Url, "B", "https://example.org/b", Created);
         var newer = Workspace.Create("Récent", null, Later);
         await _repository.AddAsync(older, Token);
         await _repository.AddAsync(newer, Token);
@@ -144,15 +144,15 @@ public sealed class SqliteWorkspaceRepositoryTests : IDisposable
     public async Task Update_SavesTheDetailsAndReplacesTheResources()
     {
         var workspace = Workspace.Create("Avant", null, Created);
-        var removed = workspace.AddResource(ResourceKind.Url, "Retirée", "a", Created);
-        var changed = workspace.AddResource(ResourceKind.Url, "Modifiée", "b", Created);
+        var removed = workspace.AddResource(ResourceKind.Url, "Retirée", "https://example.org/a", Created);
+        var changed = workspace.AddResource(ResourceKind.Url, "Modifiée", "https://example.org/b", Created);
         await _repository.AddAsync(workspace, Token);
 
         workspace.UpdateDetails("Après", "Description", Later);
         workspace.UpdateNotes("Notes", Later);
         workspace.MarkUsed(Later);
         workspace.RemoveResource(removed.Id, Later);
-        workspace.UpdateResource(changed.Id, "Nouveau nom", "c", Later);
+        workspace.UpdateResource(changed.Id, "Nouveau nom", "https://example.org/c", Later);
         workspace.AddResource(ResourceKind.File, "Ajoutée", @"C:\d.txt", Later);
 
         Assert.True(await _repository.UpdateAsync(workspace, Token));
@@ -171,7 +171,7 @@ public sealed class SqliteWorkspaceRepositoryTests : IDisposable
     public async Task Update_ReturnsFalseAndWritesNothingWhenTheWorkspaceDoesNotExist()
     {
         var missing = Workspace.Create("Absent", null, Created);
-        missing.AddResource(ResourceKind.Url, "A", "a", Created);
+        missing.AddResource(ResourceKind.Url, "A", "https://example.org/a", Created);
 
         Assert.False(await _repository.UpdateAsync(missing, Token));
 
@@ -183,9 +183,9 @@ public sealed class SqliteWorkspaceRepositoryTests : IDisposable
     public async Task Delete_RemovesTheWorkspaceAndItsResourcesOnly()
     {
         var removed = Workspace.Create("Supprimé", null, Created);
-        removed.AddResource(ResourceKind.Url, "A", "a", Created);
+        removed.AddResource(ResourceKind.Url, "A", "https://example.org/a", Created);
         var kept = Workspace.Create("Gardé", null, Created);
-        var keptResource = kept.AddResource(ResourceKind.Url, "B", "b", Created);
+        var keptResource = kept.AddResource(ResourceKind.Url, "B", "https://example.org/b", Created);
         await _repository.AddAsync(removed, Token);
         await _repository.AddAsync(kept, Token);
 
@@ -218,7 +218,7 @@ public sealed class SqliteWorkspaceRepositoryTests : IDisposable
     public async Task Update_KeepsThePreviousContentWhenAResourceCannotBeSaved()
     {
         var workspace = Workspace.Create("Avant", null, Created);
-        var original = workspace.AddResource(ResourceKind.Url, "A", "a", Created);
+        var original = workspace.AddResource(ResourceKind.Url, "A", "https://example.org/a", Created);
         await _repository.AddAsync(workspace, Token);
 
         var id = Guid.NewGuid();

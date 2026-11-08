@@ -278,6 +278,268 @@
     <value>Domaine public</value>
   </data>
 
+  <data name="Restore" xml:space="preserve">
+    <value>Restaurer</value>
+  </data>
+  <data name="AddResource" xml:space="preserve">
+    <value>Ajouter une ressource</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Ajouter</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Retirer</value>
+  </data>
+  <data name="EditResourceLabel" xml:space="preserve">
+    <value>Modifier {0}</value>
+  </data>
+  <data name="RemoveResourceLabel" xml:space="preserve">
+    <value>Retirer {0}</value>
+  </data>
+  <data name="NeedsApprovalBadge" xml:space="preserve">
+    <value>À approuver</value>
+  </data>
+  <data name="InstalledApplicationTarget" xml:space="preserve">
+    <value>Application installée sur cet ordinateur</value>
+  </data>
+  <data name="NoResourcesToRestore" xml:space="preserve">
+    <value>Aucune ressource pour l'instant. Ajoutez les applications, les fichiers, les dossiers et les liens à rouvrir ensemble.</value>
+  </data>
+
+  <data name="AddResourceDialogTitle" xml:space="preserve">
+    <value>Ajouter une ressource</value>
+  </data>
+  <data name="EditResourceDialogTitle" xml:space="preserve">
+    <value>Modifier la ressource</value>
+  </data>
+  <data name="ResourceKindLabel" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="KindApplication" xml:space="preserve">
+    <value>Application</value>
+  </data>
+  <data name="KindFile" xml:space="preserve">
+    <value>Fichier</value>
+  </data>
+  <data name="KindFolder" xml:space="preserve">
+    <value>Dossier</value>
+  </data>
+  <data name="KindLink" xml:space="preserve">
+    <value>Lien</value>
+  </data>
+  <data name="TargetLabelApplication" xml:space="preserve">
+    <value>Programme ou application installée</value>
+  </data>
+  <data name="TargetLabelFile" xml:space="preserve">
+    <value>Emplacement du fichier</value>
+  </data>
+  <data name="TargetLabelFolder" xml:space="preserve">
+    <value>Emplacement du dossier</value>
+  </data>
+  <data name="TargetLabelLink" xml:space="preserve">
+    <value>Adresse web</value>
+  </data>
+  <data name="TargetPlaceholderApplication" xml:space="preserve">
+    <value>C:\Program Files\Application\application.exe</value>
+  </data>
+  <data name="TargetPlaceholderFile" xml:space="preserve">
+    <value>C:\Users\Nom\Documents\document.pdf</value>
+  </data>
+  <data name="TargetPlaceholderFolder" xml:space="preserve">
+    <value>C:\Users\Nom\Documents\Projet</value>
+  </data>
+  <data name="TargetPlaceholderLink" xml:space="preserve">
+    <value>https://exemple.fr</value>
+  </data>
+  <data name="ResourceNameLabel" xml:space="preserve">
+    <value>Nom affiché</value>
+  </data>
+  <data name="Browse" xml:space="preserve">
+    <value>Parcourir…</value>
+  </data>
+  <data name="ChooseInstalledApplication" xml:space="preserve">
+    <value>Choisir une application installée</value>
+  </data>
+  <data name="SearchApplications" xml:space="preserve">
+    <value>Rechercher une application</value>
+  </data>
+  <data name="ApplicationsLoadFailed" xml:space="preserve">
+    <value>Impossible de lire la liste des applications installées. Choisissez le programme avec « Parcourir… ». Le détail se trouve dans le journal&#160;: {0}</value>
+  </data>
+  <data name="NoMatchingApplication" xml:space="preserve">
+    <value>Aucune application ne correspond à cette recherche.</value>
+  </data>
+  <data name="PickProgramTitle" xml:space="preserve">
+    <value>Choisir un programme</value>
+  </data>
+  <data name="PickFileTitle" xml:space="preserve">
+    <value>Choisir un fichier</value>
+  </data>
+  <data name="PickFolderTitle" xml:space="preserve">
+    <value>Choisir un dossier</value>
+  </data>
+  <data name="ProgramsFilter" xml:space="preserve">
+    <value>Programmes</value>
+  </data>
+  <data name="RemoveResourceTitle" xml:space="preserve">
+    <value>Retirer cette ressource&#160;?</value>
+  </data>
+  <data name="RemoveResourceMessage" xml:space="preserve">
+    <value>«&#160;{0}&#160;» sera retirée de cet espace de travail. Le fichier, le dossier ou l'application lui-même n'est pas touché.</value>
+  </data>
+
+  <data name="ResourceNameRequired" xml:space="preserve">
+    <value>Donnez un nom à cette ressource.</value>
+  </data>
+  <data name="TargetRequired" xml:space="preserve">
+    <value>Indiquez l'emplacement ou l'adresse de la ressource.</value>
+  </data>
+  <data name="TargetTooLong" xml:space="preserve">
+    <value>Cet emplacement est trop long.</value>
+  </data>
+  <data name="TargetInvalidCharacters" xml:space="preserve">
+    <value>L'emplacement contient un saut de ligne ou un caractère invisible.</value>
+  </data>
+  <data name="TargetInvalidPath" xml:space="preserve">
+    <value>Indiquez un chemin complet, comme C:\Documents\rapport.pdf ou \\serveur\partage\dossier.</value>
+  </data>
+  <data name="TargetUnsupportedLink" xml:space="preserve">
+    <value>Indiquez une adresse web complète, qui commence par https:// ou http://.</value>
+  </data>
+  <data name="TargetExecutableFile" xml:space="preserve">
+    <value>Ce type de fichier peut exécuter du code&#160;: Atlas ne l'ouvre pas comme un fichier. Pour lancer un programme, ajoutez-le comme application.</value>
+  </data>
+  <data name="TargetNotAnApplication" xml:space="preserve">
+    <value>Choisissez un programme (.exe) ou une application installée.</value>
+  </data>
+
+  <data name="LaunchApplicationsTitle" xml:space="preserve">
+    <value>Lancer {0} applications&#160;?</value>
+  </data>
+  <data name="LaunchApplicationsMessage" xml:space="preserve">
+    <value>La restauration va démarrer ces programmes, puis ouvrir les fichiers, les dossiers et les liens. Les applications déjà ouvertes ne sont pas fermées.</value>
+  </data>
+  <data name="LaunchAndOpen" xml:space="preserve">
+    <value>Lancer et ouvrir</value>
+  </data>
+  <data name="RestoringProgress" xml:space="preserve">
+    <value>Restauration en cours, {0} sur {1}&#160;: {2}</value>
+  </data>
+  <data name="CheckingApplications" xml:space="preserve">
+    <value>Vérification du démarrage des applications…</value>
+  </data>
+  <data name="StopRestore" xml:space="preserve">
+    <value>Arrêter</value>
+  </data>
+  <data name="StopRestoreTitle" xml:space="preserve">
+    <value>Arrêter la restauration&#160;?</value>
+  </data>
+  <data name="StopRestoreMessage" xml:space="preserve">
+    <value>La restauration est en cours. Les ressources déjà ouvertes le restent&#160;; les suivantes ne seront pas ouvertes.</value>
+  </data>
+  <data name="StopAndLeave" xml:space="preserve">
+    <value>Arrêter et quitter</value>
+  </data>
+  <data name="RestoreFinishedTitle" xml:space="preserve">
+    <value>Restauration terminée</value>
+  </data>
+  <data name="RestoreStoppedTitle" xml:space="preserve">
+    <value>Restauration arrêtée</value>
+  </data>
+  <data name="RestoreMeaning" xml:space="preserve">
+    <value>«&#160;Restaurée&#160;» signifie que Windows a accepté d'ouvrir la ressource. Atlas ne vérifie pas ce qui se passe ensuite.</value>
+  </data>
+  <data name="RestoreFailed" xml:space="preserve">
+    <value>La restauration n'a pas pu commencer. Le détail se trouve dans le journal&#160;: {0}</value>
+  </data>
+  <data name="CloseReport" xml:space="preserve">
+    <value>Fermer le rapport</value>
+  </data>
+  <data name="CountRestoredOne" xml:space="preserve">
+    <value>{0} restaurée</value>
+  </data>
+  <data name="CountRestoredMany" xml:space="preserve">
+    <value>{0} restaurées</value>
+  </data>
+  <data name="CountMissingOne" xml:space="preserve">
+    <value>{0} introuvable</value>
+  </data>
+  <data name="CountMissingMany" xml:space="preserve">
+    <value>{0} introuvables</value>
+  </data>
+  <data name="CountFailedOne" xml:space="preserve">
+    <value>{0} en erreur</value>
+  </data>
+  <data name="CountFailedMany" xml:space="preserve">
+    <value>{0} en erreur</value>
+  </data>
+  <data name="CountSkippedOne" xml:space="preserve">
+    <value>{0} ignorée</value>
+  </data>
+  <data name="CountSkippedMany" xml:space="preserve">
+    <value>{0} ignorées</value>
+  </data>
+  <data name="StatusLaunched" xml:space="preserve">
+    <value>Lancée</value>
+  </data>
+  <data name="StatusOpened" xml:space="preserve">
+    <value>Ouverte</value>
+  </data>
+  <data name="StatusMissing" xml:space="preserve">
+    <value>Introuvable</value>
+  </data>
+  <data name="StatusFailed" xml:space="preserve">
+    <value>Erreur</value>
+  </data>
+  <data name="StatusSkipped" xml:space="preserve">
+    <value>Ignorée</value>
+  </data>
+  <data name="ReasonNotFoundApplication" xml:space="preserve">
+    <value>L'application n'est plus installée, ou le programme n'est plus à cet emplacement.</value>
+  </data>
+  <data name="ReasonNotFoundFile" xml:space="preserve">
+    <value>Le fichier n'est plus à cet emplacement, ou il n'est pas accessible.</value>
+  </data>
+  <data name="ReasonNotFoundFolder" xml:space="preserve">
+    <value>Le dossier n'est plus à cet emplacement, ou il n'est pas accessible.</value>
+  </data>
+  <data name="ReasonWrongTypeFolderFound" xml:space="preserve">
+    <value>Cet emplacement désigne un dossier, pas un fichier.</value>
+  </data>
+  <data name="ReasonWrongTypeFileFound" xml:space="preserve">
+    <value>Cet emplacement désigne un fichier, pas un dossier.</value>
+  </data>
+  <data name="ReasonExitedImmediately" xml:space="preserve">
+    <value>Le programme s'est arrêté juste après son démarrage (code {0}).</value>
+  </data>
+  <data name="ReasonNoAssociatedApplication" xml:space="preserve">
+    <value>Aucune application de cet ordinateur n'ouvre ce type de fichier.</value>
+  </data>
+  <data name="ReasonSystemRefused" xml:space="preserve">
+    <value>Windows a refusé de l'ouvrir.</value>
+  </data>
+  <data name="ReasonSystemRefusedWithMessage" xml:space="preserve">
+    <value>Windows a refusé de l'ouvrir&#160;: {0}</value>
+  </data>
+  <data name="ReasonTimedOut" xml:space="preserve">
+    <value>Windows n'a pas répondu à temps. La ressource s'ouvrira peut-être quand même.</value>
+  </data>
+  <data name="ReasonNeedsApproval" xml:space="preserve">
+    <value>Cette ressource doit être approuvée avant qu'Atlas l'ouvre.</value>
+  </data>
+  <data name="ReasonBlockedFileType" xml:space="preserve">
+    <value>Ce type de fichier peut exécuter du code&#160;: Atlas ne l'ouvre jamais.</value>
+  </data>
+  <data name="ReasonInvalidTarget" xml:space="preserve">
+    <value>L'emplacement enregistré n'est pas valide.</value>
+  </data>
+  <data name="ReasonUnknownKind" xml:space="preserve">
+    <value>Ce type de ressource vient d'une version plus récente d'Atlas.</value>
+  </data>
+  <data name="ReasonCancelled" xml:space="preserve">
+    <value>La restauration a été arrêtée avant cette ressource.</value>
+  </data>
+
   <data name="AlreadyRunningTitle" xml:space="preserve">
     <value>Atlas est déjà ouvert</value>
   </data>

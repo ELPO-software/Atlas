@@ -6,7 +6,7 @@
         Title="{Binding Title}"
         Icon="/Assets/atlas.ico"
         Background="{DynamicResource AtlasBackgroundBrush}"
-        Width="460"
+        Width="500"
         SizeToContent="Height"
         CanResize="False"
         CanMinimize="False"
@@ -15,13 +15,35 @@
     <StackPanel Margin="24" Spacing="16">
         <TextBlock x:Name="ConfirmationTitle" Classes="section-title" TextWrapping="Wrap" Text="{Binding Title}" />
         <TextBlock x:Name="ConfirmationMessage" Classes="body" Text="{Binding Message}" />
+
+        <Border Classes="surface" IsVisible="{Binding HasDetails}">
+            <ScrollViewer MaxHeight="240" HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl x:Name="ConfirmationDetails" ItemsSource="{Binding Details}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="10" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="services:ConfirmationDetail">
+                            <StackPanel Spacing="2">
+                                <TextBlock Classes="strong" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Classes="caption" Text="{Binding Description}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
             <Button x:Name="CancelButton"
                     Content="{Binding CancelLabel}"
                     IsCancel="True"
                     Click="OnCancelClick" />
             <Button x:Name="ConfirmButton"
-                    Classes="danger"
+                    Classes.danger="{Binding IsDestructive}"
+                    Classes.primary="{Binding !IsDestructive}"
                     Content="{Binding ConfirmLabel}"
                     Click="OnConfirmClick" />
         </StackPanel>

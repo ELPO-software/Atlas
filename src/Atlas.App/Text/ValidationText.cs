@@ -1,4 +1,5 @@
 using Atlas.App.Resources;
+using Atlas.Core.Resources;
 using Atlas.Core.Validation;
 using Atlas.Core.Workspaces;
 
@@ -14,6 +15,19 @@ internal static class ValidationText
         (ValidationField.WorkspaceName, ValidationCode.ControlCharacters) => Strings.NameInvalidCharacters,
         (ValidationField.WorkspaceDescription, ValidationCode.TooLong) => UiText.Format(Strings.DescriptionTooLong, WorkspaceRules.DescriptionMaxLength),
         (ValidationField.WorkspaceNotes, ValidationCode.TooLong) => UiText.Format(Strings.NotesTooLong, WorkspaceRules.NotesMaxLength),
+        (ValidationField.ResourceDisplayName, ValidationCode.Required) => Strings.ResourceNameRequired,
+        (ValidationField.ResourceDisplayName, ValidationCode.TooLong) => UiText.Format(Strings.NameTooLong, ResourceRules.DisplayNameMaxLength),
+        (ValidationField.ResourceDisplayName, ValidationCode.ControlCharacters) => Strings.NameInvalidCharacters,
+        (ValidationField.ResourceTarget, ValidationCode.Required) => Strings.TargetRequired,
+        (ValidationField.ResourceTarget, ValidationCode.TooLong) => Strings.TargetTooLong,
+        (ValidationField.ResourceTarget, ValidationCode.ControlCharacters) => Strings.TargetInvalidCharacters,
+        (ValidationField.ResourceTarget, ValidationCode.InvalidPath) => Strings.TargetInvalidPath,
+        (ValidationField.ResourceTarget, ValidationCode.UnsupportedLink) => Strings.TargetUnsupportedLink,
+        (ValidationField.ResourceTarget, ValidationCode.ExecutableFile) => Strings.TargetExecutableFile,
+        (ValidationField.ResourceTarget, ValidationCode.NotAnApplication) => Strings.TargetNotAnApplication,
         _ => Strings.ValueRefused,
     };
+
+    public static string? FirstFor(AtlasValidationException exception, ValidationField field) =>
+        exception.Errors.FirstOrDefault(e => e.Field == field) is { } error ? Describe(error) : null;
 }
