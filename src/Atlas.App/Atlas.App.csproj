@@ -40,4 +40,14 @@
     <InternalsVisibleTo Include="Atlas.App.Tests" />
   </ItemGroup>
 
+  <!--
+    The SkiaSharp and HarfBuzz packages add their native debug symbols to every publish: about 100 MB that only
+    serve to debug those libraries. They are left out of the published application.
+  -->
+  <Target Name="AtlasLeaveSymbolsOutOfPublish" AfterTargets="ComputeResolvedFilesToPublishList">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(Extension)' == '.pdb'" />
+    </ItemGroup>
+  </Target>
+
 </Project>

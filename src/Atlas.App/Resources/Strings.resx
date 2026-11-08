@@ -274,6 +274,9 @@
   <data name="ComponentsTitle" xml:space="preserve">
     <value>Composants tiers et leurs licences</value>
   </data>
+  <data name="ComponentsNotice" xml:space="preserve">
+    <value>Les textes complets de ces licences accompagnent Atlas, dans le fichier THIRD-PARTY-NOTICES.md et le dossier licenses.</value>
+  </data>
   <data name="PublicDomain" xml:space="preserve">
     <value>Domaine public</value>
   </data>

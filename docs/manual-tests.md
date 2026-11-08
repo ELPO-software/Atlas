@@ -45,3 +45,12 @@ Prepare a test folder with a text file, a subfolder whose name has spaces and ac
 | Light and dark themes, and following the system | Every page stays readable; the title bar follows on Windows 11 | 2026-11-06 |
 | Smallest window (800 × 520) | Nothing overlaps; long names wrap or end with an ellipsis | 2026-11-06 |
 | Start Atlas a second time | A message says it is already open; the data is untouched | 2026-11-08 |
+
+## Release archive
+
+| Check | Expected | Last verified |
+|---|---|---|
+| Run `./build/publish.ps1` | An archive of about 50 MB and its SHA-256 checksum in `artifacts`, with no `.pdb` file | 2026-11-08 |
+| Extract it to a folder whose name has spaces and accents, and run `Atlas.exe` with `dotnet` hidden from the environment | Atlas starts; its runtime is loaded from the extracted folder, not from an installed .NET | 2026-11-08 |
+| Open the settings | The version is 0.1.0-alpha.1; the licenses are listed | 2026-11-08 |
+| Run it on a Windows 10 computer | Atlas starts and restores; the title bar keeps the system color | Not yet verified |

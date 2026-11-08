@@ -42,6 +42,8 @@
                     <SelectableTextBlock x:Name="License" Classes="body" FontSize="12" Text="{Binding LicenseText}" />
                 </Expander>
                 <Expander HorizontalAlignment="Stretch" Header="{x:Static res:Strings.ComponentsTitle}">
+                    <StackPanel Spacing="12">
+                    <TextBlock Classes="caption" TextWrapping="Wrap" Text="{x:Static res:Strings.ComponentsNotice}" />
                     <ItemsControl x:Name="Components" ItemsSource="{Binding Components}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -57,6 +59,7 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+                    </StackPanel>
                 </Expander>
             </StackPanel>
         </Grid>

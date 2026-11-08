@@ -504,6 +504,60 @@ public sealed class WindowTests
         Assert.True(await answer);
     }
 
+    /// <summary>The whole life of a workspace, through the real services and database. Nothing opens for real.</summary>
+    [AvaloniaFact]
+    public async Task EndToEnd_CreateRestoreSaveExportImportAndDelete()
+    {
+        await using var app = await RunningApp.StartAsync();
+        var history = app.Services.GetRequiredService<Atlas.Core.History.IHistoryRepository>();
+        var exportPath = Path.Combine(app.Folder.Paths.DataDirectory, "Études d'été.json");
+
+        // Create from the home page.
+        var field = app.Find<TextBox>("NewWorkspaceName");
+        field.Focus();
+        field.Text = "Études d'été";
+        app.Window.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        await app.SettleAsync();
+        var page = Assert.IsType<WorkspaceDetailViewModel>(app.ViewModel.CurrentPage);
+        var id = (await app.Workspaces.ListAsync()).Single().Id;
+
+        // Add resources and notes.
+        await app.Workspaces.AddResourceAsync(id, ResourceKind.Application, "Éditeur", @"C:\Programmes\Éditeur d'été\Éditeur.exe");
+        await app.Workspaces.AddResourceAsync(id, ResourceKind.Url, "Bibliothèque", "https://example.org");
+        await app.ViewModel.OpenWorkspaceAsync(id);
+        await app.SettleAsync();
+        page = Assert.IsType<WorkspaceDetailViewModel>(app.ViewModel.CurrentPage);
+        page.Notes = "Relire le chapitre 3";
+        await app.WaitUntilAsync(() => !page.HasUnsavedChanges);
+
+        // Restore: one program, so no confirmation is needed.
+        await page.RestoreCommand.ExecuteAsync(null);
+        Assert.Equal([@"C:\Programmes\Éditeur d'été\Éditeur.exe", "https://example.org"], app.Opener.Opened);
+        Assert.Equal("2 restaurées", page.Report?.Summary);
+
+        // Save a version, then export the workspace.
+        await app.Services.GetRequiredService<Atlas.Core.Versions.VersionService>().SaveAsync(id, "Avant les révisions");
+        await File.WriteAllTextAsync(exportPath, Atlas.Core.Exchange.WorkspaceDocument.Write(await app.Workspaces.GetAsync(id), DateTimeOffset.UtcNow));
+
+        // Import it back: a new workspace, with the program waiting for approval.
+        var read = Atlas.Core.Exchange.WorkspaceDocument.Read(await File.ReadAllTextAsync(exportPath));
+        var imported = await app.Workspaces.ImportAsync(Atlas.Core.Exchange.ImportPlan.From(read.Content!), "Études d'été.json");
+        Assert.NotEqual(id, imported.Id);
+        Assert.True(imported.Resources.Single(r => r.Kind == ResourceKind.Application).RequiresReview);
+        Assert.Equal("Relire le chapitre 3", imported.Notes);
+
+        // Delete the original: its history stays.
+        await app.Workspaces.DeleteAsync(id);
+        Assert.Single(await app.Workspaces.ListAsync());
+
+        var actions = (await history.ListAsync(50)).Select(e => e.Action).ToList();
+        Assert.Contains(Atlas.Core.History.HistoryAction.WorkspaceCreated, actions);
+        Assert.Contains(Atlas.Core.History.HistoryAction.WorkspaceRestored, actions);
+        Assert.Contains(Atlas.Core.History.HistoryAction.VersionSaved, actions);
+        Assert.Contains(Atlas.Core.History.HistoryAction.WorkspaceImported, actions);
+        Assert.Equal(Atlas.Core.History.HistoryAction.WorkspaceDeleted, actions[0]);
+    }
+
     [AvaloniaTheory]
     [InlineData(280, 1)]
     [InlineData(571, 1)]

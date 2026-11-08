@@ -111,6 +111,12 @@ A resource type is a text value (`ResourceKind`). Adding one does not change the
 - **`Atlas.Core`** contains no user-facing text. It reports problems as codes, which the interface turns into messages.
 - **Package versions** are declared once, in `Directory.Packages.props`.
 
+## Release
+
+`build/publish.ps1` publishes Atlas for 64-bit Windows with its own .NET runtime, adds `LICENSE`, `THIRD-PARTY-NOTICES.md` and the `licenses` folder, and writes the archive and its SHA-256 checksum to `artifacts`. The native debug symbols that SkiaSharp and HarfBuzz add to every publish, about 100 MB, are left out by the `AtlasLeaveSymbolsOutOfPublish` target of `Atlas.App.csproj`.
+
+`ReleaseTests` checks that no Atlas assembly references a networking library, and that `THIRD-PARTY-NOTICES.md` names every component shown in the settings and links only to license files that exist.
+
 ## Tool telemetry
 
 Two libraries bring telemetry into a normal build or test run:
