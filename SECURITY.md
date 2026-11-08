@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-Please do not describe a vulnerability in a public issue. Open an issue titled "Security contact", with no details, and a maintainer will reply with a private way to send them. You will get an answer, and credit if you wish, once the fix is published.
+Please do not describe a vulnerability in a public issue. Report it privately instead: on the [Security tab](https://github.com/ELPO-software/Atlas/security) of the repository, choose **Report a vulnerability**. You will get an answer, and credit if you wish, once the fix is published.
 
 Atlas is an alpha. Only the latest release receives fixes.
 
@@ -19,8 +19,8 @@ Atlas opens files, folders, links and programs on request, so the rules below ar
 
 ## Where data lives
 
-Atlas keeps its database and logs in `%LOCALAPPDATA%\ELPO\Atlas`, readable by the Windows account that runs it. The database is not encrypted: anyone who can read that folder can read the workspaces and notes. Exported files contain the locations of the resources, which often reveal the Windows user name; Atlas warns before exporting them.
+Atlas keeps its database and logs in `%LOCALAPPDATA%\ELPO\Atlas`, readable by the Windows account that runs it. The single-executable download also has .NET extract its native libraries on its first start, to a folder named after the executable in `%TEMP%\.net`; the zip download extracts nothing. The database is not encrypted: anyone who can read that folder can read the workspaces and notes. Exported files contain the locations of the resources, which often reveal the Windows user name; Atlas warns before exporting them.
 
 ## Distribution
 
-The release archive is not code-signed yet, so Windows SmartScreen warns before the first start. Each release lists the SHA-256 checksum of its archive; compare it before running Atlas.
+The release downloads are not code-signed yet, so Windows SmartScreen warns before the first start. Each release lists the SHA-256 checksum of every download; compare it before running Atlas.

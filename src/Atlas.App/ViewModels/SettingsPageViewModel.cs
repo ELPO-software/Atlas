@@ -57,6 +57,12 @@ public sealed partial class SettingsPageViewModel(PageServices services) : PageV
     }
 
     [RelayCommand(AllowConcurrentExecutions = true)]
+    private Task ShowLicenseAsync(ThirdPartyComponent component) =>
+        services.Dialogs.ShowTextAsync(
+            UiText.Format(Strings.LicenseWindowTitle, component.Name),
+            ThirdPartyComponents.ReadLicense(component));
+
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task OpenDataFolderAsync()
     {
         OpenFolderError = await services.Folders.OpenAsync(DataFolder) ? null : Strings.OpenFolderFailed;

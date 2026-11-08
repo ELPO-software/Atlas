@@ -558,6 +558,24 @@ public sealed class WindowTests
         Assert.Equal(Atlas.Core.History.HistoryAction.WorkspaceDeleted, actions[0]);
     }
 
+    [AvaloniaFact]
+    public async Task TextDocument_ShowsALicenseAndClosesWithEscape()
+    {
+        await using var app = await RunningApp.StartAsync();
+        var dialogs = app.Services.GetRequiredService<IDialogService>();
+
+        var shown = dialogs.ShowTextAsync("Licence de Serilog", "Apache License\nVersion 2.0, January 2004");
+        var window = await app.WaitForDialogAsync<TextDocumentWindow>();
+
+        Assert.Equal("Licence de Serilog", window.Title);
+        Assert.Equal("Apache License\nVersion 2.0, January 2004", window.FindControl<SelectableTextBlock>("DocumentText")!.Text);
+        Assert.True(window.FindControl<Button>("CloseButton")!.IsFocused);
+
+        window.KeyPressQwerty(PhysicalKey.Escape, RawInputModifiers.None);
+        await shown;
+        Assert.False(window.IsVisible);
+    }
+
     [AvaloniaTheory]
     [InlineData(280, 1)]
     [InlineData(571, 1)]

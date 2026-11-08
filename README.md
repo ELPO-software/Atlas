@@ -6,7 +6,7 @@ Atlas is part of the ELPO software suite. It saves the applications, files, fold
 
 ## Status
 
-Atlas is an alpha: version 0.1.0-alpha.1. Its interface is in French. It is built for 64-bit Windows 10 and 11, and has been tested on Windows 11. Expect rough edges, and keep your own copies of what matters.
+Atlas is an alpha: version 0.1.0-alpha.2. Its interface is in French. It is built for 64-bit Windows 10 and 11, and has been tested on Windows 11. Expect rough edges, and keep your own copies of what matters.
 
 ## What it does
 
@@ -19,13 +19,16 @@ Atlas is an alpha: version 0.1.0-alpha.1. Its interface is in French. It is buil
 
 ## Install
 
-1. Download `Atlas-0.1.0-alpha.1-win-x64.zip` from the [releases](https://github.com/ELPO-software/Atlas/releases).
-2. Optionally, check its SHA-256 checksum against the one published with the release: `Get-FileHash Atlas-0.1.0-alpha.1-win-x64.zip` in PowerShell.
-3. Extract the archive and run `Atlas.exe`. Nothing else needs to be installed: the archive includes the .NET runtime.
+Each [release](https://github.com/ELPO-software/Atlas/releases) offers two downloads. Neither needs anything else installed: both include the .NET runtime.
 
-The archive is not code-signed yet. On the first start, Windows SmartScreen may say it protected your PC: choose **More info**, then **Run anyway**.
+- **`Atlas-0.1.0-alpha.2-win-x64.exe`**, a single file to run. On its first start, it extracts the native libraries it contains to a folder named after it in `%TEMP%\.net`, such as `%TEMP%\.net\Atlas-0.1.0-alpha.2-win-x64`.
+- **`Atlas-0.1.0-alpha.2-win-x64.zip`**, a folder to extract anywhere, then run `Atlas.exe` from it. It extracts nothing at run time.
 
-To uninstall, delete the extracted folder and, to remove your data as well, `%LOCALAPPDATA%\ELPO\Atlas`.
+Optionally, check the SHA-256 checksum of the download against the one published with the release, with `Get-FileHash` in PowerShell.
+
+Atlas is not code-signed yet. On the first start, Windows SmartScreen may say it protected your PC: choose **More info**, then **Run anyway**.
+
+To uninstall, delete the executable or the extracted folder. For the executable, also delete its folder in `%TEMP%\.net`, named after it; leave the other folders there, which belong to other applications. To remove your data as well, delete `%LOCALAPPDATA%\ELPO\Atlas`.
 
 ## Principles
 
@@ -43,7 +46,7 @@ dotnet test --solution Atlas.slnx
 dotnet run --project src/Atlas.App
 ```
 
-To build the release archive, run `./build/publish.ps1` in PowerShell. It writes the archive and its checksum to `artifacts`.
+To build the release downloads, run `./build/publish.ps1` in PowerShell. It writes the executable, the archive and their checksums to `artifacts`.
 
 The .NET CLI has its own telemetry, which a repository cannot turn off. To disable it on your computer, set the environment variable `DOTNET_CLI_TELEMETRY_OPTOUT` to `1`.
 

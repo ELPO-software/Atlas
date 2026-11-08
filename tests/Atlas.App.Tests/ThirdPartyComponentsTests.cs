@@ -23,6 +23,35 @@ public sealed class ThirdPartyComponentsTests
     }
 
     [Fact]
+    public void EveryComponentCarriesItsFullLicenseText() =>
+        Assert.All(ThirdPartyComponents.All, component =>
+        {
+            Assert.NotEmpty(component.LicenseFiles);
+            Assert.True(ThirdPartyComponents.ReadLicense(component).Length > 100, $"The license of {component.Name} looks empty.");
+        });
+
+    [Theory]
+    [InlineData("Avalonia", "AvaloniaUI")]
+    [InlineData("ANGLE", "Redistribution and use in source and binary forms")]
+    [InlineData("Inter", "SIL OPEN FONT LICENSE")]
+    [InlineData("Serilog", "Apache License")]
+    [InlineData("SQLitePCLRaw", "Apache License")]
+    [InlineData("SQLite", "May you do good and not evil")]
+    [InlineData(".NET", ".NET Foundation and Contributors")]
+    [InlineData("SkiaSharp", "Microsoft Corporation")]
+    [InlineData("Tmds.DBus.Protocol", "Alp Toker")]
+    public void LicenseTexts_AreTheRightOnes(string name, string expected) =>
+        Assert.Contains(expected, ThirdPartyComponents.ReadLicense(ThirdPartyComponents.All.Single(c => c.Name == name)), StringComparison.Ordinal);
+
+    [Fact]
+    public void LicenseTexts_OfSeveralFilesAreKeptApart()
+    {
+        var text = ThirdPartyComponents.ReadLicense(ThirdPartyComponents.All.Single(c => c.Name == "CommunityToolkit.Mvvm"));
+
+        Assert.Contains(new string('-', 72), text, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void EveryEntryNamesItsLicense() =>
         Assert.All(ThirdPartyComponents.All, component => Assert.False(string.IsNullOrWhiteSpace(component.License)));
 

@@ -50,7 +50,9 @@ Prepare a test folder with a text file, a subfolder whose name has spaces and ac
 
 | Check | Expected | Last verified |
 |---|---|---|
-| Run `./build/publish.ps1` | An archive of about 50 MB and its SHA-256 checksum in `artifacts`, with no `.pdb` file | 2026-11-08 |
-| Extract it to a folder whose name has spaces and accents, and run `Atlas.exe` with `dotnet` hidden from the environment | Atlas starts; its runtime is loaded from the extracted folder, not from an installed .NET | 2026-11-08 |
-| Open the settings | The version is 0.1.0-alpha.1; the licenses are listed | 2026-11-08 |
+| Run `./build/publish.ps1` | A single executable and an archive, each about 50 MB, with their SHA-256 checksums in `artifacts`; no `.pdb` file in the archive | 2026-11-08 |
+| Extract the archive to a folder whose name has spaces and accents, and run `Atlas.exe` with `dotnet` hidden from the environment | Atlas starts; its runtime is loaded from the extracted folder, not from an installed .NET | 2026-11-08 |
+| Run the single executable from a folder whose name has spaces and accents, with `dotnet` hidden from the environment | Atlas starts; its runtime runs from the executable, and its native libraries from a folder named after it in `%TEMP%\.net`, such as `%TEMP%\.net\Atlas-0.1.0-alpha.2-win-x64` | 2026-11-08 |
+| In the settings, choose **Voir la licence** for a component | Its full license text opens, also from the single executable | 2026-11-08 |
+| Open the settings | The version is 0.1.0-alpha.2; the licenses are listed | 2026-11-08 |
 | Run it on a Windows 10 computer | Atlas starts and restores; the title bar keeps the system color | Not yet verified |

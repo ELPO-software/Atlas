@@ -113,7 +113,7 @@ A resource type is a text value (`ResourceKind`). Adding one does not change the
 
 ## Release
 
-`build/publish.ps1` publishes Atlas for 64-bit Windows with its own .NET runtime, adds `LICENSE`, `THIRD-PARTY-NOTICES.md` and the `licenses` folder, and writes the archive and its SHA-256 checksum to `artifacts`. The native debug symbols that SkiaSharp and HarfBuzz add to every publish, about 100 MB, are left out by the `AtlasLeaveSymbolsOutOfPublish` target of `Atlas.App.csproj`.
+`build/publish.ps1` publishes Atlas for 64-bit Windows with its own .NET runtime, twice: as a single executable, and as a folder in a zip archive with `LICENSE`, `THIRD-PARTY-NOTICES.md` and the `licenses` folder. It writes both, with their SHA-256 checksums, to `artifacts`. The license texts of the `licenses` folder are also built into Atlas and shown from the settings, so that the single executable carries them too. The native debug symbols that SkiaSharp and HarfBuzz add to every publish, about 100 MB, are left out by the `AtlasLeaveSymbolsOutOfPublish` target of `Atlas.App.csproj`.
 
 `ReleaseTests` checks that no Atlas assembly references a networking library, and that `THIRD-PARTY-NOTICES.md` names every component shown in the settings and links only to license files that exist.
 

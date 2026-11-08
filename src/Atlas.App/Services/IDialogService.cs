@@ -51,6 +51,9 @@ public interface IDialogService
     /// <returns>The workspace with the saved resource, or null if the user cancelled.</returns>
     Task<Workspace?> EditResourceAsync(ResourceEditorRequest request);
 
+    /// <summary>Shows a long text to read, such as a license.</summary>
+    Task ShowTextAsync(string title, string text);
+
     /// <summary>Shows what a file holds, or why it cannot be imported.</summary>
     /// <returns>True only if the user chose to import it.</returns>
     Task<bool> ConfirmImportAsync(ImportPreviewViewModel preview);

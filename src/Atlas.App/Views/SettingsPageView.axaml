@@ -52,9 +52,15 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="about:ThirdPartyComponent">
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                                    <TextBlock Text="{Binding Name}" />
+                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="16">
+                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="1" Classes="caption" Text="{Binding License}" VerticalAlignment="Center" />
+                                    <Button Grid.Column="2"
+                                            Classes="quiet"
+                                            Content="{x:Static res:Strings.ViewLicense}"
+                                            Command="{Binding $parent[UserControl].((vm:SettingsPageViewModel)DataContext).ShowLicenseCommand}"
+                                            CommandParameter="{Binding}"
+                                            AutomationProperties.Name="{Binding Name, StringFormat={x:Static res:Strings.ViewLicenseLabel}}" />
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

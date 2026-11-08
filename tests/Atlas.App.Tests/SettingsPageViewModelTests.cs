@@ -144,13 +144,25 @@ public sealed class SettingsPageViewModelTests
     }
 
     [Fact]
+    public async Task ShowLicense_OpensTheFullTextOfThatComponent()
+    {
+        var avalonia = _page.Components.Single(c => c.Name == "Avalonia");
+
+        await _page.ShowLicenseCommand.ExecuteAsync(avalonia);
+
+        var (title, text) = Assert.Single(_services.Dialogs.Texts);
+        Assert.Equal("Licence de Avalonia", title);
+        Assert.Contains("Permission is hereby granted", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void DataFolder_ShowsTheActualLocation() =>
         Assert.Equal(_services.Paths.DataDirectory, _page.DataFolder);
 
     [Fact]
     public void Version_IsTheProductVersionWithoutTheBuildSuffix()
     {
-        Assert.StartsWith("Version 0.1.0-alpha.1", _page.VersionText, StringComparison.Ordinal);
+        Assert.Matches(@"^Version \d+\.\d+\.\d+(-[a-z]+\.\d+)?$", _page.VersionText);
         Assert.DoesNotContain("+", _page.VersionText, StringComparison.Ordinal);
     }
 

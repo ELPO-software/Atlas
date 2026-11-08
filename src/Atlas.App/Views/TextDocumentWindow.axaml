@@ -1,0 +1,26 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:res="using:Atlas.App.Resources"
+        x:Class="Atlas.App.Views.TextDocumentWindow"
+        Icon="/Assets/atlas.ico"
+        Background="{DynamicResource AtlasBackgroundBrush}"
+        Width="720" Height="560"
+        MinWidth="480" MinHeight="320"
+        CanMinimize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+    <Grid RowDefinitions="Auto,*,Auto" Margin="24" RowSpacing="16">
+        <TextBlock x:Name="DocumentTitle" Classes="section-title" TextWrapping="Wrap" />
+        <Border Grid.Row="1" Classes="surface" Padding="16">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                <SelectableTextBlock x:Name="DocumentText" Classes="body" FontSize="12" TextWrapping="Wrap" />
+            </ScrollViewer>
+        </Border>
+        <Button x:Name="CloseButton"
+                Grid.Row="2"
+                HorizontalAlignment="Right"
+                IsCancel="True"
+                Content="{x:Static res:Strings.Close}"
+                Click="OnCloseClick" />
+    </Grid>
+</Window>

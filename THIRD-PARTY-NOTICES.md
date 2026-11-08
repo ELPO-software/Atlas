@@ -1,6 +1,6 @@
 # Third-party notices
 
-Atlas is distributed under the [MIT license](LICENSE). It ships with the components below, each under its own license. The full texts are in the [licenses](licenses) folder, copied as their authors publish them.
+Atlas is distributed under the [MIT license](LICENSE). It ships with the components below, each under its own license. The full texts are in the [licenses](licenses) folder, copied as their authors publish them. They are also built into Atlas: the settings show each one, so that they travel with every copy, including the single executable.
 
 | Component | Version | License | Copyright | Full text |
 |---|---|---|---|---|
@@ -16,7 +16,7 @@ Atlas is distributed under the [MIT license](LICENSE). It ships with the compone
 | Tmds.DBus.Protocol | 0.94.1 | MIT | Alp Toker and other contributors | [Tmds.DBus.Protocol.txt](licenses/Tmds.DBus.Protocol.txt) |
 | Serilog, Serilog.Sinks.File, Serilog.Extensions.Logging | 4.4.0, 7.0.0, 10.0.0 | Apache-2.0 | Serilog Contributors | [Serilog.txt](licenses/Serilog.txt) |
 | SQLitePCLRaw | 2.1.13 | Apache-2.0 | SourceGear, LLC | [SQLitePCLRaw.txt](licenses/SQLitePCLRaw.txt) |
-| SQLite, built into SQLitePCLRaw | | Public domain | | See below |
+| SQLite, built into SQLitePCLRaw | | Public domain | | [SQLite.txt](licenses/SQLite.txt) |
 
 The notices files list the components that those libraries themselves include, such as Skia and HarfBuzz in SkiaSharp.
 

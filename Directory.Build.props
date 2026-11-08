@@ -6,7 +6,7 @@
   -->
   <PropertyGroup Label="Product identity">
     <Product>ELPO Atlas</Product>
-    <Version>0.1.0-alpha.1</Version>
+    <Version>0.1.0-alpha.2</Version>
     <Authors>ELPO software</Authors>
     <Company>$(Authors)</Company>
     <Copyright>Copyright (c) 2026 $(Authors)</Copyright>

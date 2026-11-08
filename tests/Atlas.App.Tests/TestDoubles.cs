@@ -226,6 +226,14 @@ internal sealed class FakeDialogService(AtlasDataPaths paths) : IDialogService
         return Task.FromResult(Decide?.Invoke(request) ?? ConfirmAnswer);
     }
 
+    public List<(string Title, string Text)> Texts { get; } = [];
+
+    public Task ShowTextAsync(string title, string text)
+    {
+        Texts.Add((title, text));
+        return Task.CompletedTask;
+    }
+
     /// <summary>The answer to the import preview.</summary>
     public bool ImportAnswer { get; set; }
 

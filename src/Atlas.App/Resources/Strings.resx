@@ -275,7 +275,16 @@
     <value>Composants tiers et leurs licences</value>
   </data>
   <data name="ComponentsNotice" xml:space="preserve">
-    <value>Les textes complets de ces licences accompagnent Atlas, dans le fichier THIRD-PARTY-NOTICES.md et le dossier licenses.</value>
+    <value>Le texte complet de chaque licence est inclus dans Atlas.</value>
+  </data>
+  <data name="ViewLicense" xml:space="preserve">
+    <value>Voir la licence</value>
+  </data>
+  <data name="ViewLicenseLabel" xml:space="preserve">
+    <value>Voir la licence de {0}</value>
+  </data>
+  <data name="LicenseWindowTitle" xml:space="preserve">
+    <value>Licence de {0}</value>
   </data>
   <data name="PublicDomain" xml:space="preserve">
     <value>Domaine public</value>

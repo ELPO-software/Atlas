@@ -23,6 +23,9 @@ internal sealed class WindowDialogService(
     public Task<Workspace?> EditWorkspaceAsync(WorkspaceEditorRequest request) =>
         new WorkspaceEditorWindow(new WorkspaceEditorViewModel(request, paths, workspaceEditorLogger)).ShowDialog<Workspace?>(Owner);
 
+    public Task ShowTextAsync(string title, string text) =>
+        new TextDocumentWindow(title, text).ShowDialog(Owner);
+
     public Task<bool> ConfirmImportAsync(ImportPreviewViewModel preview) =>
         new ImportPreviewWindow(preview).ShowDialog<bool>(Owner);
 

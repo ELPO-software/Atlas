@@ -26,6 +26,7 @@
   <ItemGroup>
     <AvaloniaResource Include="Assets\atlas.ico" />
     <EmbeddedResource Include="..\..\LICENSE" LogicalName="Atlas.License.txt" />
+    <EmbeddedResource Include="..\..\licenses\*.txt" LogicalName="Atlas.Licenses.%(Filename)%(Extension)" />
     <EmbeddedResource Update="Resources\Strings.resx">
       <Generator>MSBuild:Compile</Generator>
       <StronglyTypedFileName>$(IntermediateOutputPath)Strings.Designer.cs</StronglyTypedFileName>
