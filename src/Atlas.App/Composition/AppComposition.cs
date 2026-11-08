@@ -1,4 +1,6 @@
+using Atlas.App.Services;
 using Atlas.App.ViewModels;
+using Atlas.Core.Settings;
 using Atlas.Core.Workspaces;
 using Atlas.Infrastructure.Logging;
 using Atlas.Infrastructure.Persistence;
@@ -23,8 +25,16 @@ internal static class AppComposition
         services.AddSingleton(_ => new SqliteDatabase(paths.DatabasePath));
         services.AddSingleton<DatabaseMigrator>();
         services.AddSingleton<IWorkspaceRepository, SqliteWorkspaceRepository>();
+        services.AddSingleton<ISettingsStore, SqliteSettingsStore>();
         services.AddSingleton<WorkspaceService>();
+        services.AddSingleton<SettingsService>();
 
+        services.AddSingleton<MainWindowHost>();
+        services.AddSingleton<IDialogService, WindowDialogService>();
+        services.AddSingleton<IThemeController, ApplicationThemeController>();
+        services.AddSingleton<IFolderOpener, LauncherFolderOpener>();
+
+        services.AddSingleton<PageServices>();
         services.AddTransient<MainWindowViewModel>();
 
         return services.BuildServiceProvider(new ServiceProviderOptions

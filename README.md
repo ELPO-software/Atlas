@@ -6,7 +6,7 @@ Atlas is part of the ELPO software suite. It saves the applications, files, fold
 
 ## Status
 
-Atlas is in early development and is not usable yet. The first Alpha is being built in stages: the data foundation exists, and the interface comes next.
+Atlas is in early development and cannot restore anything yet. The first Alpha is being built in stages. You can already create, edit, duplicate and delete workspaces, keep notes in them and choose a theme. Adding resources and restoring them come next.
 
 ## Principles
 

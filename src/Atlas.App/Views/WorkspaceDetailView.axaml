@@ -1,0 +1,114 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:res="using:Atlas.App.Resources"
+             xmlns:vm="using:Atlas.App.ViewModels"
+             x:Class="Atlas.App.Views.WorkspaceDetailView"
+             x:DataType="vm:WorkspaceDetailViewModel">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MaxWidth="1144" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Classes="page">
+                <Button x:Name="Back"
+                        Classes="quiet"
+                        Margin="-8,0,0,0"
+                        Command="{Binding BackCommand}"
+                        AutomationProperties.Name="{x:Static res:Strings.BackToWorkspaces}">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <Path Classes="icon" Data="{StaticResource IconBack}" />
+                        <TextBlock Classes="secondary" Text="{x:Static res:Strings.BackToWorkspaces}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <SelectableTextBlock x:Name="LoadError"
+                                     Classes="error"
+                                     Text="{Binding LoadError}"
+                                     IsVisible="{Binding LoadError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+                <StackPanel Spacing="12" IsVisible="{Binding IsLoaded}">
+                    <StackPanel Spacing="4">
+                        <SelectableTextBlock x:Name="WorkspaceName" Classes="page-title" Text="{Binding Name}" />
+                        <SelectableTextBlock x:Name="WorkspaceDescription"
+                                             Classes="secondary"
+                                             MaxWidth="720"
+                                             HorizontalAlignment="Left"
+                                             Text="{Binding Description}"
+                                             IsVisible="{Binding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                        <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,4,0,0">
+                            <TextBlock Classes="caption" Text="{Binding CreatedText}" />
+                            <TextBlock x:Name="ModifiedDate" Classes="caption" Text="{Binding ModifiedText}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                        <Button x:Name="EditWorkspace" Content="{x:Static res:Strings.Edit}" Command="{Binding EditCommand}" />
+                        <Button x:Name="DuplicateWorkspace" Content="{x:Static res:Strings.Duplicate}" Command="{Binding DuplicateCommand}" />
+                        <Button x:Name="DeleteWorkspace" Classes="danger-text" Content="{x:Static res:Strings.Delete}" Command="{Binding DeleteCommand}" />
+                    </StackPanel>
+
+                    <SelectableTextBlock x:Name="ActionError"
+                                         Classes="error"
+                                         Text="{Binding ActionError}"
+                                         IsVisible="{Binding ActionError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+                    <TextBlock Classes="section-title spaced" Text="{x:Static res:Strings.ResourcesTitle}" />
+                    <TextBlock x:Name="NoResources"
+                               Classes="secondary"
+                               Text="{x:Static res:Strings.NoResources}"
+                               IsVisible="{Binding HasNoResources}" />
+                    <ItemsControl x:Name="ResourceGroups" ItemsSource="{Binding ResourceGroups}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ResourceGroupViewModel">
+                                <StackPanel Spacing="6" Margin="0,0,0,12">
+                                    <TextBlock Classes="strong" Text="{Binding Title}" />
+                                    <Border Classes="surface">
+                                        <ItemsControl ItemsSource="{Binding Items}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Spacing="10" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:ResourceItemViewModel">
+                                                    <StackPanel Spacing="2">
+                                                        <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Classes="caption"
+                                                                   Text="{Binding Target}"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   ToolTip.Tip="{Binding Target}" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Border>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,16,0,0">
+                        <TextBlock Classes="section-title" Text="{x:Static res:Strings.NotesTitle}" />
+                        <TextBlock x:Name="NotesStatus"
+                                   Grid.Column="1"
+                                   Classes="caption"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding NotesStatus}" />
+                    </Grid>
+                    <TextBox x:Name="Notes"
+                             Text="{Binding Notes}"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             MinHeight="180"
+                             MaxHeight="480"
+                             PlaceholderText="{x:Static res:Strings.NotesPlaceholder}"
+                             AutomationProperties.Name="{x:Static res:Strings.NotesTitle}" />
+                    <StackPanel Spacing="8" IsVisible="{Binding NotesError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <SelectableTextBlock x:Name="NotesError" Classes="error" Text="{Binding NotesError}" />
+                        <Button Content="{x:Static res:Strings.Retry}" Command="{Binding RetrySaveNotesCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

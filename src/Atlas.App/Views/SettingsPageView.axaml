@@ -1,0 +1,64 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:about="using:Atlas.App.About"
+             xmlns:res="using:Atlas.App.Resources"
+             xmlns:vm="using:Atlas.App.ViewModels"
+             x:Class="Atlas.App.Views.SettingsPageView"
+             x:DataType="vm:SettingsPageViewModel">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MaxWidth="784" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Classes="page">
+                <TextBlock Classes="page-title" Text="{x:Static res:Strings.SettingsTitle}" />
+
+                <TextBlock Classes="section-title spaced" Text="{x:Static res:Strings.AppearanceTitle}" />
+                <StackPanel Spacing="2">
+                    <RadioButton x:Name="ThemeSystem" GroupName="Theme" Content="{x:Static res:Strings.ThemeSystem}" IsChecked="{Binding IsSystemTheme}" />
+                    <RadioButton x:Name="ThemeLight" GroupName="Theme" Content="{x:Static res:Strings.ThemeLight}" IsChecked="{Binding IsLightTheme}" />
+                    <RadioButton x:Name="ThemeDark" GroupName="Theme" Content="{x:Static res:Strings.ThemeDark}" IsChecked="{Binding IsDarkTheme}" />
+                </StackPanel>
+                <SelectableTextBlock x:Name="ThemeError"
+                                     Classes="error"
+                                     Text="{Binding ThemeError}"
+                                     IsVisible="{Binding ThemeError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+                <TextBlock Classes="section-title spaced" Text="{x:Static res:Strings.DataTitle}" />
+                <TextBlock Classes="secondary" Text="{x:Static res:Strings.DataMessage}" />
+                <Border Classes="surface">
+                    <SelectableTextBlock x:Name="DataFolder" Classes="body" Text="{Binding DataFolder}" />
+                </Border>
+                <Button x:Name="OpenDataFolder" Content="{x:Static res:Strings.OpenFolder}" Command="{Binding OpenDataFolderCommand}" />
+                <SelectableTextBlock x:Name="OpenFolderError"
+                                     Classes="error"
+                                     Text="{Binding OpenFolderError}"
+                                     IsVisible="{Binding OpenFolderError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+                <TextBlock Classes="section-title spaced" Text="{x:Static res:Strings.AboutTitle}" />
+                <TextBlock x:Name="Version" Classes="secondary" Text="{Binding VersionText}" />
+
+                <Expander HorizontalAlignment="Stretch" Header="{x:Static res:Strings.AtlasLicenseTitle}">
+                    <SelectableTextBlock x:Name="License" Classes="body" FontSize="12" Text="{Binding LicenseText}" />
+                </Expander>
+                <Expander HorizontalAlignment="Stretch" Header="{x:Static res:Strings.ComponentsTitle}">
+                    <ItemsControl x:Name="Components" ItemsSource="{Binding Components}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="6" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="about:ThirdPartyComponent">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                    <TextBlock Text="{Binding Name}" />
+                                    <TextBlock Grid.Column="1" Classes="caption" Text="{Binding License}" VerticalAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Expander>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

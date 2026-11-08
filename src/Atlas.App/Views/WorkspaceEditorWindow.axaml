@@ -1,0 +1,60 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:res="using:Atlas.App.Resources"
+        xmlns:vm="using:Atlas.App.ViewModels"
+        x:Class="Atlas.App.Views.WorkspaceEditorWindow"
+        x:DataType="vm:WorkspaceEditorViewModel"
+        Title="{Binding Title}"
+        Icon="/Assets/atlas.ico"
+        Background="{DynamicResource AtlasBackgroundBrush}"
+        Width="480"
+        SizeToContent="Height"
+        CanResize="False"
+        CanMinimize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+    <StackPanel Margin="24" Spacing="16">
+        <TextBlock Classes="section-title" Text="{Binding Title}" />
+
+        <StackPanel Spacing="6">
+            <Label Target="{Binding #NameBox}" Content="{x:Static res:Strings.NameLabel}" Padding="0" />
+            <TextBox x:Name="NameBox" Text="{Binding Name}" AutomationProperties.Name="{x:Static res:Strings.NameLabel}" />
+            <TextBlock x:Name="NameError"
+                       Classes="error"
+                       Text="{Binding NameError}"
+                       IsVisible="{Binding NameError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        </StackPanel>
+
+        <StackPanel Spacing="6" IsVisible="{Binding ShowDescription}">
+            <Label Target="{Binding #DescriptionBox}" Content="{x:Static res:Strings.DescriptionLabel}" Padding="0" />
+            <TextBox x:Name="DescriptionBox"
+                     Text="{Binding Description}"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     MinHeight="88"
+                     MaxHeight="200"
+                     AutomationProperties.Name="{x:Static res:Strings.DescriptionLabel}" />
+            <TextBlock x:Name="DescriptionError"
+                       Classes="error"
+                       Text="{Binding DescriptionError}"
+                       IsVisible="{Binding DescriptionError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        </StackPanel>
+
+        <SelectableTextBlock x:Name="SaveError"
+                             Classes="error"
+                             Text="{Binding SaveError}"
+                             IsVisible="{Binding SaveError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button x:Name="CancelButton"
+                    Content="{x:Static res:Strings.Cancel}"
+                    IsCancel="True"
+                    Click="OnCancelClick" />
+            <Button x:Name="ConfirmButton"
+                    Classes="primary"
+                    Content="{Binding ConfirmLabel}"
+                    IsDefault="True"
+                    Command="{Binding SubmitCommand}" />
+        </StackPanel>
+    </StackPanel>
+</Window>

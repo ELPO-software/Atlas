@@ -144,6 +144,26 @@ public sealed class DatabaseMigratorTests : IDisposable
         Assert.Throws<InvalidOperationException>(() => Migrator());
 
     [Fact]
+    public async Task Migrate_UpgradesAPreviousRealSchemaWithoutLosingWorkspaces()
+    {
+        var database = new SqliteDatabase(_folder.DatabasePath);
+        var firstVersion = EmbeddedMigrations.Load().Where(m => m.Version == 1).ToArray();
+        new DatabaseMigrator(database, _clock, NullLogger<DatabaseMigrator>.Instance, firstVersion).Migrate();
+        var repository = new SqliteWorkspaceRepository(database);
+        var workspace = Atlas.Core.Workspaces.Workspace.Create("Études d'été", "Avant la mise à jour", _clock.GetUtcNow());
+        await repository.AddAsync(workspace, TestContext.Current.CancellationToken);
+
+        var backup = new DatabaseMigrator(database, _clock, NullLogger<DatabaseMigrator>.Instance).Migrate();
+
+        Assert.NotNull(backup);
+        Assert.Equal(EmbeddedMigrations.Load()[^1].Version, Pragma("user_version"));
+        Assert.Equal(1, Query("SELECT COUNT(*) FROM workspaces", backup));
+        var stored = await repository.GetAsync(workspace.Id, TestContext.Current.CancellationToken);
+        Assert.Equal("Études d'été", stored?.Name);
+        Assert.Equal(1, Query("SELECT COUNT(*) FROM sqlite_master WHERE name = 'settings'"));
+    }
+
+    [Fact]
     public void EmbeddedMigrations_StartAtOneAndAreSequential()
     {
         var versions = EmbeddedMigrations.Load().Select(m => m.Version).ToList();

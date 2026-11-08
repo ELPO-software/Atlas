@@ -1,0 +1,68 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:res="using:Atlas.App.Resources"
+             xmlns:vm="using:Atlas.App.ViewModels"
+             x:Class="Atlas.App.Views.HomePageView"
+             x:DataType="vm:HomePageViewModel">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MaxWidth="784" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Classes="page">
+                <TextBlock Classes="page-title" Text="{x:Static res:Strings.HomeTitle}" />
+                <TextBlock x:Name="WorkspaceCount" Classes="secondary" Text="{Binding WorkspaceCountText}" />
+
+                <StackPanel Spacing="8" IsVisible="{Binding LoadError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                    <SelectableTextBlock Classes="error" Text="{Binding LoadError}" />
+                    <Button Content="{x:Static res:Strings.Retry}" Command="{Binding LoadCommand}" />
+                </StackPanel>
+
+                <TextBlock Classes="body" Text="{x:Static res:Strings.HomeEmptyMessage}" IsVisible="{Binding IsEmpty}" Margin="0,8,0,0" />
+
+                <TextBlock Classes="section-title spaced" Text="{x:Static res:Strings.QuickCreateTitle}" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <TextBox x:Name="NewWorkspaceName"
+                             Text="{Binding NewWorkspaceName}"
+                             PlaceholderText="{x:Static res:Strings.QuickCreatePlaceholder}"
+                             AutomationProperties.Name="{x:Static res:Strings.QuickCreatePlaceholder}">
+                        <TextBox.KeyBindings>
+                            <KeyBinding Gesture="Enter" Command="{Binding QuickCreateCommand}" />
+                        </TextBox.KeyBindings>
+                    </TextBox>
+                    <Button x:Name="QuickCreate"
+                            Grid.Column="1"
+                            Classes="primary"
+                            Content="{x:Static res:Strings.Create}"
+                            Command="{Binding QuickCreateCommand}" />
+                </Grid>
+                <TextBlock x:Name="NewWorkspaceError"
+                           Classes="error"
+                           Text="{Binding NewWorkspaceError}"
+                           IsVisible="{Binding NewWorkspaceError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+                <TextBlock Classes="section-title spaced" Text="{x:Static res:Strings.RecentTitle}" IsVisible="{Binding HasRecents}" />
+                <ItemsControl x:Name="Recents" ItemsSource="{Binding Recents}" Margin="-12,0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:WorkspaceCardViewModel">
+                            <Button Classes="row"
+                                    Command="{Binding OpenCommand}"
+                                    AutomationProperties.Name="{Binding OpenLabel}">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                    <TextBlock Classes="strong"
+                                               Text="{Binding Name}"
+                                               TextTrimming="CharacterEllipsis"
+                                               ToolTip.Tip="{Binding Name}" />
+                                    <TextBlock Grid.Column="1"
+                                               Classes="caption"
+                                               Text="{Binding ModifiedText}"
+                                               VerticalAlignment="Center" />
+                                </Grid>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

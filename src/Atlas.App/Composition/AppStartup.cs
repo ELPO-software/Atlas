@@ -1,5 +1,5 @@
-using System.Globalization;
 using Atlas.App.Resources;
+using Atlas.App.Text;
 using Atlas.Infrastructure.Persistence;
 using Atlas.Infrastructure.Storage;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +25,7 @@ internal static class AppStartup
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            return new StartupOutcome(null, string.Format(CultureInfo.CurrentCulture, Strings.DataFolderUnavailableMessage, "%LOCALAPPDATA%"));
+            return new StartupOutcome(null, UiText.Format(Strings.DataFolderUnavailableMessage, "%LOCALAPPDATA%"));
         }
     }
 
@@ -58,7 +58,7 @@ internal static class AppStartup
             _ => (Strings.DataFolderUnavailableMessage, paths.DataDirectory),
         };
 
-        return string.Format(CultureInfo.CurrentCulture, message, location);
+        return UiText.Format(message, location);
     }
 
     private static void TryLog(ServiceProvider? services, Exception exception)

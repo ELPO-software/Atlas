@@ -16,11 +16,51 @@
   <data name="AppName" xml:space="preserve">
     <value>ELPO Atlas</value>
   </data>
+  <data name="AppShortName" xml:space="preserve">
+    <value>Atlas</value>
+  </data>
   <data name="Close" xml:space="preserve">
     <value>Fermer</value>
   </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Créer</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>Ouvrir</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Modifier</value>
+  </data>
+  <data name="Duplicate" xml:space="preserve">
+    <value>Dupliquer</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Supprimer</value>
+  </data>
+  <data name="Retry" xml:space="preserve">
+    <value>Réessayer</value>
+  </data>
+  <data name="Stay" xml:space="preserve">
+    <value>Rester</value>
+  </data>
   <data name="Loading" xml:space="preserve">
     <value>Chargement…</value>
+  </data>
+
+  <data name="NavHome" xml:space="preserve">
+    <value>Accueil</value>
+  </data>
+  <data name="NavWorkspaces" xml:space="preserve">
+    <value>Espaces de travail</value>
+  </data>
+  <data name="NavSettings" xml:space="preserve">
+    <value>Paramètres</value>
   </data>
 
   <data name="WorkspaceCountOne" xml:space="preserve">
@@ -29,8 +69,213 @@
   <data name="WorkspaceCountMany" xml:space="preserve">
     <value>{0} espaces de travail</value>
   </data>
-  <data name="WorkspaceCountFailed" xml:space="preserve">
-    <value>Impossible de lire les espaces de travail. Le détail se trouve dans le journal : {0}</value>
+  <data name="ResourceCountOne" xml:space="preserve">
+    <value>{0} ressource</value>
+  </data>
+  <data name="ResourceCountMany" xml:space="preserve">
+    <value>{0} ressources</value>
+  </data>
+  <data name="ModifiedToday" xml:space="preserve">
+    <value>Modifié aujourd'hui à {0}</value>
+  </data>
+  <data name="ModifiedYesterday" xml:space="preserve">
+    <value>Modifié hier à {0}</value>
+  </data>
+  <data name="ModifiedOn" xml:space="preserve">
+    <value>Modifié le {0}</value>
+  </data>
+  <data name="CreatedOn" xml:space="preserve">
+    <value>Créé le {0}</value>
+  </data>
+
+  <data name="HomeTitle" xml:space="preserve">
+    <value>Bienvenue dans Atlas</value>
+  </data>
+  <data name="HomeEmptyMessage" xml:space="preserve">
+    <value>Un espace de travail regroupe les applications, les fichiers, les dossiers, les liens et les notes d'une activité, pour les retrouver en quelques clics. Créez le premier pour commencer.</value>
+  </data>
+  <data name="QuickCreateTitle" xml:space="preserve">
+    <value>Nouvel espace de travail</value>
+  </data>
+  <data name="QuickCreatePlaceholder" xml:space="preserve">
+    <value>Nom de l'espace de travail</value>
+  </data>
+  <data name="RecentTitle" xml:space="preserve">
+    <value>Récents</value>
+  </data>
+
+  <data name="WorkspacesTitle" xml:space="preserve">
+    <value>Espaces de travail</value>
+  </data>
+  <data name="NewWorkspace" xml:space="preserve">
+    <value>Nouvel espace</value>
+  </data>
+  <data name="WorkspacesEmptyMessage" xml:space="preserve">
+    <value>Aucun espace de travail pour l'instant. Créez-en un pour regrouper les applications, les fichiers et les liens d'une activité.</value>
+  </data>
+  <data name="OpenWorkspaceLabel" xml:space="preserve">
+    <value>Ouvrir {0}</value>
+  </data>
+
+  <data name="NewWorkspaceDialogTitle" xml:space="preserve">
+    <value>Nouvel espace de travail</value>
+  </data>
+  <data name="EditWorkspaceDialogTitle" xml:space="preserve">
+    <value>Modifier l'espace de travail</value>
+  </data>
+  <data name="DuplicateWorkspaceDialogTitle" xml:space="preserve">
+    <value>Dupliquer l'espace de travail</value>
+  </data>
+  <data name="NameLabel" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="DescriptionLabel" xml:space="preserve">
+    <value>Description (facultative)</value>
+  </data>
+  <data name="CopyNameFormat" xml:space="preserve">
+    <value>{0} (copie)</value>
+  </data>
+
+  <data name="BackToWorkspaces" xml:space="preserve">
+    <value>Espaces de travail</value>
+  </data>
+  <data name="ResourcesTitle" xml:space="preserve">
+    <value>Ressources</value>
+  </data>
+  <data name="NoResources" xml:space="preserve">
+    <value>Aucune ressource pour l'instant.</value>
+  </data>
+  <data name="ResourceGroupApplications" xml:space="preserve">
+    <value>Applications</value>
+  </data>
+  <data name="ResourceGroupFiles" xml:space="preserve">
+    <value>Fichiers</value>
+  </data>
+  <data name="ResourceGroupFolders" xml:space="preserve">
+    <value>Dossiers</value>
+  </data>
+  <data name="ResourceGroupLinks" xml:space="preserve">
+    <value>Liens</value>
+  </data>
+  <data name="ResourceGroupOther" xml:space="preserve">
+    <value>Autres types</value>
+  </data>
+  <data name="NotesTitle" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="NotesPlaceholder" xml:space="preserve">
+    <value>Ce dont vous voulez vous souvenir pour cette activité.</value>
+  </data>
+  <data name="NotesSaving" xml:space="preserve">
+    <value>Enregistrement…</value>
+  </data>
+  <data name="NotesSaved" xml:space="preserve">
+    <value>Enregistré</value>
+  </data>
+  <data name="NotesSaveFailed" xml:space="preserve">
+    <value>Vos notes n'ont pas pu être enregistrées. Elles restent affichées ici. Le détail se trouve dans le journal&#160;: {0}</value>
+  </data>
+  <data name="DeleteWorkspaceTitle" xml:space="preserve">
+    <value>Supprimer cet espace de travail&#160;?</value>
+  </data>
+  <data name="DeleteWorkspaceMessage" xml:space="preserve">
+    <value>«&#160;{0}&#160;» ({1}) et ses notes seront définitivement supprimés d'Atlas. Vos fichiers, vos dossiers et vos applications ne sont pas touchés.</value>
+  </data>
+  <data name="LeaveWithoutSavingTitle" xml:space="preserve">
+    <value>Quitter sans enregistrer vos notes&#160;?</value>
+  </data>
+  <data name="LeaveWithoutSavingMessage" xml:space="preserve">
+    <value>Vos dernières notes n'ont pas pu être enregistrées. Si vous quittez maintenant, elles seront perdues.</value>
+  </data>
+  <data name="LeaveWithoutSaving" xml:space="preserve">
+    <value>Quitter sans enregistrer</value>
+  </data>
+  <data name="WorkspaceNotFound" xml:space="preserve">
+    <value>Cet espace de travail n'existe plus.</value>
+  </data>
+
+  <data name="WorkspacesReadFailed" xml:space="preserve">
+    <value>Impossible de lire les espaces de travail. Le détail se trouve dans le journal&#160;: {0}</value>
+  </data>
+  <data name="WorkspaceReadFailed" xml:space="preserve">
+    <value>Impossible d'ouvrir cet espace de travail. Le détail se trouve dans le journal&#160;: {0}</value>
+  </data>
+  <data name="SaveFailed" xml:space="preserve">
+    <value>L'enregistrement a échoué et rien n'a été modifié. Le détail se trouve dans le journal&#160;: {0}</value>
+  </data>
+  <data name="DeleteFailed" xml:space="preserve">
+    <value>La suppression a échoué et l'espace de travail est conservé. Le détail se trouve dans le journal&#160;: {0}</value>
+  </data>
+  <data name="UnexpectedError" xml:space="preserve">
+    <value>Une erreur inattendue s'est produite. Le détail se trouve dans le journal&#160;: {0}</value>
+  </data>
+
+  <data name="NameRequired" xml:space="preserve">
+    <value>Donnez un nom à cet espace de travail.</value>
+  </data>
+  <data name="NameTooLong" xml:space="preserve">
+    <value>Le nom ne peut pas dépasser {0} caractères.</value>
+  </data>
+  <data name="NameInvalidCharacters" xml:space="preserve">
+    <value>Le nom contient des caractères qui ne sont pas acceptés, comme un saut de ligne.</value>
+  </data>
+  <data name="DescriptionTooLong" xml:space="preserve">
+    <value>La description ne peut pas dépasser {0} caractères.</value>
+  </data>
+  <data name="NotesTooLong" xml:space="preserve">
+    <value>Vos notes ne sont pas enregistrées&#160;: elles ne peuvent pas dépasser {0} caractères.</value>
+  </data>
+  <data name="ValueRefused" xml:space="preserve">
+    <value>Cette valeur n'est pas acceptée.</value>
+  </data>
+
+  <data name="SettingsTitle" xml:space="preserve">
+    <value>Paramètres</value>
+  </data>
+  <data name="AppearanceTitle" xml:space="preserve">
+    <value>Apparence</value>
+  </data>
+  <data name="ThemeSystem" xml:space="preserve">
+    <value>Comme le système</value>
+  </data>
+  <data name="ThemeLight" xml:space="preserve">
+    <value>Clair</value>
+  </data>
+  <data name="ThemeDark" xml:space="preserve">
+    <value>Sombre</value>
+  </data>
+  <data name="ThemeReadFailed" xml:space="preserve">
+    <value>Impossible de lire le thème enregistré. Le détail se trouve dans le journal&#160;: {0}</value>
+  </data>
+  <data name="ThemeSaveFailed" xml:space="preserve">
+    <value>Le thème est appliqué, mais il n'a pas pu être enregistré pour le prochain démarrage. Le détail se trouve dans le journal&#160;: {0}</value>
+  </data>
+  <data name="DataTitle" xml:space="preserve">
+    <value>Données</value>
+  </data>
+  <data name="DataMessage" xml:space="preserve">
+    <value>Vos espaces de travail, vos notes et les journaux restent sur cet ordinateur. Atlas n'envoie rien.</value>
+  </data>
+  <data name="OpenFolder" xml:space="preserve">
+    <value>Ouvrir le dossier</value>
+  </data>
+  <data name="OpenFolderFailed" xml:space="preserve">
+    <value>Impossible d'ouvrir ce dossier. Son emplacement est indiqué ci-dessus.</value>
+  </data>
+  <data name="AboutTitle" xml:space="preserve">
+    <value>À propos</value>
+  </data>
+  <data name="VersionFormat" xml:space="preserve">
+    <value>Version {0}</value>
+  </data>
+  <data name="AtlasLicenseTitle" xml:space="preserve">
+    <value>Licence d'Atlas</value>
+  </data>
+  <data name="ComponentsTitle" xml:space="preserve">
+    <value>Composants tiers et leurs licences</value>
+  </data>
+  <data name="PublicDomain" xml:space="preserve">
+    <value>Domaine public</value>
   </data>
 
   <data name="AlreadyRunningTitle" xml:space="preserve">

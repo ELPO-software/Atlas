@@ -6,6 +6,10 @@ namespace Atlas.Core.Workspaces;
 /// </summary>
 public sealed class WorkspaceService(IWorkspaceRepository repository, TimeProvider timeProvider)
 {
+    // A change reads a workspace and writes it back whole. Running changes one at a time keeps the automatic
+    // save of the notes from overwriting a rename that lands between its read and its write.
+    private readonly SemaphoreSlim _changeGate = new(1, 1);
+
     public Task<IReadOnlyList<WorkspaceSummary>> ListAsync(CancellationToken cancellationToken = default) =>
         repository.ListAsync(cancellationToken);
 
@@ -23,42 +27,62 @@ public sealed class WorkspaceService(IWorkspaceRepository repository, TimeProvid
         return workspace;
     }
 
-    public async Task<Workspace> UpdateDetailsAsync(
-        Guid id, string? name, string? description, CancellationToken cancellationToken = default)
-    {
-        var workspace = await GetAsync(id, cancellationToken);
-        workspace.UpdateDetails(name, description, timeProvider.GetUtcNow());
-        await SaveAsync(workspace, cancellationToken);
-        return workspace;
-    }
+    public Task<Workspace> UpdateDetailsAsync(
+        Guid id, string? name, string? description, CancellationToken cancellationToken = default) =>
+        ChangeAsync(id, (workspace, now) => workspace.UpdateDetails(name, description, now), cancellationToken);
 
-    public async Task<Workspace> UpdateNotesAsync(
-        Guid id, string? notes, CancellationToken cancellationToken = default)
-    {
-        var workspace = await GetAsync(id, cancellationToken);
-        workspace.UpdateNotes(notes, timeProvider.GetUtcNow());
-        await SaveAsync(workspace, cancellationToken);
-        return workspace;
-    }
+    public Task<Workspace> UpdateNotesAsync(
+        Guid id, string? notes, CancellationToken cancellationToken = default) =>
+        ChangeAsync(id, (workspace, now) => workspace.UpdateNotes(notes, now), cancellationToken);
 
     public async Task<Workspace> DuplicateAsync(
         Guid id, string? newName, CancellationToken cancellationToken = default)
     {
-        var source = await GetAsync(id, cancellationToken);
-        var copy = source.Duplicate(newName, timeProvider.GetUtcNow());
-        await repository.AddAsync(copy, cancellationToken);
-        return copy;
+        await _changeGate.WaitAsync(cancellationToken);
+        try
+        {
+            var source = await GetAsync(id, cancellationToken);
+            var copy = source.Duplicate(newName, timeProvider.GetUtcNow());
+            await repository.AddAsync(copy, cancellationToken);
+            return copy;
+        }
+        finally
+        {
+            _changeGate.Release();
+        }
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        if (!await repository.DeleteAsync(id, cancellationToken))
-            throw new WorkspaceNotFoundException(id);
+        await _changeGate.WaitAsync(cancellationToken);
+        try
+        {
+            if (!await repository.DeleteAsync(id, cancellationToken))
+                throw new WorkspaceNotFoundException(id);
+        }
+        finally
+        {
+            _changeGate.Release();
+        }
     }
 
-    private async Task SaveAsync(Workspace workspace, CancellationToken cancellationToken)
+    private async Task<Workspace> ChangeAsync(
+        Guid id, Action<Workspace, DateTimeOffset> change, CancellationToken cancellationToken)
     {
-        if (!await repository.UpdateAsync(workspace, cancellationToken))
-            throw new WorkspaceNotFoundException(workspace.Id);
+        await _changeGate.WaitAsync(cancellationToken);
+        try
+        {
+            var workspace = await GetAsync(id, cancellationToken);
+            change(workspace, timeProvider.GetUtcNow());
+
+            if (!await repository.UpdateAsync(workspace, cancellationToken))
+                throw new WorkspaceNotFoundException(id);
+
+            return workspace;
+        }
+        finally
+        {
+            _changeGate.Release();
+        }
     }
 }

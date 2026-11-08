@@ -141,6 +141,32 @@ public sealed class WorkspaceServiceTests
         await Assert.ThrowsAsync<WorkspaceNotFoundException>(() => _service.DeleteAsync(Guid.NewGuid(), Token));
 
     [Fact]
+    public async Task OverlappingChanges_DoNotOverwriteEachOther()
+    {
+        var created = await _service.CreateAsync("Avant", null, Token);
+        _repository.ReadDelay = TimeSpan.FromMilliseconds(20);
+
+        await Task.WhenAll(
+            _service.UpdateDetailsAsync(created.Id, "Renommé", "Décrit", Token),
+            _service.UpdateNotesAsync(created.Id, "Notes écrites en même temps", Token));
+
+        var stored = await _service.GetAsync(created.Id, Token);
+        Assert.Equal("Renommé", stored.Name);
+        Assert.Equal("Notes écrites en même temps", stored.Notes);
+    }
+
+    [Fact]
+    public async Task ARefusedChange_DoesNotBlockTheNextOne()
+    {
+        var created = await _service.CreateAsync("Avant", null, Token);
+        await Assert.ThrowsAsync<AtlasValidationException>(() => _service.UpdateDetailsAsync(created.Id, " ", null, Token));
+
+        await _service.UpdateDetailsAsync(created.Id, "Après", null, Token).WaitAsync(TimeSpan.FromSeconds(5), Token);
+
+        Assert.Equal("Après", (await _service.GetAsync(created.Id, Token)).Name);
+    }
+
+    [Fact]
     public async Task UpdateDetailsAsync_KeepsTheResources()
     {
         var workspace = Workspace.Create("Nom", null, _clock.GetUtcNow());

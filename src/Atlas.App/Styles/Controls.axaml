@@ -1,0 +1,196 @@
+<!--
+    Text and control styles. The type scale and the radii follow the rest of the ELPO suite:
+    page title 28, section title 18, card title 16, body 14, secondary 12; buttons and rows 8, cards 12.
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Text -->
+    <Style Selector=":is(TextBlock).page-title">
+        <Setter Property="FontSize" Value="28" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasTextBrush}" />
+    </Style>
+    <Style Selector="TextBlock.section-title">
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasTextBrush}" />
+    </Style>
+    <Style Selector="TextBlock.card-title">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasTextBrush}" />
+    </Style>
+    <Style Selector="TextBlock.strong">
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasTextBrush}" />
+    </Style>
+    <Style Selector=":is(TextBlock).body">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasTextBrush}" />
+    </Style>
+    <Style Selector=":is(TextBlock).secondary">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasTextSecondaryBrush}" />
+    </Style>
+    <Style Selector=":is(TextBlock).caption">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasTextSecondaryBrush}" />
+    </Style>
+    <Style Selector=":is(TextBlock).error">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasErrorTextBrush}" />
+    </Style>
+
+    <!-- Pages -->
+    <Style Selector="StackPanel.page">
+        <Setter Property="Margin" Value="32,24,32,32" />
+        <Setter Property="Spacing" Value="12" />
+    </Style>
+    <Style Selector="TextBlock.section-title.spaced">
+        <Setter Property="Margin" Value="0,16,0,0" />
+    </Style>
+    <Style Selector="Border.surface">
+        <Setter Property="Background" Value="{DynamicResource AtlasSurfaceBrush}" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="16,12" />
+    </Style>
+
+    <!-- Controls keep the radius of the rest of the suite -->
+    <Style Selector="Button">
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="TextBox">
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="Expander">
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+
+    <!-- Main action: at most one on a screen -->
+    <Style Selector="Button.primary">
+        <Setter Property="Background" Value="{DynamicResource AtlasAccentBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasOnColorBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="16,8" />
+    </Style>
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AtlasAccentHoverBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasOnColorBrush}" />
+    </Style>
+    <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AtlasAccentPressedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasOnColorBrush}" />
+    </Style>
+
+    <!-- A destructive decision, in a confirmation window -->
+    <Style Selector="Button.danger">
+        <Setter Property="Background" Value="{DynamicResource AtlasDangerBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasOnColorBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="16,8" />
+    </Style>
+    <Style Selector="Button.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AtlasDangerHoverBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasOnColorBrush}" />
+    </Style>
+    <Style Selector="Button.danger:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AtlasDangerPressedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasOnColorBrush}" />
+    </Style>
+
+    <!-- The action that leads to a destructive decision, among ordinary buttons -->
+    <Style Selector="Button.danger-text">
+        <Setter Property="Foreground" Value="{DynamicResource AtlasErrorTextBrush}" />
+    </Style>
+    <Style Selector="Button.danger-text:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource AtlasErrorTextBrush}" />
+    </Style>
+    <Style Selector="Button.danger-text:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource AtlasErrorTextBrush}" />
+    </Style>
+
+    <!-- Transparent until hovered: a way back, or a line of a list -->
+    <Style Selector="Button.quiet, Button.row, Button.nav">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="Button.quiet:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button.row:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button.nav:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AtlasSurfaceHoverBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasTextBrush}" />
+    </Style>
+    <Style Selector="Button.quiet:pressed /template/ ContentPresenter#PART_ContentPresenter, Button.row:pressed /template/ ContentPresenter#PART_ContentPresenter, Button.nav:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AtlasSurfacePressedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasTextBrush}" />
+    </Style>
+    <Style Selector="Button.quiet">
+        <Setter Property="Padding" Value="8,6" />
+    </Style>
+    <Style Selector="Button.row">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Padding" Value="12,10" />
+    </Style>
+
+    <!-- Navigation -->
+    <Style Selector="Button.nav">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Padding" Value="4,8,12,8" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasTextSecondaryBrush}" />
+    </Style>
+    <Style Selector="Button.nav.selected">
+        <Setter Property="Background" Value="{DynamicResource AtlasSurfaceHoverBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasTextBrush}" />
+    </Style>
+    <Style Selector="Button.nav Border.nav-indicator">
+        <Setter Property="Width" Value="3" />
+        <Setter Property="Height" Value="16" />
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.nav.selected Border.nav-indicator">
+        <Setter Property="Background" Value="{DynamicResource AtlasAccentBrush}" />
+    </Style>
+    <Style Selector="Button.nav.selected Path.icon, Button.nav:pointerover Path.icon">
+        <Setter Property="Stroke" Value="{DynamicResource AtlasTextBrush}" />
+    </Style>
+
+    <!-- Workspace cards: the whole surface opens the workspace -->
+    <Style Selector="Button.card">
+        <Setter Property="Background" Value="{DynamicResource AtlasSurfaceBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="MinHeight" Value="148" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="Button.card:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AtlasSurfaceHoverBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasTextBrush}" />
+    </Style>
+    <Style Selector="Button.card:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AtlasSurfacePressedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AtlasTextBrush}" />
+    </Style>
+
+    <!-- Icons -->
+    <Style Selector="Path.icon">
+        <Setter Property="Width" Value="20" />
+        <Setter Property="Height" Value="20" />
+        <Setter Property="Stretch" Value="None" />
+        <Setter Property="Stroke" Value="{DynamicResource AtlasTextSecondaryBrush}" />
+        <Setter Property="StrokeThickness" Value="1.5" />
+        <Setter Property="StrokeLineCap" Value="Round" />
+        <Setter Property="StrokeJoin" Value="Round" />
+    </Style>
+
+</Styles>

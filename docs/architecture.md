@@ -33,9 +33,39 @@ Schema changes are numbered scripts in `src/Atlas.Infrastructure/Persistence/Mig
 
 Atlas never repairs, replaces or deletes a data file on its own. A failure at startup becomes a message for the user.
 
+### Settings
+
+Preferences are named text values in the `settings` table. `SettingsService` turns them into typed values. A value it does not recognize, such as one written by a newer version, falls back to the default and stays in the file until the user changes that setting.
+
+### Concurrent changes
+
+A change reads a workspace and writes it back whole. `WorkspaceService` runs changes one at a time, so the automatic save of the notes cannot overwrite a rename that lands between its read and its write. The single-instance guard means no other process writes to the file.
+
 ## Logs
 
 Diagnostic logs stay on the computer, in `%LOCALAPPDATA%\ELPO\Atlas\logs`. A new file starts each day or at 5 MB, and Atlas keeps the 14 most recent files. These are the only files Atlas deletes on its own.
+
+## Interface
+
+`MainWindowViewModel` owns the current page and implements `INavigator`. Each page is a `PageViewModel`, created for each visit, and `MainWindow` picks its view through data templates.
+
+- **Leaving a page:** before a page is replaced or the window closes, `TryLeaveAsync` lets it finish its work. A page can refuse, which keeps the user on it. `WorkspaceDetailViewModel` uses this to store pending notes, or to ask before losing notes it cannot store.
+- **Notes** are saved one second after typing stops. Saves run one at a time, and text typed during a save is stored right after it. A failed save is reported, and the text stays on screen.
+- **Dialogs** go through `IDialogService`, so view models can be tested without windows. A form stays open until its save succeeds, so a refused value or a failed save loses nothing. A confirmation starts on the safe answer.
+- **Failures:** pages report the failures they expect, with the location of the log. `AtlasApp` logs anything else and shows a banner.
+- **Text** is formatted in French by `UiText` and `DateText`, whatever the language of the system, because the interface is written in French.
+
+### Theme
+
+`Styles/Theme.axaml` is the only place that defines colors, and `Styles/Controls.axaml` holds the text and control styles. Blue is reserved for the main action of a screen and the navigation selection. Surfaces are separated by their fill, not by borders.
+
+`ThemeTests` reads the colors from the real theme and fails if text drops below 4.5:1 or a control boundary below 3:1. Add any new pair of colors to it.
+
+The title bar stays the one drawn by the system, which keeps its buttons and window snapping. `WindowChrome` tints it to match the page where the system allows it, which means Windows 11. Extending the page under the title bar is not an option: Avalonia then draws its own buttons.
+
+### Third-party components
+
+`ThirdPartyComponents` lists what ships with Atlas, shown in the settings. `ThirdPartyComponentsTests` fails if a package in the application has no entry. Licenses come from each package's own metadata, except for the Inter font, whose OFL-1.1 license is separate from the MIT license of the package that carries it.
 
 ## Adding a resource type
 

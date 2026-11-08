@@ -1,32 +1,84 @@
-using System.Globalization;
 using Atlas.App.Resources;
-using Atlas.Core.Workspaces;
-using Atlas.Infrastructure.Storage;
+using Atlas.App.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.Extensions.Logging;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Atlas.App.ViewModels;
 
-public sealed partial class MainWindowViewModel(
-    WorkspaceService workspaces,
-    AtlasDataPaths paths,
-    ILogger<MainWindowViewModel> logger) : ViewModelBase
+public enum AppSection
 {
-    [ObservableProperty]
-    public partial string WorkspaceCountText { get; private set; } = Strings.Loading;
+    Home,
+    Workspaces,
+    Settings,
+}
 
-    public async Task LoadAsync(CancellationToken cancellationToken = default)
+public sealed partial class MainWindowViewModel(PageServices services) : ViewModelBase, INavigator
+{
+    private bool _isLeavingPage;
+
+    [ObservableProperty]
+    public partial PageViewModel? CurrentPage { get; private set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsHomeSelected), nameof(IsWorkspacesSelected), nameof(IsSettingsSelected))]
+    public partial AppSection Section { get; private set; }
+
+    [ObservableProperty]
+    public partial string? UnexpectedErrorText { get; private set; }
+
+    public bool IsHomeSelected => Section == AppSection.Home;
+
+    public bool IsWorkspacesSelected => Section == AppSection.Workspaces;
+
+    public bool IsSettingsSelected => Section == AppSection.Settings;
+
+    public bool HasUnsavedChanges => CurrentPage?.HasUnsavedChanges ?? false;
+
+    public Task InitializeAsync() => OpenHomeAsync();
+
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    public Task OpenHomeAsync() =>
+        GoToAsync(new HomePageViewModel(services, this), AppSection.Home);
+
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    public Task OpenWorkspacesAsync() =>
+        GoToAsync(new WorkspacesPageViewModel(services, this), AppSection.Workspaces);
+
+    public Task OpenWorkspaceAsync(Guid workspaceId) =>
+        GoToAsync(new WorkspaceDetailViewModel(workspaceId, services, this), AppSection.Workspaces);
+
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    public Task OpenSettingsAsync() =>
+        GoToAsync(new SettingsPageViewModel(services), AppSection.Settings);
+
+    /// <returns>False if the user chose to stay.</returns>
+    public Task<bool> TryCloseAsync() => CurrentPage?.TryLeaveAsync() ?? Task.FromResult(true);
+
+    public void ShowUnexpectedError() =>
+        UnexpectedErrorText = UiText.Format(Strings.UnexpectedError, services.Paths.LogsDirectory);
+
+    [RelayCommand]
+    private void DismissUnexpectedError() => UnexpectedErrorText = null;
+
+    private async Task GoToAsync(PageViewModel page, AppSection section)
     {
+        // A second click while the current page is still finishing its work must not start another departure.
+        if (_isLeavingPage)
+            return;
+
+        _isLeavingPage = true;
         try
         {
-            var count = await workspaces.CountAsync(cancellationToken);
-            var format = count <= 1 ? Strings.WorkspaceCountOne : Strings.WorkspaceCountMany;
-            WorkspaceCountText = string.Format(CultureInfo.CurrentCulture, format, count);
+            if (CurrentPage is { } current && !await current.TryLeaveAsync())
+                return;
         }
-        catch (Exception ex) when (ex is not OperationCanceledException)
+        finally
         {
-            logger.LogError(ex, "The workspace count could not be read");
-            WorkspaceCountText = string.Format(CultureInfo.CurrentCulture, Strings.WorkspaceCountFailed, paths.LogsDirectory);
+            _isLeavingPage = false;
         }
+
+        CurrentPage = page;
+        Section = section;
+        await page.LoadAsync();
     }
 }

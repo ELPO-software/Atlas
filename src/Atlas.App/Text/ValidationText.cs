@@ -1,0 +1,19 @@
+using Atlas.App.Resources;
+using Atlas.Core.Validation;
+using Atlas.Core.Workspaces;
+
+namespace Atlas.App.Text;
+
+/// <summary>Turns the codes reported by the business rules into messages for the user.</summary>
+internal static class ValidationText
+{
+    public static string Describe(ValidationError error) => (error.Field, error.Code) switch
+    {
+        (ValidationField.WorkspaceName, ValidationCode.Required) => Strings.NameRequired,
+        (ValidationField.WorkspaceName, ValidationCode.TooLong) => UiText.Format(Strings.NameTooLong, WorkspaceRules.NameMaxLength),
+        (ValidationField.WorkspaceName, ValidationCode.ControlCharacters) => Strings.NameInvalidCharacters,
+        (ValidationField.WorkspaceDescription, ValidationCode.TooLong) => UiText.Format(Strings.DescriptionTooLong, WorkspaceRules.DescriptionMaxLength),
+        (ValidationField.WorkspaceNotes, ValidationCode.TooLong) => UiText.Format(Strings.NotesTooLong, WorkspaceRules.NotesMaxLength),
+        _ => Strings.ValueRefused,
+    };
+}

@@ -5,6 +5,7 @@
     <AssemblyName>Atlas</AssemblyName>
     <RootNamespace>Atlas.App</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\atlas.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,6 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <AvaloniaResource Include="Assets\atlas.ico" />
+    <EmbeddedResource Include="..\..\LICENSE" LogicalName="Atlas.License.txt" />
     <EmbeddedResource Update="Resources\Strings.resx">
       <Generator>MSBuild:Compile</Generator>
       <StronglyTypedFileName>$(IntermediateOutputPath)Strings.Designer.cs</StronglyTypedFileName>

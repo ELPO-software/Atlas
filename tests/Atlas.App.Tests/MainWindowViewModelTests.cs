@@ -1,68 +1,152 @@
 using Atlas.App.ViewModels;
-using Atlas.Core.Workspaces;
-using Atlas.Infrastructure.Storage;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Atlas.App.Tests;
 
 public sealed class MainWindowViewModelTests
 {
-    private static CancellationToken Token => TestContext.Current.CancellationToken;
+    private readonly TestServices _services = new();
+    private readonly MainWindowViewModel _viewModel;
 
-    [Theory]
-    [InlineData(0, "0 espace de travail")]
-    [InlineData(1, "1 espace de travail")]
-    [InlineData(2, "2 espaces de travail")]
-    public async Task LoadAsync_ShowsTheCountWithTheRightPlural(int count, string expected)
+    public MainWindowViewModelTests() => _viewModel = new MainWindowViewModel(_services.Pages);
+
+    [Fact]
+    public async Task InitializeAsync_OpensTheHomePage()
     {
-        var viewModel = CreateViewModel(new StubRepository(count));
+        await _viewModel.InitializeAsync();
 
-        await viewModel.LoadAsync(Token);
-
-        Assert.Equal(expected, viewModel.WorkspaceCountText);
+        Assert.IsType<HomePageViewModel>(_viewModel.CurrentPage);
+        Assert.True(_viewModel.IsHomeSelected);
     }
 
     [Fact]
-    public async Task LoadAsync_SaysSoWhenTheCountCannotBeRead()
+    public async Task OpenWorkspacesAsync_ShowsTheListAndSelectsItsSection()
     {
-        var viewModel = CreateViewModel(new StubRepository(new IOException("Disque indisponible")));
+        await _viewModel.OpenWorkspacesAsync();
 
-        await viewModel.LoadAsync(Token);
-
-        Assert.Contains("Impossible de lire", viewModel.WorkspaceCountText, StringComparison.Ordinal);
-        Assert.Contains("journaux-test", viewModel.WorkspaceCountText, StringComparison.Ordinal);
+        Assert.IsType<WorkspacesPageViewModel>(_viewModel.CurrentPage);
+        Assert.True(_viewModel.IsWorkspacesSelected);
+        Assert.False(_viewModel.IsHomeSelected);
     }
 
     [Fact]
-    public void WorkspaceCountText_IsAnnouncedAsLoadingBeforeTheFirstRead() =>
-        Assert.Equal("Chargement…", CreateViewModel(new StubRepository(0)).WorkspaceCountText);
-
-    private static MainWindowViewModel CreateViewModel(IWorkspaceRepository repository) =>
-        new(
-            new WorkspaceService(repository, TimeProvider.System),
-            new AtlasDataPaths(Path.Combine(Path.GetTempPath(), "journaux-test")),
-            NullLogger<MainWindowViewModel>.Instance);
-
-    private sealed class StubRepository : IWorkspaceRepository
+    public async Task OpenSettingsAsync_ShowsTheSettingsAndSelectsItsSection()
     {
-        private readonly int _count;
-        private readonly Exception? _failure;
+        await _viewModel.OpenSettingsAsync();
 
-        public StubRepository(int count) => _count = count;
+        Assert.IsType<SettingsPageViewModel>(_viewModel.CurrentPage);
+        Assert.True(_viewModel.IsSettingsSelected);
+    }
 
-        public StubRepository(Exception failure) => _failure = failure;
+    [Fact]
+    public async Task OpenWorkspaceAsync_ShowsTheWorkspaceWithinTheWorkspacesSection()
+    {
+        var workspace = _services.SeedWorkspace();
 
-        public Task<int> CountAsync(CancellationToken cancellationToken = default) =>
-            _failure is null ? Task.FromResult(_count) : Task.FromException<int>(_failure);
+        await _viewModel.OpenWorkspaceAsync(workspace.Id);
 
-        public Task<IReadOnlyList<WorkspaceSummary>> ListAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        var page = Assert.IsType<WorkspaceDetailViewModel>(_viewModel.CurrentPage);
+        Assert.Equal(workspace.Name, page.Name);
+        Assert.True(_viewModel.IsWorkspacesSelected);
+    }
 
-        public Task<Workspace?> GetAsync(Guid id, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+    [Fact]
+    public async Task Navigation_LoadsTheNewPage()
+    {
+        _services.SeedWorkspace();
 
-        public Task AddAsync(Workspace workspace, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        await _viewModel.OpenWorkspacesAsync();
 
-        public Task<bool> UpdateAsync(Workspace workspace, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        Assert.Single(Assert.IsType<WorkspacesPageViewModel>(_viewModel.CurrentPage).Cards);
+    }
 
-        public Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+    [Fact]
+    public async Task Navigation_StaysOnThePageWhenItRefusesToBeLeft()
+    {
+        var page = await OpenWorkspaceWithNotesThatCannotBeSavedAsync();
+        _services.Dialogs.ConfirmAnswer = false;
+
+        await _viewModel.OpenHomeAsync();
+
+        Assert.Same(page, _viewModel.CurrentPage);
+        Assert.True(_viewModel.IsWorkspacesSelected);
+    }
+
+    [Fact]
+    public async Task Navigation_LeavesWhenTheUserAcceptsToLoseTheNotes()
+    {
+        await OpenWorkspaceWithNotesThatCannotBeSavedAsync();
+        _services.Dialogs.ConfirmAnswer = true;
+
+        await _viewModel.OpenHomeAsync();
+
+        Assert.IsType<HomePageViewModel>(_viewModel.CurrentPage);
+    }
+
+    [Fact]
+    public async Task Navigation_IgnoresASecondRequestWhileThePageIsFinishingItsWork()
+    {
+        var workspace = _services.SeedWorkspace();
+        await _viewModel.OpenWorkspaceAsync(workspace.Id);
+        var page = Assert.IsType<WorkspaceDetailViewModel>(_viewModel.CurrentPage);
+        page.Notes = "À enregistrer";
+        var gate = new TaskCompletionSource();
+        _services.Repository.WriteGate = gate.Task;
+
+        var first = _viewModel.OpenHomeAsync();
+        var second = _viewModel.OpenSettingsAsync();
+        await second;
+        gate.SetResult();
+        await first;
+
+        Assert.IsType<HomePageViewModel>(_viewModel.CurrentPage);
+    }
+
+    [Fact]
+    public async Task TryCloseAsync_SavesPendingNotes()
+    {
+        var workspace = _services.SeedWorkspace();
+        await _viewModel.OpenWorkspaceAsync(workspace.Id);
+        Assert.IsType<WorkspaceDetailViewModel>(_viewModel.CurrentPage).Notes = "Écrit juste avant de fermer";
+        Assert.True(_viewModel.HasUnsavedChanges);
+
+        Assert.True(await _viewModel.TryCloseAsync());
+
+        Assert.Equal("Écrit juste avant de fermer", _services.Repository.Stored(workspace.Id)?.Notes);
+        Assert.False(_viewModel.HasUnsavedChanges);
+    }
+
+    [Fact]
+    public async Task TryCloseAsync_StaysOpenWhenNotesCannotBeSavedAndTheUserStays()
+    {
+        await OpenWorkspaceWithNotesThatCannotBeSavedAsync();
+        _services.Dialogs.ConfirmAnswer = false;
+
+        Assert.False(await _viewModel.TryCloseAsync());
+    }
+
+    [Fact]
+    public void HasUnsavedChanges_IsFalseBeforeAnyPageOpens() =>
+        Assert.False(_viewModel.HasUnsavedChanges);
+
+    [Fact]
+    public void ShowUnexpectedError_PointsToTheLogUntilDismissed()
+    {
+        _viewModel.ShowUnexpectedError();
+
+        Assert.Contains(TestServices.LogsMarker, _viewModel.UnexpectedErrorText, StringComparison.Ordinal);
+
+        _viewModel.DismissUnexpectedErrorCommand.Execute(null);
+
+        Assert.Null(_viewModel.UnexpectedErrorText);
+    }
+
+    private async Task<WorkspaceDetailViewModel> OpenWorkspaceWithNotesThatCannotBeSavedAsync()
+    {
+        var workspace = _services.SeedWorkspace();
+        await _viewModel.OpenWorkspaceAsync(workspace.Id);
+        var page = Assert.IsType<WorkspaceDetailViewModel>(_viewModel.CurrentPage);
+        _services.Repository.WriteFailure = new IOException("Disque plein");
+        page.Notes = "Ne peut pas être enregistré";
+        return page;
     }
 }

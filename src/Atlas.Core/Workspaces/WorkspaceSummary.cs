@@ -7,4 +7,8 @@ public sealed record WorkspaceSummary(
     string Description,
     int ResourceCount,
     DateTimeOffset UpdatedAt,
-    DateTimeOffset? LastUsedAt);
+    DateTimeOffset? LastUsedAt)
+{
+    /// <summary>The last time the user changed or restored this workspace.</summary>
+    public DateTimeOffset LastActivityAt => LastUsedAt is { } usedAt && usedAt > UpdatedAt ? usedAt : UpdatedAt;
+}

@@ -15,6 +15,9 @@ internal sealed class InMemoryWorkspaceRepository : IWorkspaceRepository
     /// <summary>Simulates another operation deleting the workspace just before the next update.</summary>
     public bool LoseWorkspaceBeforeUpdate { get; set; }
 
+    /// <summary>Makes reads take real time, as on a disk, so that overlapping changes can actually interleave.</summary>
+    public TimeSpan ReadDelay { get; set; }
+
     public Task<IReadOnlyList<WorkspaceSummary>> ListAsync(CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyList<WorkspaceSummary>>(
             _workspaces.Values
@@ -25,8 +28,15 @@ internal sealed class InMemoryWorkspaceRepository : IWorkspaceRepository
     public Task<int> CountAsync(CancellationToken cancellationToken = default) =>
         Task.FromResult(_workspaces.Count);
 
-    public Task<Workspace?> GetAsync(Guid id, CancellationToken cancellationToken = default) =>
-        Task.FromResult(_workspaces.TryGetValue(id, out var workspace) ? Copy(workspace) : null);
+    public async Task<Workspace?> GetAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var workspace = _workspaces.TryGetValue(id, out var found) ? Copy(found) : null;
+
+        if (ReadDelay > TimeSpan.Zero)
+            await Task.Delay(ReadDelay, cancellationToken);
+
+        return workspace;
+    }
 
     public Task AddAsync(Workspace workspace, CancellationToken cancellationToken = default)
     {
