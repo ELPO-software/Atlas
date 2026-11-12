@@ -1,0 +1,208 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:Atlas.App.Controls"
+             xmlns:res="using:Atlas.App.Resources"
+             xmlns:vm="using:Atlas.App.ViewModels"
+             x:Class="Atlas.App.Views.SuggestionsPageView"
+             x:DataType="vm:SuggestionsPageViewModel">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MaxWidth="1000" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Classes="page">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="page-title" Text="{x:Static res:Strings.SuggestionsTitle}" />
+                        <TextBlock Classes="secondary" MaxWidth="680" HorizontalAlignment="Left" Text="{x:Static res:Strings.SuggestionsIntro}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Top" IsVisible="{Binding IsEnabled}">
+                        <Button x:Name="ScanNow"
+                                HorizontalAlignment="Right"
+                                Command="{Binding ScanCommand}"
+                                IsEnabled="{Binding !Center.IsScanning}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Path Classes="icon small" Data="{StaticResource IconRefresh}" />
+                                <TextBlock Text="{x:Static res:Strings.ScanNow}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <TextBlock x:Name="LastScan" Classes="caption" HorizontalAlignment="Right" Text="{Binding LastScanText}" />
+                    </StackPanel>
+                </Grid>
+
+                <ProgressBar Classes="thin" IsIndeterminate="True" IsVisible="{Binding Center.IsScanning}" />
+
+                <Border Classes="infobar error" IsVisible="{Binding ActionError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <Path Classes="icon" Data="{StaticResource IconWarning}" />
+                        <SelectableTextBlock x:Name="ActionError" Grid.Column="1" Classes="body" Text="{Binding ActionError}" />
+                    </Grid>
+                </Border>
+
+                <Border Classes="infobar warning" IsVisible="{Binding Center.ScanFailed}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <Path Classes="icon" Data="{StaticResource IconWarning}" />
+                        <TextBlock x:Name="ScanFailed" Grid.Column="1" Classes="body" Text="{Binding ScanFailedText}" />
+                    </Grid>
+                </Border>
+
+                <!-- Atlas observes nothing before the user agrees. -->
+                <Border x:Name="DetectionInvite" Classes="panel" IsVisible="{Binding IsUndecided}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                        <Border Classes="tile top">
+                            <Path Classes="icon" Data="{StaticResource IconDetect}" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Spacing="8">
+                            <TextBlock Classes="section-title" Text="{x:Static res:Strings.DetectionInviteTitle}" />
+                            <TextBlock Classes="secondary" MaxWidth="640" HorizontalAlignment="Left" Text="{x:Static res:Strings.DetectionInviteText}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                                <Button x:Name="EnableDetection"
+                                        Classes="primary"
+                                        Content="{x:Static res:Strings.EnableDetection}"
+                                        Command="{Binding EnableCommand}" />
+                                <Button x:Name="DeclineDetection"
+                                        Classes="quiet"
+                                        Content="{x:Static res:Strings.NotNow}"
+                                        Command="{Binding DeclineCommand}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border x:Name="DetectionOff" Classes="panel" IsVisible="{Binding IsDisabled}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                        <Border Classes="tile top">
+                            <Path Classes="icon" Data="{StaticResource IconDetect}" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Spacing="8">
+                            <TextBlock Classes="section-title" Text="{x:Static res:Strings.DetectionOffTitle}" />
+                            <TextBlock Classes="secondary" Text="{x:Static res:Strings.DetectionOffText}" />
+                            <Button x:Name="EnableDetectionAgain"
+                                    Margin="0,8,0,0"
+                                    Classes="primary"
+                                    Content="{x:Static res:Strings.EnableDetection}"
+                                    Command="{Binding EnableCommand}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <StackPanel x:Name="SuggestionsEmpty" Classes="empty" IsVisible="{Binding IsEmpty}">
+                    <Border Classes="empty-icon">
+                        <Path Classes="icon" Data="{StaticResource IconSuggestions}" />
+                    </Border>
+                    <TextBlock Classes="section-title" Text="{x:Static res:Strings.SuggestionsEmptyTitle}" />
+                    <TextBlock Classes="secondary" Text="{x:Static res:Strings.SuggestionsEmptyText}" />
+                </StackPanel>
+
+                <ItemsControl x:Name="SuggestionCards" ItemsSource="{Binding Cards}" IsVisible="{Binding IsEnabled}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="16" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:SuggestionCardViewModel">
+                            <Border Classes="panel">
+                                <StackPanel Spacing="16">
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                        <Border Classes="tile top">
+                                            <Path Classes="icon" Data="{Binding IconKind, Converter={x:Static controls:ResourceIcons.Geometry}}" />
+                                        </Border>
+                                        <StackPanel Grid.Column="1" Spacing="6">
+                                            <WrapPanel Orientation="Horizontal">
+                                                <TextBlock Classes="card-title" FontSize="16" Margin="0,0,10,0" Text="{Binding Title}" VerticalAlignment="Center" />
+                                                <Border Classes="chip" Margin="0,0,6,0">
+                                                    <TextBlock Text="{Binding KindText}" />
+                                                </Border>
+                                                <Border Classes="chip" Classes.success="{Binding !IsProbable}" Classes.warning="{Binding IsProbable}">
+                                                    <TextBlock Text="{Binding ConfidenceText}" />
+                                                </Border>
+                                            </WrapPanel>
+                                            <TextBlock Classes="secondary" FontSize="13" Text="{Binding Explanation}" />
+                                            <TextBlock Classes="caption" Text="{Binding SnoozedText}" IsVisible="{Binding SnoozedText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="eyebrow" Text="{x:Static res:Strings.SuggestionNameLabel}" />
+                                        <TextBox Text="{Binding Name}"
+                                                 MaxWidth="480"
+                                                 HorizontalAlignment="Left"
+                                                 MinWidth="320"
+                                                 AutomationProperties.Name="{x:Static res:Strings.SuggestionNameLabel}" />
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="eyebrow" Text="{x:Static res:Strings.SuggestionResourcesLabel}" />
+                                        <Border Classes="surface" Padding="8,4">
+                                            <ItemsControl ItemsSource="{Binding Resources}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:ResourceChoiceViewModel">
+                                                        <CheckBox IsChecked="{Binding IsSelected}"
+                                                                  Padding="10,6"
+                                                                  HorizontalAlignment="Stretch"
+                                                                  HorizontalContentAlignment="Stretch"
+                                                                  AutomationProperties.Name="{Binding ChoiceLabel}">
+                                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                                                <Path Classes="icon" VerticalAlignment="Center" Data="{Binding Kind, Converter={x:Static controls:ResourceIcons.Geometry}}" />
+                                                                <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                                                                    <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                                                    <TextBlock Classes="caption"
+                                                                               Text="{Binding Target}"
+                                                                               TextTrimming="PathSegmentEllipsis"
+                                                                               ToolTip.Tip="{Binding Target}" />
+                                                                </StackPanel>
+                                                                <TextBlock Grid.Column="2" Classes="caption" VerticalAlignment="Center" Text="{Binding ReasonText}" />
+                                                            </Grid>
+                                                        </CheckBox>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <SelectableTextBlock Classes="error" Text="{Binding Error}" IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Button Classes="primary"
+                                                Content="{x:Static res:Strings.SuggestionSave}"
+                                                Command="{Binding SaveCommand}"
+                                                AutomationProperties.Name="{Binding SaveLabel}" />
+                                        <Button Content="{x:Static res:Strings.SuggestionLater}" Command="{Binding LaterCommand}" />
+                                        <Button Classes="quiet" Content="{x:Static res:Strings.SuggestionIgnore}" Command="{Binding IgnoreCommand}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Expander x:Name="IgnoredSuggestions"
+                          HorizontalAlignment="Stretch"
+                          Margin="0,8,0,0"
+                          Header="{Binding IgnoredTitle}"
+                          IsVisible="{Binding HasIgnored}">
+                    <ItemsControl ItemsSource="{Binding Ignored}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:IgnoredSuggestionViewModel">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                    <TextBlock Text="{Binding Title}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    <Button Grid.Column="1"
+                                            Classes="quiet"
+                                            Content="{x:Static res:Strings.RestoreSuggestion}"
+                                            Command="{Binding RestoreCommand}"
+                                            AutomationProperties.Name="{Binding RestoreLabel}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Expander>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

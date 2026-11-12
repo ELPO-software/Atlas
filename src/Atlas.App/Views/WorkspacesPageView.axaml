@@ -8,38 +8,53 @@
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MaxWidth="1144" />
+                <ColumnDefinition Width="*" MaxWidth="1180" />
             </Grid.ColumnDefinitions>
             <StackPanel Classes="page">
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                    <StackPanel Spacing="4">
+                    <StackPanel Spacing="6">
                         <TextBlock Classes="page-title" Text="{x:Static res:Strings.WorkspacesTitle}" />
                         <TextBlock Classes="secondary" Text="{Binding WorkspaceCountText}" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
-                        <Button x:Name="ImportWorkspace"
-                                Content="{x:Static res:Strings.Import}"
-                                Command="{Binding ImportCommand}" />
-                        <Button x:Name="NewWorkspace"
-                                Classes="primary"
-                                Content="{x:Static res:Strings.NewWorkspace}"
-                                Command="{Binding CreateCommand}" />
+                        <Button x:Name="ImportWorkspace" Command="{Binding ImportCommand}" AutomationProperties.Name="{x:Static res:Strings.Import}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Path Classes="icon small" Data="{StaticResource IconImport}" />
+                                <TextBlock Text="{x:Static res:Strings.Import}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="NewWorkspace" Classes="primary" Command="{Binding CreateCommand}" AutomationProperties.Name="{x:Static res:Strings.NewWorkspace}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Path Classes="icon small" Data="{StaticResource IconPlus}" />
+                                <TextBlock Text="{x:Static res:Strings.NewWorkspace}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </Grid>
 
-                <SelectableTextBlock x:Name="ImportError"
-                                     Classes="error"
-                                     Text="{Binding ImportError}"
-                                     IsVisible="{Binding ImportError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                <Border Classes="infobar error" IsVisible="{Binding ImportError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <Path Classes="icon" Data="{StaticResource IconWarning}" />
+                        <SelectableTextBlock x:Name="ImportError" Grid.Column="1" Classes="body" Text="{Binding ImportError}" />
+                    </Grid>
+                </Border>
 
-                <StackPanel Spacing="8" IsVisible="{Binding LoadError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                    <SelectableTextBlock Classes="error" Text="{Binding LoadError}" />
-                    <Button Content="{x:Static res:Strings.Retry}" Command="{Binding LoadCommand}" />
+                <Border Classes="infobar error" IsVisible="{Binding LoadError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <Path Classes="icon" Data="{StaticResource IconWarning}" />
+                        <SelectableTextBlock Grid.Column="1" Classes="body" Text="{Binding LoadError}" VerticalAlignment="Center" />
+                        <Button Grid.Column="2" Content="{x:Static res:Strings.Retry}" Command="{Binding LoadCommand}" />
+                    </Grid>
+                </Border>
+
+                <StackPanel Classes="empty" IsVisible="{Binding IsEmpty}">
+                    <Border Classes="empty-icon">
+                        <Path Classes="icon" Data="{StaticResource IconWorkspaces}" />
+                    </Border>
+                    <TextBlock Classes="secondary" Text="{x:Static res:Strings.WorkspacesEmptyMessage}" />
                 </StackPanel>
 
-                <TextBlock Classes="body" Text="{x:Static res:Strings.WorkspacesEmptyMessage}" IsVisible="{Binding IsEmpty}" Margin="0,8,0,0" />
-
-                <ItemsControl x:Name="Cards" ItemsSource="{Binding Cards}" Margin="0,8,0,0">
+                <ItemsControl x:Name="Cards" ItemsSource="{Binding Cards}" Margin="0,4,0,0">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <controls:ResponsiveGrid />
@@ -50,22 +65,32 @@
                             <Button Classes="card"
                                     Command="{Binding OpenCommand}"
                                     AutomationProperties.Name="{Binding OpenLabel}">
-                                <Grid RowDefinitions="Auto,*,Auto" RowSpacing="6">
-                                    <TextBlock Classes="card-title" Text="{Binding Name}" ToolTip.Tip="{Binding Name}" />
+                                <Grid RowDefinitions="Auto,*,Auto" RowSpacing="10">
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                        <Border Classes="tile">
+                                            <Path Classes="icon" Data="{StaticResource IconWorkspaces}" />
+                                        </Border>
+                                        <TextBlock Grid.Column="1"
+                                                   Classes="card-title"
+                                                   VerticalAlignment="Center"
+                                                   Text="{Binding Name}"
+                                                   ToolTip.Tip="{Binding Name}" />
+                                    </Grid>
                                     <TextBlock Grid.Row="1"
                                                Classes="secondary"
+                                               FontSize="13"
                                                Text="{Binding Description}"
                                                MaxLines="2"
                                                TextTrimming="CharacterEllipsis" />
-                                    <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="12" Margin="0,8,0,0">
+                                    <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="12">
                                         <StackPanel Spacing="2">
                                             <TextBlock Classes="caption" Text="{Binding ResourceCountText}" />
                                             <TextBlock Classes="caption" Text="{Binding ModifiedText}" TextTrimming="CharacterEllipsis" />
                                         </StackPanel>
-                                        <TextBlock Grid.Column="1"
-                                                   Classes="strong"
-                                                   VerticalAlignment="Bottom"
-                                                   Text="{x:Static res:Strings.Open}" />
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" VerticalAlignment="Bottom">
+                                            <TextBlock Classes="strong accent" FontSize="13" VerticalAlignment="Center" Text="{x:Static res:Strings.Open}" />
+                                            <Path Classes="icon small" Data="{StaticResource IconChevron}" Stroke="{DynamicResource AtlasAccentTextBrush}" />
+                                        </StackPanel>
                                     </Grid>
                                 </Grid>
                             </Button>

@@ -29,6 +29,7 @@ internal static class HistoryTable
         [HistoryAction.VersionRestored] = "version-restored",
         [HistoryAction.WorkspaceRestored] = "workspace-restored",
         [HistoryAction.WorkspaceExported] = "workspace-exported",
+        [HistoryAction.WorkspaceDetected] = "workspace-detected",
     };
 
     private static readonly Dictionary<string, HistoryAction> Actions = Names.ToDictionary(pair => pair.Value, pair => pair.Key);

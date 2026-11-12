@@ -9,4 +9,8 @@
     <ProjectReference Include="..\Atlas.Core\Atlas.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Atlas.Platform.Tests" />
+  </ItemGroup>
+
 </Project>

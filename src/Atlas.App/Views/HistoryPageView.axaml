@@ -7,34 +7,50 @@
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MaxWidth="1144" />
+                <ColumnDefinition Width="*" MaxWidth="1000" />
             </Grid.ColumnDefinitions>
             <StackPanel Classes="page">
-                <TextBlock Classes="page-title" Text="{x:Static res:Strings.HistoryTitle}" />
-                <TextBlock Classes="secondary" MaxWidth="720" HorizontalAlignment="Left" Text="{x:Static res:Strings.HistoryIntro}" />
-
-                <StackPanel Spacing="8" IsVisible="{Binding LoadError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                    <SelectableTextBlock Classes="error" Text="{Binding LoadError}" />
-                    <Button Content="{x:Static res:Strings.Retry}" Command="{Binding LoadCommand}" />
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="page-title" Text="{x:Static res:Strings.HistoryTitle}" />
+                    <TextBlock Classes="secondary" MaxWidth="720" HorizontalAlignment="Left" Text="{x:Static res:Strings.HistoryIntro}" />
                 </StackPanel>
 
-                <TextBlock x:Name="HistoryEmpty" Classes="body" Text="{x:Static res:Strings.HistoryEmpty}" IsVisible="{Binding IsEmpty}" Margin="0,8,0,0" />
+                <Border Classes="infobar error" IsVisible="{Binding LoadError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <Path Classes="icon" Data="{StaticResource IconWarning}" />
+                        <SelectableTextBlock Grid.Column="1" Classes="body" Text="{Binding LoadError}" VerticalAlignment="Center" />
+                        <Button Grid.Column="2" Content="{x:Static res:Strings.Retry}" Command="{Binding LoadCommand}" />
+                    </Grid>
+                </Border>
 
-                <ItemsControl x:Name="HistoryItems" ItemsSource="{Binding Items}" Margin="0,8,0,0">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Spacing="2" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="vm:HistoryItemViewModel">
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24" Margin="0,6">
-                                <SelectableTextBlock Classes="body" Classes.error="{Binding IsProblem}" Text="{Binding Text}" />
-                                <TextBlock Grid.Column="1" Classes="caption" VerticalAlignment="Center" Text="{Binding When}" />
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                <StackPanel Classes="empty" IsVisible="{Binding IsEmpty}">
+                    <Border Classes="empty-icon">
+                        <Path Classes="icon" Data="{StaticResource IconHistory}" />
+                    </Border>
+                    <TextBlock x:Name="HistoryEmpty" Classes="secondary" Text="{x:Static res:Strings.HistoryEmpty}" />
+                </StackPanel>
+
+                <Border Classes="surface" Padding="6" IsVisible="{Binding !IsEmpty}">
+                    <ItemsControl x:Name="HistoryItems" ItemsSource="{Binding Items}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="0" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:HistoryItemViewModel">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14" Margin="10,8">
+                                    <Panel VerticalAlignment="Top" Margin="0,1,0,0">
+                                        <Path Classes="icon small" Data="{StaticResource IconHistory}" IsVisible="{Binding !IsProblem}" />
+                                        <Path Classes="icon small" Data="{StaticResource IconWarning}" Stroke="{DynamicResource AtlasErrorTextBrush}" IsVisible="{Binding IsProblem}" />
+                                    </Panel>
+                                    <SelectableTextBlock Grid.Column="1" Classes="body" Classes.error="{Binding IsProblem}" Text="{Binding Text}" />
+                                    <TextBlock Grid.Column="2" Classes="caption" VerticalAlignment="Top" Margin="0,2,0,0" Text="{Binding When}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
             </StackPanel>
         </Grid>
     </ScrollViewer>

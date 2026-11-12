@@ -1,6 +1,8 @@
 using Atlas.App.Services;
 using Atlas.App.ViewModels;
+using Atlas.Core.Detection;
 using Atlas.Core.History;
+using Atlas.Core.Notifications;
 using Atlas.Core.Resources;
 using Atlas.Core.Restoration;
 using Atlas.Core.Settings;
@@ -11,6 +13,8 @@ using Atlas.Infrastructure.Persistence;
 using Atlas.Infrastructure.Storage;
 using Atlas.Platform;
 using Atlas.Platform.Windows;
+using Atlas.Platform.Windows.Detection;
+using Atlas.Platform.Windows.Notifications;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -40,16 +44,25 @@ internal static class AppComposition
         services.AddSingleton<SettingsService>();
         services.AddSingleton<RestorationService>();
 
-        // Opening resources depends on the operating system. Elsewhere, Atlas says it cannot instead of pretending.
+        services.AddSingleton<IDetectionStore, SqliteDetectionStore>();
+        services.AddSingleton<EnvironmentDetectionService>();
+
+        // Opening resources, reading the session and notifying depend on the operating system. Elsewhere, Atlas says
+        // it cannot instead of pretending.
         if (OperatingSystem.IsWindows())
         {
+            var catalog = new ShellApplicationCatalog();
             services.AddSingleton<IResourceOpener>(new WindowsResourceOpener(new WindowsShell()));
-            services.AddSingleton<IApplicationCatalog, ShellApplicationCatalog>();
+            services.AddSingleton<IApplicationCatalog>(catalog);
+            services.AddSingleton<IWorkObserver>(new WindowsWorkObserver(catalog, ProjectLocator.ForCurrentUser()));
+            services.AddSingleton<IDesktopNotifications>(new WindowsNotifications(InstalledCopy.IsThisCopy()));
         }
         else
         {
             services.AddSingleton<IResourceOpener, UnsupportedResourceOpener>();
             services.AddSingleton<IApplicationCatalog, EmptyApplicationCatalog>();
+            services.AddSingleton<IWorkObserver, NoWorkObserver>();
+            services.AddSingleton<IDesktopNotifications, NoDesktopNotifications>();
         }
 
         services.AddSingleton<MainWindowHost>();
@@ -59,6 +72,7 @@ internal static class AppComposition
         services.AddSingleton<IFilePicker>(provider =>
             new StorageFilePicker(() => provider.GetRequiredService<MainWindowHost>().Window));
 
+        services.AddSingleton<SuggestionCenter>();
         services.AddSingleton<PageServices>();
         services.AddTransient<MainWindowViewModel>();
 

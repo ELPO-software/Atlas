@@ -1,4 +1,5 @@
 using Atlas.Core.History;
+using Atlas.Core.Resources;
 using Atlas.Core.Workspaces;
 
 namespace Atlas.Core.Tests;
@@ -30,6 +31,10 @@ internal sealed class InMemoryWorkspaceRepository : IWorkspaceRepository
 
     public Task<int> CountAsync(CancellationToken cancellationToken = default) =>
         Task.FromResult(_workspaces.Count);
+
+    public Task<IReadOnlyList<(ResourceKind Kind, string Target)>> ListResourceTargetsAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<(ResourceKind Kind, string Target)>>(
+            _workspaces.Values.SelectMany(w => w.Resources).Select(r => (r.Kind, r.Target)).ToList());
 
     public async Task<Workspace?> GetAsync(Guid id, CancellationToken cancellationToken = default)
     {

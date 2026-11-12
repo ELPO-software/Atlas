@@ -20,6 +20,7 @@ internal static class HistoryText
         HistoryAction.VersionSaved => UiText.Format(Strings.HistoryVersionSaved, entry.WorkspaceName, entry.Detail),
         HistoryAction.VersionRestored => UiText.Format(Strings.HistoryVersionRestored, entry.WorkspaceName, entry.Detail),
         HistoryAction.WorkspaceRestored => UiText.Format(Strings.HistoryWorkspaceRestored, entry.WorkspaceName, Counts(entry.Counts)),
+        HistoryAction.WorkspaceDetected => UiText.Format(Strings.HistoryWorkspaceDetected, entry.WorkspaceName),
         _ => UiText.Format(Strings.HistoryWorkspaceExported, entry.WorkspaceName, entry.Detail),
     };
 

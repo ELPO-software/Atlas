@@ -5,68 +5,133 @@
              xmlns:vm="using:Atlas.App.ViewModels"
              x:Class="Atlas.App.Views.SettingsPageView"
              x:DataType="vm:SettingsPageViewModel">
+    <UserControl.Styles>
+        <Style Selector="ToggleSwitch">
+            <Setter Property="OnContent" Value="" />
+            <Setter Property="OffContent" Value="" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </UserControl.Styles>
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MaxWidth="784" />
+                <ColumnDefinition Width="*" MaxWidth="860" />
             </Grid.ColumnDefinitions>
             <StackPanel Classes="page">
                 <TextBlock Classes="page-title" Text="{x:Static res:Strings.SettingsTitle}" />
 
-                <TextBlock Classes="section-title spaced" Text="{x:Static res:Strings.AppearanceTitle}" />
-                <StackPanel Spacing="2">
-                    <RadioButton x:Name="ThemeSystem" GroupName="Theme" Content="{x:Static res:Strings.ThemeSystem}" IsChecked="{Binding IsSystemTheme}" />
-                    <RadioButton x:Name="ThemeLight" GroupName="Theme" Content="{x:Static res:Strings.ThemeLight}" IsChecked="{Binding IsLightTheme}" />
-                    <RadioButton x:Name="ThemeDark" GroupName="Theme" Content="{x:Static res:Strings.ThemeDark}" IsChecked="{Binding IsDarkTheme}" />
-                </StackPanel>
-                <SelectableTextBlock x:Name="ThemeError"
-                                     Classes="error"
-                                     Text="{Binding ThemeError}"
-                                     IsVisible="{Binding ThemeError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-
-                <TextBlock Classes="section-title spaced" Text="{x:Static res:Strings.DataTitle}" />
-                <TextBlock Classes="secondary" Text="{x:Static res:Strings.DataMessage}" />
-                <Border Classes="surface">
-                    <SelectableTextBlock x:Name="DataFolder" Classes="body" Text="{Binding DataFolder}" />
-                </Border>
-                <Button x:Name="OpenDataFolder" Content="{x:Static res:Strings.OpenFolder}" Command="{Binding OpenDataFolderCommand}" />
-                <SelectableTextBlock x:Name="OpenFolderError"
-                                     Classes="error"
-                                     Text="{Binding OpenFolderError}"
-                                     IsVisible="{Binding OpenFolderError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-
-                <TextBlock Classes="section-title spaced" Text="{x:Static res:Strings.AboutTitle}" />
-                <TextBlock x:Name="Version" Classes="secondary" Text="{Binding VersionText}" />
-
-                <Expander HorizontalAlignment="Stretch" Header="{x:Static res:Strings.AtlasLicenseTitle}">
-                    <SelectableTextBlock x:Name="License" Classes="body" FontSize="12" Text="{Binding LicenseText}" />
-                </Expander>
-                <Expander HorizontalAlignment="Stretch" Header="{x:Static res:Strings.ComponentsTitle}">
+                <Border Classes="panel">
                     <StackPanel Spacing="12">
-                    <TextBlock Classes="caption" TextWrapping="Wrap" Text="{x:Static res:Strings.ComponentsNotice}" />
-                    <ItemsControl x:Name="Components" ItemsSource="{Binding Components}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Spacing="6" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="about:ThirdPartyComponent">
-                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="16">
-                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
-                                    <TextBlock Grid.Column="1" Classes="caption" Text="{Binding License}" VerticalAlignment="Center" />
-                                    <Button Grid.Column="2"
-                                            Classes="quiet"
-                                            Content="{x:Static res:Strings.ViewLicense}"
-                                            Command="{Binding $parent[UserControl].((vm:SettingsPageViewModel)DataContext).ShowLicenseCommand}"
-                                            CommandParameter="{Binding}"
-                                            AutomationProperties.Name="{Binding Name, StringFormat={x:Static res:Strings.ViewLicenseLabel}}" />
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                        <TextBlock Classes="section-title" Text="{x:Static res:Strings.AppearanceTitle}" />
+                        <StackPanel Spacing="2">
+                            <RadioButton x:Name="ThemeSystem" GroupName="Theme" Content="{x:Static res:Strings.ThemeSystem}" IsChecked="{Binding IsSystemTheme}" />
+                            <RadioButton x:Name="ThemeLight" GroupName="Theme" Content="{x:Static res:Strings.ThemeLight}" IsChecked="{Binding IsLightTheme}" />
+                            <RadioButton x:Name="ThemeDark" GroupName="Theme" Content="{x:Static res:Strings.ThemeDark}" IsChecked="{Binding IsDarkTheme}" />
+                        </StackPanel>
+                        <SelectableTextBlock x:Name="ThemeError"
+                                             Classes="error"
+                                             Text="{Binding ThemeError}"
+                                             IsVisible="{Binding ThemeError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                     </StackPanel>
-                </Expander>
+                </Border>
+
+                <Border Classes="panel">
+                    <StackPanel Spacing="14">
+                        <TextBlock Classes="section-title" Text="{x:Static res:Strings.DetectionSettingsTitle}" />
+                        <TextBlock Classes="secondary" FontSize="13" Text="{x:Static res:Strings.DetectionSettingsExplain}" />
+
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                            <TextBlock Text="{x:Static res:Strings.DetectionSetting}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                            <ToggleSwitch x:Name="DetectionToggle"
+                                          Grid.Column="1"
+                                          IsChecked="{Binding DetectionEnabled}"
+                                          AutomationProperties.Name="{x:Static res:Strings.DetectionSetting}" />
+                        </Grid>
+                        <Border Classes="separator" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16" IsEnabled="{Binding DetectionEnabled}">
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="{x:Static res:Strings.DetectionNotificationsSetting}" TextWrapping="Wrap" />
+                                <TextBlock x:Name="NotificationsUnavailable"
+                                           Classes="caption"
+                                           TextWrapping="Wrap"
+                                           Text="{x:Static res:Strings.NotificationsUnavailable}"
+                                           IsVisible="{Binding NotificationsUnavailable}" />
+                            </StackPanel>
+                            <ToggleSwitch x:Name="NotificationsToggle"
+                                          Grid.Column="1"
+                                          IsChecked="{Binding DetectionNotifications}"
+                                          AutomationProperties.Name="{x:Static res:Strings.DetectionNotificationsSetting}" />
+                        </Grid>
+                        <Border Classes="separator" />
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Button x:Name="ForgetObservations"
+                                    Content="{x:Static res:Strings.ForgetObservations}"
+                                    Command="{Binding ForgetObservationsCommand}" />
+                            <TextBlock x:Name="DetectionInfo"
+                                       Classes="caption"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding DetectionInfo}"
+                                       IsVisible="{Binding DetectionInfo, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                        </StackPanel>
+                        <SelectableTextBlock x:Name="DetectionError"
+                                             Classes="error"
+                                             Text="{Binding DetectionError}"
+                                             IsVisible="{Binding DetectionError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="panel">
+                    <StackPanel Spacing="12">
+                        <TextBlock Classes="section-title" Text="{x:Static res:Strings.DataTitle}" />
+                        <TextBlock Classes="secondary" FontSize="13" Text="{x:Static res:Strings.DataMessage}" />
+                        <Border Classes="surface">
+                            <SelectableTextBlock x:Name="DataFolder" Classes="body" Text="{Binding DataFolder}" />
+                        </Border>
+                        <Button x:Name="OpenDataFolder" Content="{x:Static res:Strings.OpenFolder}" Command="{Binding OpenDataFolderCommand}" />
+                        <SelectableTextBlock x:Name="OpenFolderError"
+                                             Classes="error"
+                                             Text="{Binding OpenFolderError}"
+                                             IsVisible="{Binding OpenFolderError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="panel">
+                    <StackPanel Spacing="12">
+                        <TextBlock Classes="section-title" Text="{x:Static res:Strings.AboutTitle}" />
+                        <TextBlock x:Name="Version" Classes="secondary" Text="{Binding VersionText}" />
+
+                        <Expander HorizontalAlignment="Stretch" Header="{x:Static res:Strings.AtlasLicenseTitle}">
+                            <SelectableTextBlock x:Name="License" Classes="body" FontSize="12" Text="{Binding LicenseText}" />
+                        </Expander>
+                        <Expander HorizontalAlignment="Stretch" Header="{x:Static res:Strings.ComponentsTitle}">
+                            <StackPanel Spacing="12">
+                                <TextBlock Classes="caption" TextWrapping="Wrap" Text="{x:Static res:Strings.ComponentsNotice}" />
+                                <ItemsControl x:Name="Components" ItemsSource="{Binding Components}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="6" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="about:ThirdPartyComponent">
+                                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="16">
+                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" Classes="caption" Text="{Binding License}" VerticalAlignment="Center" />
+                                                <Button Grid.Column="2"
+                                                        Classes="quiet"
+                                                        Content="{x:Static res:Strings.ViewLicense}"
+                                                        Command="{Binding $parent[UserControl].((vm:SettingsPageViewModel)DataContext).ShowLicenseCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        AutomationProperties.Name="{Binding Name, StringFormat={x:Static res:Strings.ViewLicenseLabel}}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Expander>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </Grid>
     </ScrollViewer>

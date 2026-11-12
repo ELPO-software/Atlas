@@ -4,6 +4,8 @@ using Atlas.App.Resources;
 using Atlas.App.Services;
 using Atlas.App.ViewModels;
 using Atlas.App.Views;
+using Atlas.Core.Detection;
+using Atlas.Core.Notifications;
 using Atlas.Core.Resources;
 using Atlas.Core.Restoration;
 using Atlas.Core.Settings;
@@ -178,6 +180,47 @@ public sealed class WindowTests
         Assert.True(app.Find<RadioButton>("ThemeSystem").IsChecked);
         Assert.Equal(app.Folder.Paths.DataDirectory, app.Find<SelectableTextBlock>("DataFolder").Text);
         Assert.StartsWith("Version ", app.Find<TextBlock>("Version").Text, StringComparison.Ordinal);
+    }
+
+    [AvaloniaFact]
+    public async Task Suggestions_AskFirstThenShowWhatAtlasFound()
+    {
+        await using var app = await RunningApp.StartAsync();
+        const string Root = @"C:\Users\Léa\source\Atlas";
+        app.Observer.Next = new WorkObservation(
+            [new ObservedApplication("Visual Studio Code", @"C:\Programmes\Code.exe", [new ObservedItem(Root, true)])],
+            [],
+            [new ObservedProject(Root, "Atlas", null, null)]);
+
+        app.Click("NavSuggestions");
+        await app.SettleAsync();
+        Assert.True(app.Find<Border>("DetectionInvite").IsVisible);
+        Assert.Equal(0, app.Observer.Observations);
+
+        app.Click("EnableDetection");
+        await app.WaitUntilAsync(() => app.ViewModel.Suggestions.Count == 1);
+        await app.SettleAsync();
+
+        Assert.False(app.Find<Border>("DetectionInvite").IsVisible);
+        var texts = app.Find<ItemsControl>("SuggestionCards").GetVisualDescendants().OfType<TextBlock>().Select(t => t.Text).ToList();
+        Assert.Contains("Atlas", texts);
+        Assert.Contains(Strings.SuggestionDetected, texts);
+        Assert.Contains("Visual Studio Code", texts);
+        Assert.True(app.Find<Border>("SuggestionBadge").IsVisible);
+        Assert.Empty(app.Notifications.Shown);
+    }
+
+    [AvaloniaFact]
+    public async Task Settings_ShowTheDetectionSwitches()
+    {
+        await using var app = await RunningApp.StartAsync();
+
+        app.Click("NavSettings");
+        await app.SettleAsync();
+
+        Assert.False(app.Find<ToggleSwitch>("DetectionToggle").IsChecked);
+        Assert.True(app.Find<ToggleSwitch>("NotificationsToggle").IsChecked);
+        Assert.False(app.Find<TextBlock>("NotificationsUnavailable").IsVisible);
     }
 
     [AvaloniaFact]
@@ -654,17 +697,26 @@ public sealed class WindowTests
 
         public FakeApplicationCatalog Catalog { get; private init; } = new();
 
+        public FakeWorkObserver Observer { get; private init; } = new();
+
+        public FakeDesktopNotifications Notifications { get; private init; } = new();
+
         public static async Task<RunningApp> StartAsync(Func<ServiceProvider, Task>? seed = null)
         {
             var folder = new TemporaryDataFolder();
             var opener = new FakeResourceOpener();
             var catalog = new FakeApplicationCatalog();
+            var observer = new FakeWorkObserver();
+            var notifications = new FakeDesktopNotifications();
 
-            // Nothing a test does may open a file, a folder, a link or a program on this computer.
+            // Nothing a test does may open a file, a folder, a link or a program on this computer, read its windows,
+            // or show a Windows notification.
             var services = AppStartup.Run(folder.Paths, replace =>
             {
                 replace.AddSingleton<IResourceOpener>(opener);
                 replace.AddSingleton<IApplicationCatalog>(catalog);
+                replace.AddSingleton<IWorkObserver>(observer);
+                replace.AddSingleton<IDesktopNotifications>(notifications);
             }).Services ?? throw new InvalidOperationException("Atlas did not start.");
 
             if (seed is not null)
@@ -675,7 +727,7 @@ public sealed class WindowTests
             services.GetRequiredService<MainWindowHost>().Window = window;
             window.Show();
 
-            var app = new RunningApp(folder, services, viewModel, window) { Opener = opener, Catalog = catalog };
+            var app = new RunningApp(folder, services, viewModel, window) { Opener = opener, Catalog = catalog, Observer = observer, Notifications = notifications };
             await viewModel.InitializeAsync();
             await app.SettleAsync();
             return app;

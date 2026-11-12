@@ -1,5 +1,9 @@
 using Atlas.App.ViewModels;
+using Atlas.Platform;
+using Avalonia;
+using Avalonia.Animation;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 
 namespace Atlas.App.Views;
@@ -13,6 +17,13 @@ public sealed partial class MainWindow : Window
     {
         InitializeComponent();
         WindowChrome.MatchTitleBarToTheme(this);
+
+        // A short fade between pages, unless the user turned animations off in Windows. Tests run without it, so that
+        // a page never shares the screen with the one it replaces.
+        var isDesktop = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime;
+        PageHost.PageTransition = isDesktop && SystemMotion.AnimationsEnabled()
+            ? new CrossFade(TimeSpan.FromMilliseconds(140))
+            : null;
     }
 
     protected override void OnClosing(WindowClosingEventArgs e)

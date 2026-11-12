@@ -50,6 +50,25 @@ public sealed class SqliteWorkspaceRepository(SqliteDatabase database) : IWorksp
             },
             cancellationToken);
 
+    public Task<IReadOnlyList<(ResourceKind Kind, string Target)>> ListResourceTargetsAsync(CancellationToken cancellationToken = default) =>
+        database.RunAsync<IReadOnlyList<(ResourceKind Kind, string Target)>>(
+            connection =>
+            {
+                using var command = connection.CreateCommand();
+                command.CommandText = "SELECT kind, target FROM resources";
+
+                using var reader = command.ExecuteReader();
+                var targets = new List<(ResourceKind Kind, string Target)>();
+                while (reader.Read())
+                {
+                    if (ResourceKind.TryParse(reader.GetString(0), out var kind))
+                        targets.Add((kind, reader.GetString(1)));
+                }
+
+                return targets;
+            },
+            cancellationToken);
+
     public Task<Workspace?> GetAsync(Guid id, CancellationToken cancellationToken = default) =>
         database.RunAsync(
             connection =>

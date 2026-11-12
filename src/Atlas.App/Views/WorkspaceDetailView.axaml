@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:Atlas.App.Controls"
              xmlns:res="using:Atlas.App.Resources"
              xmlns:vm="using:Atlas.App.ViewModels"
              x:Class="Atlas.App.Views.WorkspaceDetailView"
@@ -7,27 +8,32 @@
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MaxWidth="1144" />
+                <ColumnDefinition Width="*" MaxWidth="1000" />
             </Grid.ColumnDefinitions>
             <StackPanel Classes="page">
                 <Button x:Name="Back"
                         Classes="quiet"
                         Margin="-8,0,0,0"
+                        HorizontalAlignment="Left"
                         Command="{Binding BackCommand}"
                         AutomationProperties.Name="{x:Static res:Strings.BackToWorkspaces}">
                     <StackPanel Orientation="Horizontal" Spacing="4">
-                        <Path Classes="icon" Data="{StaticResource IconBack}" />
-                        <TextBlock Classes="secondary" Text="{x:Static res:Strings.BackToWorkspaces}" VerticalAlignment="Center" />
+                        <Path Classes="icon small" Data="{StaticResource IconBack}" />
+                        <TextBlock Classes="secondary" FontSize="13" Text="{x:Static res:Strings.BackToWorkspaces}" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
 
-                <SelectableTextBlock x:Name="LoadError"
-                                     Classes="error"
-                                     Text="{Binding LoadError}"
-                                     IsVisible="{Binding LoadError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                <Border Classes="infobar error" IsVisible="{Binding LoadError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <Path Classes="icon" Data="{StaticResource IconWarning}" />
+                        <SelectableTextBlock x:Name="LoadError" Grid.Column="1" Classes="body" Text="{Binding LoadError}" />
+                    </Grid>
+                </Border>
 
-                <StackPanel Spacing="12" IsVisible="{Binding IsLoaded}">
-                    <StackPanel Spacing="4">
+                <ProgressBar Classes="thin" IsIndeterminate="True" IsVisible="{Binding IsLoading}" />
+
+                <StackPanel Spacing="16" IsVisible="{Binding IsLoaded}">
+                    <StackPanel Spacing="6">
                         <SelectableTextBlock x:Name="WorkspaceName" Classes="page-title" Text="{Binding Name}" />
                         <SelectableTextBlock x:Name="WorkspaceDescription"
                                              Classes="secondary"
@@ -35,37 +41,53 @@
                                              HorizontalAlignment="Left"
                                              Text="{Binding Description}"
                                              IsVisible="{Binding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                        <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,4,0,0">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock Classes="caption" Text="{Binding CreatedText}" />
+                            <TextBlock Classes="caption" Text="·" />
                             <TextBlock x:Name="ModifiedDate" Classes="caption" Text="{Binding ModifiedText}" />
                         </StackPanel>
                     </StackPanel>
 
-                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                    <WrapPanel Orientation="Horizontal">
                         <Button x:Name="RestoreWorkspace"
                                 Classes="primary"
-                                Content="{x:Static res:Strings.Restore}"
+                                Margin="0,0,8,8"
                                 Command="{Binding RestoreCommand}"
-                                IsEnabled="{Binding CanRestore}" />
-                        <Button x:Name="EditWorkspace" Content="{x:Static res:Strings.Edit}" Command="{Binding EditCommand}" IsEnabled="{Binding CanChange}" />
-                        <Button x:Name="DuplicateWorkspace" Content="{x:Static res:Strings.Duplicate}" Command="{Binding DuplicateCommand}" IsEnabled="{Binding CanChange}" />
-                        <Button x:Name="ExportWorkspace" Content="{x:Static res:Strings.Export}" Command="{Binding ExportCommand}" IsEnabled="{Binding CanChange}" />
-                        <Button x:Name="DeleteWorkspace" Classes="danger-text" Content="{x:Static res:Strings.Delete}" Command="{Binding DeleteCommand}" IsEnabled="{Binding CanChange}" />
-                    </StackPanel>
+                                IsEnabled="{Binding CanRestore}"
+                                AutomationProperties.Name="{x:Static res:Strings.Restore}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Path Classes="icon small" Data="{StaticResource IconPlay}" />
+                                <TextBlock Text="{x:Static res:Strings.Restore}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="EditWorkspace" Margin="0,0,8,8" Content="{x:Static res:Strings.Edit}" Command="{Binding EditCommand}" IsEnabled="{Binding CanChange}" />
+                        <Button x:Name="DuplicateWorkspace" Margin="0,0,8,8" Content="{x:Static res:Strings.Duplicate}" Command="{Binding DuplicateCommand}" IsEnabled="{Binding CanChange}" />
+                        <Button x:Name="ExportWorkspace" Margin="0,0,8,8" Command="{Binding ExportCommand}" IsEnabled="{Binding CanChange}" AutomationProperties.Name="{x:Static res:Strings.Export}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Path Classes="icon small" Data="{StaticResource IconExport}" />
+                                <TextBlock Text="{x:Static res:Strings.Export}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="DeleteWorkspace" Margin="0,0,8,8" Classes="danger-text" Content="{x:Static res:Strings.Delete}" Command="{Binding DeleteCommand}" IsEnabled="{Binding CanChange}" />
+                    </WrapPanel>
 
-                    <SelectableTextBlock x:Name="ActionError"
-                                         Classes="error"
-                                         Text="{Binding ActionError}"
-                                         IsVisible="{Binding ActionError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    <Border Classes="infobar error" IsVisible="{Binding ActionError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <Path Classes="icon" Data="{StaticResource IconWarning}" />
+                            <SelectableTextBlock x:Name="ActionError" Grid.Column="1" Classes="body" Text="{Binding ActionError}" />
+                        </Grid>
+                    </Border>
 
-                    <SelectableTextBlock x:Name="ActionInfo"
-                                         Classes="secondary"
-                                         Text="{Binding ActionInfo}"
-                                         IsVisible="{Binding ActionInfo, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    <Border Classes="infobar success" IsVisible="{Binding ActionInfo, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <Path Classes="icon" Data="{StaticResource IconCheck}" />
+                            <SelectableTextBlock x:Name="ActionInfo" Grid.Column="1" Classes="body" Text="{Binding ActionInfo}" />
+                        </Grid>
+                    </Border>
 
-                    <Border x:Name="RestoreProgress" Classes="surface" IsVisible="{Binding IsRestoring}">
+                    <Border x:Name="RestoreProgress" Classes="panel" IsVisible="{Binding IsRestoring}">
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                            <StackPanel Spacing="8">
+                            <StackPanel Spacing="10">
                                 <TextBlock x:Name="RestoreProgressText" Text="{Binding RestoreProgressText}" TextTrimming="CharacterEllipsis" />
                                 <ProgressBar Minimum="0" Maximum="{Binding RestoreTotal}" Value="{Binding RestoreCompleted}" />
                             </StackPanel>
@@ -77,11 +99,11 @@
                         </Grid>
                     </Border>
 
-                    <Border x:Name="RestoreReport" Classes="surface" Padding="16" IsVisible="{Binding HasReport}">
-                        <StackPanel Spacing="12">
+                    <Border x:Name="RestoreReport" Classes="panel" IsVisible="{Binding HasReport}">
+                        <StackPanel Spacing="14">
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
                                 <StackPanel Spacing="2">
-                                    <TextBlock x:Name="ReportTitle" Classes="strong" FontSize="16" Text="{Binding Report.Title}" />
+                                    <TextBlock x:Name="ReportTitle" Classes="section-title" Text="{Binding Report.Title}" />
                                     <TextBlock x:Name="ReportSummary" Classes="secondary" Text="{Binding Report.Summary}" />
                                 </StackPanel>
                                 <Button Grid.Column="1"
@@ -103,11 +125,9 @@
                                                 <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
                                                 <TextBlock Classes="caption" Text="{Binding Detail}" TextWrapping="Wrap" IsVisible="{Binding HasDetail}" />
                                             </StackPanel>
-                                            <TextBlock Grid.Column="1"
-                                                       Classes="strong"
-                                                       Classes.error="{Binding IsProblem}"
-                                                       VerticalAlignment="Top"
-                                                       Text="{Binding Status}" />
+                                            <Border Grid.Column="1" Classes="chip success" Classes.success="{Binding !IsProblem}" Classes.warning="{Binding IsProblem}" VerticalAlignment="Top">
+                                                <TextBlock Text="{Binding Status}" />
+                                            </Border>
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
@@ -116,13 +136,18 @@
                         </StackPanel>
                     </Border>
 
-                    <Grid ColumnDefinitions="*,Auto" Margin="0,16,0,0">
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,12,0,0">
                         <TextBlock Classes="section-title" VerticalAlignment="Center" Text="{x:Static res:Strings.ResourcesTitle}" />
                         <Button x:Name="AddResource"
                                 Grid.Column="1"
-                                Content="{x:Static res:Strings.AddResource}"
                                 Command="{Binding AddResourceCommand}"
-                                IsEnabled="{Binding CanChange}" />
+                                IsEnabled="{Binding CanChange}"
+                                AutomationProperties.Name="{x:Static res:Strings.AddResource}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Path Classes="icon small" Data="{StaticResource IconPlus}" />
+                                <TextBlock Text="{x:Static res:Strings.AddResource}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
                     </Grid>
                     <TextBlock x:Name="NoResources"
                                Classes="secondary"
@@ -131,47 +156,54 @@
                     <ItemsControl x:Name="ResourceGroups" ItemsSource="{Binding ResourceGroups}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:ResourceGroupViewModel">
-                                <StackPanel Spacing="6" Margin="0,0,0,12">
-                                    <TextBlock Classes="strong" Text="{Binding Title}" />
-                                    <Border Classes="surface">
+                                <StackPanel Spacing="8" Margin="0,0,0,14">
+                                    <TextBlock Classes="eyebrow" Text="{Binding Title}" />
+                                    <Border Classes="surface" Padding="6">
                                         <ItemsControl ItemsSource="{Binding Items}">
                                             <ItemsControl.ItemsPanel>
                                                 <ItemsPanelTemplate>
-                                                    <StackPanel Spacing="10" />
+                                                    <StackPanel Spacing="2" />
                                                 </ItemsPanelTemplate>
                                             </ItemsControl.ItemsPanel>
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate x:DataType="vm:ResourceItemViewModel">
-                                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                                                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Margin="8,6">
+                                                        <Border Classes="tile" Width="32" Height="32">
+                                                            <Path Classes="icon small" Data="{Binding Kind, Converter={x:Static controls:ResourceIcons.Geometry}}" />
+                                                        </Border>
+                                                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                                                             <StackPanel Orientation="Horizontal" Spacing="8">
                                                                 <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
-                                                                <TextBlock Classes="caption strong"
-                                                                           VerticalAlignment="Center"
-                                                                           Text="{x:Static res:Strings.NeedsApprovalBadge}"
-                                                                           IsVisible="{Binding NeedsApproval}" />
+                                                                <Border Classes="chip warning" IsVisible="{Binding NeedsApproval}">
+                                                                    <TextBlock Text="{x:Static res:Strings.NeedsApprovalBadge}" />
+                                                                </Border>
                                                             </StackPanel>
                                                             <TextBlock Classes="caption"
                                                                        Text="{Binding Target}"
-                                                                       TextTrimming="CharacterEllipsis"
+                                                                       TextTrimming="PathSegmentEllipsis"
                                                                        ToolTip.Tip="{Binding Target}" />
                                                         </StackPanel>
-                                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
                                                             <Button Content="{x:Static res:Strings.Approve}"
+                                                                    Margin="0,0,6,0"
                                                                     Command="{Binding ApproveCommand}"
                                                                     IsVisible="{Binding NeedsApproval}"
                                                                     IsEnabled="{Binding $parent[UserControl].((vm:WorkspaceDetailViewModel)DataContext).CanChange}"
                                                                     AutomationProperties.Name="{Binding ApproveLabel}" />
-                                                            <Button Classes="quiet"
-                                                                    Content="{x:Static res:Strings.Edit}"
+                                                            <Button Classes="icon-button"
                                                                     Command="{Binding EditCommand}"
                                                                     IsEnabled="{Binding $parent[UserControl].((vm:WorkspaceDetailViewModel)DataContext).CanChange}"
-                                                                    AutomationProperties.Name="{Binding EditLabel}" />
-                                                            <Button Classes="quiet"
-                                                                    Content="{x:Static res:Strings.Remove}"
+                                                                    ToolTip.Tip="{x:Static res:Strings.Edit}"
+                                                                    AutomationProperties.Name="{Binding EditLabel}">
+                                                                <Path Classes="icon small" Data="{StaticResource IconEdit}" />
+                                                            </Button>
+                                                            <Button Classes="icon-button"
                                                                     Command="{Binding RemoveCommand}"
                                                                     IsEnabled="{Binding $parent[UserControl].((vm:WorkspaceDetailViewModel)DataContext).CanChange}"
-                                                                    AutomationProperties.Name="{Binding RemoveLabel}" />
+                                                                    ToolTip.Tip="{x:Static res:Strings.Remove}"
+                                                                    AutomationProperties.Name="{Binding RemoveLabel}">
+                                                                <Path Classes="icon small" Data="{StaticResource IconRemove}" />
+                                                            </Button>
                                                         </StackPanel>
                                                     </Grid>
                                                 </DataTemplate>
@@ -183,7 +215,7 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
-                    <Grid ColumnDefinitions="*,Auto" Margin="0,16,0,0">
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,12,0,0">
                         <TextBlock Classes="section-title" Text="{x:Static res:Strings.NotesTitle}" />
                         <TextBlock x:Name="NotesStatus"
                                    Grid.Column="1"
@@ -199,12 +231,15 @@
                              MaxHeight="480"
                              PlaceholderText="{x:Static res:Strings.NotesPlaceholder}"
                              AutomationProperties.Name="{x:Static res:Strings.NotesTitle}" />
-                    <StackPanel Spacing="8" IsVisible="{Binding NotesError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                        <SelectableTextBlock x:Name="NotesError" Classes="error" Text="{Binding NotesError}" />
-                        <Button Content="{x:Static res:Strings.Retry}" Command="{Binding RetrySaveNotesCommand}" />
-                    </StackPanel>
+                    <Border Classes="infobar error" IsVisible="{Binding NotesError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <Path Classes="icon" Data="{StaticResource IconWarning}" />
+                            <SelectableTextBlock x:Name="NotesError" Grid.Column="1" Classes="body" Text="{Binding NotesError}" VerticalAlignment="Center" />
+                            <Button Grid.Column="2" Content="{x:Static res:Strings.Retry}" Command="{Binding RetrySaveNotesCommand}" />
+                        </Grid>
+                    </Border>
 
-                    <Grid ColumnDefinitions="*,Auto" Margin="0,16,0,0">
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,12,0,0">
                         <TextBlock Classes="section-title" VerticalAlignment="Center" Text="{x:Static res:Strings.VersionsTitle}" />
                         <Button x:Name="SaveVersion"
                                 Grid.Column="1"
@@ -220,17 +255,20 @@
                                          Classes="error"
                                          Text="{Binding VersionsError}"
                                          IsVisible="{Binding VersionsError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                    <Border Classes="surface" IsVisible="{Binding !HasNoVersions}">
+                    <Border Classes="surface" Padding="6" IsVisible="{Binding !HasNoVersions}">
                         <ItemsControl x:Name="Versions" ItemsSource="{Binding Versions}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <StackPanel Spacing="10" />
+                                    <StackPanel Spacing="2" />
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:VersionItemViewModel">
-                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Margin="8,6">
+                                        <Border Classes="tile" Width="32" Height="32">
+                                            <Path Classes="icon small" Data="{StaticResource IconHistory}" />
+                                        </Border>
+                                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}" />
                                             <StackPanel Orientation="Horizontal" Spacing="12">
                                                 <TextBlock Classes="caption" Text="{Binding SavedText}" />
@@ -238,7 +276,7 @@
                                                 <TextBlock Classes="caption" Text="{x:Static res:Strings.AutomaticVersion}" IsVisible="{Binding IsAutomatic}" />
                                             </StackPanel>
                                         </StackPanel>
-                                        <Button Grid.Column="1"
+                                        <Button Grid.Column="2"
                                                 Classes="quiet"
                                                 VerticalAlignment="Center"
                                                 Content="{x:Static res:Strings.RestoreVersion}"

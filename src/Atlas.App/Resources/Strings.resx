@@ -817,4 +817,229 @@ Fichier : {0}</value>
 
 Dossier : {0}</value>
   </data>
+  <data name="NavSuggestions" xml:space="preserve">
+    <value>Suggestions</value>
+  </data>
+  <data name="SuggestionsTitle" xml:space="preserve">
+    <value>Suggestions</value>
+  </data>
+  <data name="SuggestionsIntro" xml:space="preserve">
+    <value>Atlas repère les projets et les ensembles d&apos;applications que vous utilisez, et vous propose de les enregistrer comme espaces de travail. Rien n&apos;est enregistré sans votre accord, et rien ne quitte cet ordinateur.</value>
+  </data>
+  <data name="SuggestionKindProject" xml:space="preserve">
+    <value>Projet</value>
+  </data>
+  <data name="SuggestionKindContext" xml:space="preserve">
+    <value>Contexte récurrent</value>
+  </data>
+  <data name="SuggestionDetected" xml:space="preserve">
+    <value>Détecté</value>
+  </data>
+  <data name="SuggestionProbable" xml:space="preserve">
+    <value>Probable · à vérifier</value>
+  </data>
+  <data name="SuggestionWhyContext" xml:space="preserve">
+    <value>Ces éléments étaient ouverts ensemble sur {0} jours différents.</value>
+  </data>
+  <data name="SuggestionWhyOpenIn" xml:space="preserve">
+    <value>Ouvert dans {0}.</value>
+  </data>
+  <data name="SuggestionWhyExplorer" xml:space="preserve">
+    <value>Vu seulement dans l&apos;Explorateur de fichiers : aucune application ne l&apos;a ouvert pour l&apos;instant.</value>
+  </data>
+  <data name="SuggestionContextTitle" xml:space="preserve">
+    <value>Contexte : {0}</value>
+  </data>
+  <data name="SummaryOneFolder" xml:space="preserve">
+    <value>le dossier</value>
+  </data>
+  <data name="SummaryFolders" xml:space="preserve">
+    <value>{0} dossiers</value>
+  </data>
+  <data name="SummaryOtherApplications" xml:space="preserve">
+    <value>{0} autres applications</value>
+  </data>
+  <data name="SummaryOneFile" xml:space="preserve">
+    <value>1 fichier</value>
+  </data>
+  <data name="SummaryFiles" xml:space="preserve">
+    <value>{0} fichiers</value>
+  </data>
+  <data name="SummaryOneLink" xml:space="preserve">
+    <value>1 lien</value>
+  </data>
+  <data name="SummaryLinks" xml:space="preserve">
+    <value>{0} liens</value>
+  </data>
+  <data name="ListAnd" xml:space="preserve">
+    <value>{0} et {1}</value>
+  </data>
+  <data name="ReasonProjectFolder" xml:space="preserve">
+    <value>Dossier du projet</value>
+  </data>
+  <data name="ReasonEntryFile" xml:space="preserve">
+    <value>Ouvre le projet dans son outil</value>
+  </data>
+  <data name="ReasonRepository" xml:space="preserve">
+    <value>Dépôt en ligne du projet</value>
+  </data>
+  <data name="ReasonOpenInApplication" xml:space="preserve">
+    <value>Ouvert dans une application</value>
+  </data>
+  <data name="ReasonOpenInExplorer" xml:space="preserve">
+    <value>Ouvert dans l&apos;Explorateur</value>
+  </data>
+  <data name="ReasonRunningApplication" xml:space="preserve">
+    <value>Application ouverte</value>
+  </data>
+  <data name="NotificationDetectedTitle" xml:space="preserve">
+    <value>Nouvel environnement détecté</value>
+  </data>
+  <data name="NotificationDetectedMessage" xml:space="preserve">
+    <value>Atlas a identifié un environnement de travail : {0} ({1}). Souhaitez-vous enregistrer cette configuration ?</value>
+  </data>
+  <data name="NotificationProbableTitle" xml:space="preserve">
+    <value>Environnement de travail possible</value>
+  </data>
+  <data name="NotificationProbableMessage" xml:space="preserve">
+    <value>Atlas pense avoir repéré un environnement : {0} ({1}). Vérifiez-le avant de l&apos;enregistrer.</value>
+  </data>
+  <data name="SuggestionSave" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="SuggestionReview" xml:space="preserve">
+    <value>Vérifier</value>
+  </data>
+  <data name="SuggestionLater" xml:space="preserve">
+    <value>Plus tard</value>
+  </data>
+  <data name="SuggestionIgnore" xml:space="preserve">
+    <value>Ignorer</value>
+  </data>
+  <data name="SuggestionSaveLabel" xml:space="preserve">
+    <value>Enregistrer {0}</value>
+  </data>
+  <data name="SuggestionNothingSelected" xml:space="preserve">
+    <value>Gardez au moins un élément pour enregistrer cet environnement.</value>
+  </data>
+  <data name="SuggestionSnoozedUntil" xml:space="preserve">
+    <value>Reportée : Atlas vous la reproposera {0}.</value>
+  </data>
+  <data name="SuggestionNameLabel" xml:space="preserve">
+    <value>Nom de l&apos;espace de travail</value>
+  </data>
+  <data name="SuggestionResourcesLabel" xml:space="preserve">
+    <value>Éléments à garder</value>
+  </data>
+  <data name="KeepResourceLabel" xml:space="preserve">
+    <value>Garder {0}</value>
+  </data>
+  <data name="IgnoredSuggestionsTitle" xml:space="preserve">
+    <value>Suggestions ignorées ({0})</value>
+  </data>
+  <data name="RestoreSuggestion" xml:space="preserve">
+    <value>Ne plus ignorer</value>
+  </data>
+  <data name="RestoreSuggestionLabel" xml:space="preserve">
+    <value>Ne plus ignorer {0}</value>
+  </data>
+  <data name="ScanNow" xml:space="preserve">
+    <value>Analyser maintenant</value>
+  </data>
+  <data name="ScanInProgress" xml:space="preserve">
+    <value>Analyse en cours…</value>
+  </data>
+  <data name="LastScan" xml:space="preserve">
+    <value>Dernière analyse {0}</value>
+  </data>
+  <data name="ScanNotYet" xml:space="preserve">
+    <value>Aucune analyse pour l&apos;instant</value>
+  </data>
+  <data name="ScanFailedMessage" xml:space="preserve">
+    <value>Atlas n&apos;a pas pu observer la session. Le détail est dans le journal : {0}</value>
+  </data>
+  <data name="SuggestionsEmptyTitle" xml:space="preserve">
+    <value>Aucune suggestion pour l&apos;instant</value>
+  </data>
+  <data name="SuggestionsEmptyText" xml:space="preserve">
+    <value>Ouvrez un projet dans Visual Studio Code ou Visual Studio, ou son dossier dans l&apos;Explorateur : Atlas vous le proposera ici. Les ensembles d&apos;applications que vous ouvrez souvent ensemble apparaissent après quelques jours.</value>
+  </data>
+  <data name="DetectionInviteTitle" xml:space="preserve">
+    <value>Laissez Atlas repérer vos environnements</value>
+  </data>
+  <data name="DetectionInviteText" xml:space="preserve">
+    <value>Atlas peut regarder les applications ouvertes, les dossiers ouverts dans l&apos;Explorateur et les projets ouverts dans Visual Studio Code ou Visual Studio, pour vous proposer de les enregistrer. Il ne lit pas le contenu de vos fichiers, ne garde rien sans votre accord, et rien ne quitte cet ordinateur.</value>
+  </data>
+  <data name="EnableDetection" xml:space="preserve">
+    <value>Activer la détection</value>
+  </data>
+  <data name="NotNow" xml:space="preserve">
+    <value>Pas maintenant</value>
+  </data>
+  <data name="DetectionOffTitle" xml:space="preserve">
+    <value>La détection est désactivée</value>
+  </data>
+  <data name="DetectionOffText" xml:space="preserve">
+    <value>Atlas n&apos;observe rien. Vous pouvez la réactiver ici ou dans les paramètres.</value>
+  </data>
+  <data name="DetectionSettingsTitle" xml:space="preserve">
+    <value>Détection de l&apos;environnement</value>
+  </data>
+  <data name="DetectionSetting" xml:space="preserve">
+    <value>Proposer les environnements détectés</value>
+  </data>
+  <data name="DetectionNotificationsSetting" xml:space="preserve">
+    <value>Proposer par une notification Windows</value>
+  </data>
+  <data name="DetectionSettingsExplain" xml:space="preserve">
+    <value>Atlas regarde les applications ouvertes, les dossiers ouverts dans l&apos;Explorateur et les projets ouverts dans Visual Studio Code ou Visual Studio. Il ne lit pas le contenu de vos fichiers, et rien ne quitte cet ordinateur.</value>
+  </data>
+  <data name="NotificationsUnavailable" xml:space="preserve">
+    <value>Les notifications Windows sont réservées à un Atlas installé. Les suggestions restent visibles dans Atlas.</value>
+  </data>
+  <data name="ForgetObservations" xml:space="preserve">
+    <value>Oublier les observations</value>
+  </data>
+  <data name="ForgetObservationsTitle" xml:space="preserve">
+    <value>Oublier les observations ?</value>
+  </data>
+  <data name="ForgetObservationsMessage" xml:space="preserve">
+    <value>Atlas oubliera les suggestions en attente et celles que vous avez ignorées. Vos espaces de travail ne changent pas.</value>
+  </data>
+  <data name="ForgetConfirm" xml:space="preserve">
+    <value>Oublier</value>
+  </data>
+  <data name="ObservationsForgotten" xml:space="preserve">
+    <value>Atlas a oublié ses observations.</value>
+  </data>
+  <data name="SuggestionsWaitingOne" xml:space="preserve">
+    <value>1 suggestion vous attend</value>
+  </data>
+  <data name="SuggestionsWaitingMany" xml:space="preserve">
+    <value>{0} suggestions vous attendent</value>
+  </data>
+  <data name="ViewSuggestions" xml:space="preserve">
+    <value>Voir les suggestions</value>
+  </data>
+  <data name="HistoryWorkspaceDetected" xml:space="preserve">
+    <value>Espace « {0} » créé depuis une suggestion</value>
+  </data>
+  <data name="WhenToday" xml:space="preserve">
+    <value>à {0}</value>
+  </data>
+  <data name="WhenYesterday" xml:space="preserve">
+    <value>hier à {0}</value>
+  </data>
+  <data name="WhenTomorrow" xml:space="preserve">
+    <value>demain à {0}</value>
+  </data>
+  <data name="WhenOn" xml:space="preserve">
+    <value>le {0} à {1}</value>
+  </data>
+  <data name="NavSuggestionsWithCount" xml:space="preserve">
+    <value>Suggestions, {0} en attente</value>
+  </data>
+  <data name="Publisher" xml:space="preserve">
+    <value>ELPO software</value>
+  </data>
 </root>

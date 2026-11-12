@@ -20,6 +20,7 @@ public sealed record PageServices(
     IFilePicker Files,
     IThemeController Theme,
     IFolderOpener Folders,
+    SuggestionCenter Suggestions,
     AtlasDataPaths Paths,
     TimeProvider Time,
     ILoggerFactory Loggers);

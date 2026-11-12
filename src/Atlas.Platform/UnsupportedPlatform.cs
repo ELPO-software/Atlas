@@ -1,3 +1,4 @@
+using Atlas.Core.Detection;
 using Atlas.Core.Resources;
 using Atlas.Core.Restoration;
 
@@ -14,4 +15,11 @@ public sealed class EmptyApplicationCatalog : IApplicationCatalog
 {
     public Task<IReadOnlyList<InstalledApplication>> ListAsync(CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyList<InstalledApplication>>([]);
+}
+
+/// <summary>Observes nothing, on systems where Atlas cannot read the session yet.</summary>
+public sealed class NoWorkObserver : IWorkObserver
+{
+    public Task<WorkObservation> ObserveAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult(WorkObservation.Empty);
 }

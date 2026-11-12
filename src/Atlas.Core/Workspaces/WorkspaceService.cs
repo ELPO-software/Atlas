@@ -32,6 +32,30 @@ public sealed class WorkspaceService(IWorkspaceRepository repository, TimeProvid
         return workspace;
     }
 
+    /// <summary>
+    /// Creates a workspace from an environment Atlas detected and the user chose to save, with the resources they kept.
+    /// Every resource is checked as if the user had added it by hand.
+    /// </summary>
+    public async Task<Workspace> CreateFromDetectionAsync(
+        string? name,
+        IReadOnlyList<(ResourceKind Kind, string DisplayName, string Target)> resources,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(resources);
+
+        var now = timeProvider.GetUtcNow();
+        var workspace = Workspace.Create(name, string.Empty, now);
+        foreach (var (kind, displayName, target) in resources)
+            workspace.AddResource(kind, displayName, target, now);
+
+        await repository.AddAsync(workspace, Record(now, HistoryAction.WorkspaceDetected, workspace), cancellationToken);
+        return workspace;
+    }
+
+    /// <summary>The type and target of every resource of every workspace, to recognize what the user already keeps.</summary>
+    public Task<IReadOnlyList<(ResourceKind Kind, string Target)>> ListResourceTargetsAsync(CancellationToken cancellationToken = default) =>
+        repository.ListResourceTargetsAsync(cancellationToken);
+
     /// <param name="source">Where the workspace comes from, such as the file name, for the history.</param>
     public async Task<Workspace> ImportAsync(ImportPlan plan, string source, CancellationToken cancellationToken = default)
     {

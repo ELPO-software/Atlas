@@ -39,10 +39,11 @@ public sealed partial class WorkspaceDetailViewModel(
     private int _versionCount;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanRestore))]
+    [NotifyPropertyChangedFor(nameof(CanRestore), nameof(IsLoading))]
     public partial bool IsLoaded { get; private set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsLoading))]
     public partial string? LoadError { get; private set; }
 
     [ObservableProperty]
@@ -106,6 +107,9 @@ public sealed partial class WorkspaceDetailViewModel(
     public bool HasNoResources => ResourceGroups.Count == 0;
 
     public bool CanRestore => IsLoaded && !HasNoResources && !IsRestoring;
+
+    /// <summary>True while the workspace is being read, for the progress line.</summary>
+    public bool IsLoading => !IsLoaded && LoadError is null;
 
     /// <summary>The workspace cannot change while it is being restored.</summary>
     public bool CanChange => !IsRestoring;

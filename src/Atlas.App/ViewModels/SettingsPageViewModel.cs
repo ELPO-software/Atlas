@@ -1,6 +1,7 @@
 using System.Reflection;
 using Atlas.App.About;
 using Atlas.App.Resources;
+using Atlas.App.Services;
 using Atlas.App.Text;
 using Atlas.Core.Settings;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -15,6 +16,7 @@ public sealed partial class SettingsPageViewModel(PageServices services) : PageV
 
     private readonly ILogger _logger = services.Loggers.CreateLogger<SettingsPageViewModel>();
     private bool _isShowingStoredTheme;
+    private bool _isShowingDetection;
 
     [ObservableProperty]
     public partial bool IsSystemTheme { get; set; }
@@ -31,6 +33,24 @@ public sealed partial class SettingsPageViewModel(PageServices services) : PageV
     [ObservableProperty]
     public partial string? OpenFolderError { get; private set; }
 
+    [ObservableProperty]
+    public partial bool DetectionEnabled { get; set; }
+
+    [ObservableProperty]
+    public partial bool DetectionNotifications { get; set; }
+
+    [ObservableProperty]
+    public partial string? DetectionError { get; private set; }
+
+    [ObservableProperty]
+    public partial string? DetectionInfo { get; private set; }
+
+    /// <summary>True for a copy of Atlas that cannot show Windows notifications, such as the portable one.</summary>
+    public bool NotificationsUnavailable => !services.Suggestions.DesktopNotificationsAvailable;
+
+    /// <summary>The detection change being stored, if any. Lets tests wait for it.</summary>
+    internal Task PendingDetectionSave { get; private set; } = Task.CompletedTask;
+
     public string DataFolder => services.Paths.DataDirectory;
 
     public string VersionText { get; } = UiText.Format(Strings.VersionFormat, ReadVersion());
@@ -44,6 +64,11 @@ public sealed partial class SettingsPageViewModel(PageServices services) : PageV
 
     public override async Task LoadAsync()
     {
+        _isShowingDetection = true;
+        DetectionEnabled = services.Suggestions.IsEnabled == true;
+        DetectionNotifications = services.Suggestions.NotificationsEnabled;
+        _isShowingDetection = false;
+
         ThemeError = null;
         try
         {
@@ -66,6 +91,47 @@ public sealed partial class SettingsPageViewModel(PageServices services) : PageV
     private async Task OpenDataFolderAsync()
     {
         OpenFolderError = await services.Folders.OpenAsync(DataFolder) ? null : Strings.OpenFolderFailed;
+    }
+
+    /// <summary>Forgets what Atlas observed, after the user confirms. Workspaces never change.</summary>
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    private async Task ForgetObservationsAsync()
+    {
+        DetectionInfo = null;
+        var confirmed = await services.Dialogs.ConfirmAsync(new ConfirmationRequest(
+            Strings.ForgetObservationsTitle, Strings.ForgetObservationsMessage, Strings.ForgetConfirm, Strings.Cancel));
+        if (!confirmed)
+            return;
+
+        await RunDetectionChangeAsync(services.Suggestions.ForgetObservationsAsync);
+        if (DetectionError is null)
+            DetectionInfo = Strings.ObservationsForgotten;
+    }
+
+    partial void OnDetectionEnabledChanged(bool value)
+    {
+        if (!_isShowingDetection)
+            PendingDetectionSave = RunDetectionChangeAsync(() => services.Suggestions.SetEnabledAsync(value));
+    }
+
+    partial void OnDetectionNotificationsChanged(bool value)
+    {
+        if (!_isShowingDetection)
+            PendingDetectionSave = RunDetectionChangeAsync(() => services.Suggestions.SetNotificationsEnabledAsync(value));
+    }
+
+    private async Task RunDetectionChangeAsync(Func<Task> change)
+    {
+        DetectionError = null;
+        try
+        {
+            await change();
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _logger.LogError(ex, "A detection setting could not be saved");
+            DetectionError = UiText.Format(Strings.SaveFailed, services.Paths.LogsDirectory);
+        }
     }
 
     partial void OnIsSystemThemeChanged(bool value) => OnThemeChosen(value, ThemePreference.System);

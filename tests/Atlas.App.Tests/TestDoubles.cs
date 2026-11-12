@@ -1,6 +1,8 @@
 using Atlas.App.Services;
 using Atlas.App.ViewModels;
+using Atlas.Core.Detection;
 using Atlas.Core.History;
+using Atlas.Core.Notifications;
 using Atlas.Core.Resources;
 using Atlas.Core.Restoration;
 using Atlas.Core.Settings;
@@ -43,6 +45,13 @@ internal sealed class FakeWorkspaceRepository : IWorkspaceRepository
     {
         ThrowIfSet(ReadFailure);
         return Task.FromResult(_workspaces.Count);
+    }
+
+    public Task<IReadOnlyList<(ResourceKind Kind, string Target)>> ListResourceTargetsAsync(CancellationToken cancellationToken = default)
+    {
+        ThrowIfSet(ReadFailure);
+        return Task.FromResult<IReadOnlyList<(ResourceKind Kind, string Target)>>(
+            _workspaces.Values.SelectMany(w => w.Resources).Select(r => (r.Kind, r.Target)).ToList());
     }
 
     public Task<Workspace?> GetAsync(Guid id, CancellationToken cancellationToken = default)
@@ -384,6 +393,8 @@ internal sealed class RecordingNavigator : INavigator
 
     public Task OpenSettingsAsync() => Record("settings");
 
+    public Task OpenSuggestionsAsync(string? focusKey = null) => Record(focusKey is null ? "suggestions" : "suggestions:" + focusKey);
+
     private Task Record(string visit)
     {
         Visits.Add(visit);
@@ -403,16 +414,20 @@ internal sealed class TestServices
         Workspaces = new WorkspaceService(Repository, Clock);
         Versions = new FakeVersionRepository(Repository);
         History = new FakeHistoryRepository(Repository);
+        Settings = new SettingsService(SettingsStore);
+        Detection = new EnvironmentDetectionService(Observer, DetectionStore, Workspaces, Clock);
+        Suggestions = new SuggestionCenter(Detection, Settings, Notifications, Host, Clock, NullLoggerFactory.Instance);
         Pages = new PageServices(
             Workspaces,
             new VersionService(Workspaces, Versions, Clock),
             History,
-            new SettingsService(SettingsStore),
+            Settings,
             new RestorationService(Opener, Clock),
             Dialogs,
             Files,
             Theme,
             Folders,
+            Suggestions,
             Paths,
             Clock,
             NullLoggerFactory.Instance);
@@ -439,6 +454,20 @@ internal sealed class TestServices
 
     public RecordingNavigator Navigator { get; } = new();
 
+    public SettingsService Settings { get; }
+
+    public FakeWorkObserver Observer { get; } = new();
+
+    public InMemoryDetectionStore DetectionStore { get; } = new();
+
+    public FakeDesktopNotifications Notifications { get; } = new();
+
+    public MainWindowHost Host { get; } = new();
+
+    public EnvironmentDetectionService Detection { get; }
+
+    public SuggestionCenter Suggestions { get; }
+
     public FakeTimeProvider Clock { get; } = new(new DateTimeOffset(2026, 11, 6, 12, 0, 0, TimeSpan.Zero));
 
     public AtlasDataPaths Paths { get; }
@@ -453,4 +482,68 @@ internal sealed class TestServices
         Repository.Seed(workspace);
         return workspace;
     }
+}
+
+/// <summary>Stands in for the session: tests decide what Atlas sees, and the real windows of the computer are never read.</summary>
+internal sealed class FakeWorkObserver : IWorkObserver
+{
+    public WorkObservation Next { get; set; } = WorkObservation.Empty;
+
+    public int Observations { get; private set; }
+
+    public Task<WorkObservation> ObserveAsync(CancellationToken cancellationToken = default)
+    {
+        Observations++;
+        return Task.FromResult(Next);
+    }
+}
+
+internal sealed class InMemoryDetectionStore : IDetectionStore
+{
+    private readonly Dictionary<string, StoredProposal> _proposals = new(StringComparer.Ordinal);
+
+    public Task<IReadOnlyList<StoredProposal>> ListAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<StoredProposal>>([.. _proposals.Values]);
+
+    public Task SaveAsync(StoredProposal proposal, CancellationToken cancellationToken = default)
+    {
+        _proposals[proposal.Key] = proposal;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(IReadOnlyCollection<string> keys, CancellationToken cancellationToken = default)
+    {
+        foreach (var key in keys)
+            _proposals.Remove(key);
+
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>Records notifications instead of showing them on the computer running the tests.</summary>
+internal sealed class FakeDesktopNotifications : IDesktopNotifications
+{
+    public bool IsAvailable { get; set; } = true;
+
+    public bool Accepts { get; set; } = true;
+
+    public List<DesktopNotification> Shown { get; } = [];
+
+    public List<string> Removed { get; } = [];
+
+    public int RemovedAll { get; private set; }
+
+    public event EventHandler<NotificationActivation>? Activated;
+
+    public bool Show(DesktopNotification notification)
+    {
+        Shown.Add(notification);
+        return Accepts;
+    }
+
+    public void Remove(string tag) => Removed.Add(tag);
+
+    public void RemoveAll() => RemovedAll++;
+
+    public void Choose(string tag, string argument) => Activated?.Invoke(this, new NotificationActivation(tag, argument));
 }

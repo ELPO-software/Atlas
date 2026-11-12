@@ -69,6 +69,8 @@ DisableProgramGroupPage=yes
 PrivilegesRequired=admin
 PrivilegesRequiredOverridesAllowed=dialog commandline
 UsePreviousPrivileges=yes
+; The only per-user area is the notification settings of the current user, removed on uninstall.
+UsedUserAreasWarning=no
 ArchitecturesAllowed={#AllowedArchitectures}
 ArchitecturesInstallIn64BitMode={#AllowedArchitectures}
 MinVersion=10.0.17763
@@ -111,6 +113,10 @@ Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs 
 [Icons]
 Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExe}"; Comment: "{cm:AppComment}"; AppUserModelID: "{#AppUserModelId}"
 Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Comment: "{cm:AppComment}"; AppUserModelID: "{#AppUserModelId}"; Tasks: desktopicon
+
+[Registry]
+; Windows keeps the notification settings of an application after it is gone. Uninstalling removes those of Atlas.
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Notifications\Settings\{#AppUserModelId}"; Flags: uninsdeletekey dontcreatekey
 
 [Run]
 ; A post-install entry runs with the rights of the user who started Setup, not elevated.

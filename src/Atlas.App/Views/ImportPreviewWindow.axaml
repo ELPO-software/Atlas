@@ -13,59 +13,62 @@
         CanMinimize="False"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner">
-    <StackPanel Margin="24" Spacing="16">
-        <StackPanel Spacing="4">
-            <TextBlock Classes="section-title" Text="{x:Static res:Strings.ImportTitle}" />
-            <TextBlock x:Name="FileName" Classes="caption" Text="{Binding FileName}" TextTrimming="CharacterEllipsis" />
-        </StackPanel>
-
-        <StackPanel Spacing="8" IsVisible="{Binding HasProblem}">
-            <SelectableTextBlock x:Name="Problem" Classes="error" Text="{Binding Problem}" />
-            <TextBlock Classes="body" Text="{x:Static res:Strings.ImportNothingImported}" />
-        </StackPanel>
-
-        <StackPanel Spacing="12" IsVisible="{Binding CanImport}">
-            <TextBlock Classes="secondary" Text="{x:Static res:Strings.ImportIntro}" />
-            <StackPanel Spacing="2">
-                <TextBlock x:Name="WorkspaceName" Classes="card-title" Text="{Binding WorkspaceName}" />
-                <TextBlock Classes="secondary" Text="{Binding Description}" MaxLines="3" TextTrimming="CharacterEllipsis" IsVisible="{Binding HasDescription}" />
-                <TextBlock x:Name="CountText" Classes="caption" Text="{Binding CountText}" />
+    <DockPanel>
+        <Border DockPanel.Dock="Bottom" Classes="dialog-footer">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button x:Name="CancelButton"
+                        Content="{x:Static res:Strings.Cancel}"
+                        IsCancel="True"
+                        Click="OnCancelClick" />
+                <Button x:Name="ImportButton"
+                        Classes="primary"
+                        Content="{x:Static res:Strings.Import}"
+                        IsVisible="{Binding CanImport}"
+                        Click="OnImportClick" />
             </StackPanel>
-            <Border Classes="surface" IsVisible="{Binding HasItems}">
-                <ScrollViewer MaxHeight="280" HorizontalScrollBarVisibility="Disabled">
-                    <ItemsControl x:Name="Items" ItemsSource="{Binding Items}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Spacing="10" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="vm:ImportPreviewItem">
-                                <StackPanel Spacing="2">
-                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                                        <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Grid.Column="1" Classes="caption" Text="{Binding KindText}" VerticalAlignment="Center" />
-                                    </Grid>
-                                    <TextBlock Classes="caption" Text="{Binding Target}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Target}" />
-                                    <TextBlock Classes="caption strong" Classes.error="{Binding IsRefused}" Text="{Binding Note}" TextWrapping="Wrap" IsVisible="{Binding HasNote}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-            </Border>
-        </StackPanel>
+        </Border>
+        <StackPanel Margin="24,24,24,20" Spacing="16">
+            <StackPanel Spacing="4">
+                <TextBlock Classes="section-title" Text="{x:Static res:Strings.ImportTitle}" />
+                <TextBlock x:Name="FileName" Classes="caption" Text="{Binding FileName}" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-            <Button x:Name="CancelButton"
-                    Content="{x:Static res:Strings.Cancel}"
-                    IsCancel="True"
-                    Click="OnCancelClick" />
-            <Button x:Name="ImportButton"
-                    Classes="primary"
-                    Content="{x:Static res:Strings.Import}"
-                    IsVisible="{Binding CanImport}"
-                    Click="OnImportClick" />
+            <StackPanel Spacing="8" IsVisible="{Binding HasProblem}">
+                <SelectableTextBlock x:Name="Problem" Classes="error" Text="{Binding Problem}" />
+                <TextBlock Classes="body" Text="{x:Static res:Strings.ImportNothingImported}" />
+            </StackPanel>
+
+            <StackPanel Spacing="12" IsVisible="{Binding CanImport}">
+                <TextBlock Classes="secondary" Text="{x:Static res:Strings.ImportIntro}" />
+                <StackPanel Spacing="2">
+                    <TextBlock x:Name="WorkspaceName" Classes="card-title" Text="{Binding WorkspaceName}" />
+                    <TextBlock Classes="secondary" Text="{Binding Description}" MaxLines="3" TextTrimming="CharacterEllipsis" IsVisible="{Binding HasDescription}" />
+                    <TextBlock x:Name="CountText" Classes="caption" Text="{Binding CountText}" />
+                </StackPanel>
+                <Border Classes="surface" IsVisible="{Binding HasItems}">
+                    <ScrollViewer MaxHeight="280" HorizontalScrollBarVisibility="Disabled">
+                        <ItemsControl x:Name="Items" ItemsSource="{Binding Items}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Spacing="10" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ImportPreviewItem">
+                                    <StackPanel Spacing="2">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="1" Classes="caption" Text="{Binding KindText}" VerticalAlignment="Center" />
+                                        </Grid>
+                                        <TextBlock Classes="caption" Text="{Binding Target}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Target}" />
+                                        <TextBlock Classes="caption strong" Classes.error="{Binding IsRefused}" Text="{Binding Note}" TextWrapping="Wrap" IsVisible="{Binding HasNote}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </StackPanel>
         </StackPanel>
-    </StackPanel>
+    </DockPanel>
 </Window>

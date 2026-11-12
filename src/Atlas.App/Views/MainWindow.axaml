@@ -8,17 +8,19 @@
         Title="{x:Static res:Strings.AppName}"
         Icon="/Assets/atlas.ico"
         Background="{DynamicResource AtlasBackgroundBrush}"
-        Width="1100" Height="720"
-        MinWidth="800" MinHeight="520"
+        Width="1180" Height="760"
+        MinWidth="860" MinHeight="560"
         WindowStartupLocation="CenterScreen">
-    <Grid ColumnDefinitions="220,*">
+    <Grid ColumnDefinitions="236,*">
 
-        <Border Background="{DynamicResource AtlasSidebarBrush}">
-            <DockPanel Margin="12,16">
-                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="10" Margin="8,4,8,20">
-                    <Viewbox Width="24" Height="24">
+        <Border Background="{DynamicResource AtlasSidebarBrush}"
+                BorderBrush="{DynamicResource AtlasBorderBrush}"
+                BorderThickness="0,0,1,0">
+            <DockPanel Margin="12,18,12,14">
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="11" Margin="10,2,8,26">
+                    <Viewbox Width="30" Height="30">
                         <Canvas Width="32" Height="32">
-                            <Rectangle Width="32" Height="32" RadiusX="8" RadiusY="8" Fill="{DynamicResource AtlasAccentBrush}" />
+                            <Rectangle Width="32" Height="32" RadiusX="9" RadiusY="9" Fill="{DynamicResource AtlasAccentBrush}" />
                             <Path Data="{StaticResource LogoGlyph}"
                                   Stroke="{DynamicResource AtlasOnColorBrush}"
                                   StrokeThickness="2.75"
@@ -26,10 +28,10 @@
                                   StrokeJoin="Round" />
                         </Canvas>
                     </Viewbox>
-                    <TextBlock Text="{x:Static res:Strings.AppShortName}"
-                               Classes="strong"
-                               FontSize="16"
-                               VerticalAlignment="Center" />
+                    <StackPanel VerticalAlignment="Center" Spacing="0">
+                        <TextBlock Text="{x:Static res:Strings.AppShortName}" Classes="strong" FontSize="16" LetterSpacing="-0.2" />
+                        <TextBlock Text="{x:Static res:Strings.Publisher}" Classes="caption" FontSize="11" />
+                    </StackPanel>
                 </StackPanel>
 
                 <Button x:Name="NavSettings"
@@ -41,7 +43,7 @@
                     <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10">
                         <Border Classes="nav-indicator" />
                         <Path Grid.Column="1" Classes="icon" Data="{StaticResource IconSettings}" />
-                        <TextBlock Grid.Column="2" Text="{x:Static res:Strings.NavSettings}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="2" Classes="nav-label" Text="{x:Static res:Strings.NavSettings}" VerticalAlignment="Center" />
                     </Grid>
                 </Button>
 
@@ -54,7 +56,7 @@
                         <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10">
                             <Border Classes="nav-indicator" />
                             <Path Grid.Column="1" Classes="icon" Data="{StaticResource IconHome}" />
-                            <TextBlock Grid.Column="2" Text="{x:Static res:Strings.NavHome}" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Classes="nav-label" Text="{x:Static res:Strings.NavHome}" VerticalAlignment="Center" />
                         </Grid>
                     </Button>
                     <Button x:Name="NavWorkspaces"
@@ -65,7 +67,24 @@
                         <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10">
                             <Border Classes="nav-indicator" />
                             <Path Grid.Column="1" Classes="icon" Data="{StaticResource IconWorkspaces}" />
-                            <TextBlock Grid.Column="2" Text="{x:Static res:Strings.NavWorkspaces}" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Classes="nav-label" Text="{x:Static res:Strings.NavWorkspaces}" VerticalAlignment="Center" />
+                        </Grid>
+                    </Button>
+                    <Button x:Name="NavSuggestions"
+                            Classes="nav"
+                            Classes.selected="{Binding IsSuggestionsSelected}"
+                            Command="{Binding OpenSuggestionsCommand}"
+                            AutomationProperties.Name="{Binding SuggestionsNavigationLabel}">
+                        <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="10">
+                            <Border Classes="nav-indicator" />
+                            <Path Grid.Column="1" Classes="icon" Data="{StaticResource IconSuggestions}" />
+                            <TextBlock Grid.Column="2" Classes="nav-label" Text="{x:Static res:Strings.NavSuggestions}" VerticalAlignment="Center" />
+                            <Border x:Name="SuggestionBadge"
+                                    Grid.Column="3"
+                                    Classes="badge"
+                                    IsVisible="{Binding HasSuggestionBadge}">
+                                <TextBlock Text="{Binding SuggestionBadgeText}" />
+                            </Border>
                         </Grid>
                     </Button>
                     <Button x:Name="NavHistory"
@@ -76,30 +95,71 @@
                         <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10">
                             <Border Classes="nav-indicator" />
                             <Path Grid.Column="1" Classes="icon" Data="{StaticResource IconHistory}" />
-                            <TextBlock Grid.Column="2" Text="{x:Static res:Strings.NavHistory}" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Classes="nav-label" Text="{x:Static res:Strings.NavHistory}" VerticalAlignment="Center" />
                         </Grid>
                     </Button>
                 </StackPanel>
             </DockPanel>
         </Border>
 
-        <Grid Grid.Column="1" RowDefinitions="Auto,*">
+        <Grid Grid.Column="1" RowDefinitions="Auto,Auto,*">
             <Border x:Name="UnexpectedErrorBanner"
-                    Background="{DynamicResource AtlasErrorSurfaceBrush}"
-                    Padding="32,12"
+                    Classes="infobar error"
+                    Margin="24,16,24,0"
                     IsVisible="{Binding UnexpectedErrorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                    <SelectableTextBlock Classes="error"
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                    <Path Classes="icon" Data="{StaticResource IconWarning}" />
+                    <SelectableTextBlock Grid.Column="1"
+                                         Classes="body"
                                          Text="{Binding UnexpectedErrorText}"
                                          VerticalAlignment="Center" />
-                    <Button Grid.Column="1"
+                    <Button Grid.Column="2"
                             Content="{x:Static res:Strings.Close}"
                             Command="{Binding DismissUnexpectedErrorCommand}" />
                 </Grid>
             </Border>
 
-            <ContentControl x:Name="PageHost" Grid.Row="1" Content="{Binding CurrentPage}">
-                <ContentControl.DataTemplates>
+            <Border x:Name="AnnouncementBanner"
+                    Grid.Row="1"
+                    Classes="infobar"
+                    Classes.warning="{Binding !IsAnnouncementCertain}"
+                    Margin="24,16,24,0"
+                    IsVisible="{Binding HasAnnouncement}">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                    <Path Classes="icon" Data="{StaticResource IconDetect}" />
+                    <StackPanel Grid.Column="1" Spacing="4">
+                        <TextBlock x:Name="AnnouncementTitle" Classes="strong" Text="{Binding AnnouncementTitle}" />
+                        <TextBlock x:Name="AnnouncementMessage" Classes="body" Text="{Binding AnnouncementMessage}" />
+                        <TextBlock Classes="error"
+                                   Text="{Binding AnnouncementError}"
+                                   IsVisible="{Binding AnnouncementError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                            <Button x:Name="AcceptAnnouncement"
+                                    Classes="primary"
+                                    Content="{Binding AnnouncementAcceptLabel}"
+                                    Command="{Binding AcceptAnnouncementCommand}" />
+                            <Button x:Name="LaterAnnouncement"
+                                    Content="{x:Static res:Strings.SuggestionLater}"
+                                    Command="{Binding LaterAnnouncementCommand}" />
+                            <Button x:Name="IgnoreAnnouncement"
+                                    Classes="quiet"
+                                    Content="{x:Static res:Strings.SuggestionIgnore}"
+                                    Command="{Binding IgnoreAnnouncementCommand}" />
+                        </StackPanel>
+                    </StackPanel>
+                    <Button Grid.Column="2"
+                            Classes="icon-button"
+                            VerticalAlignment="Top"
+                            Command="{Binding DismissAnnouncementCommand}"
+                            ToolTip.Tip="{x:Static res:Strings.Close}"
+                            AutomationProperties.Name="{x:Static res:Strings.Close}">
+                        <Path Classes="icon small" Data="{StaticResource IconRemove}" />
+                    </Button>
+                </Grid>
+            </Border>
+
+            <TransitioningContentControl x:Name="PageHost" Grid.Row="2" Content="{Binding CurrentPage}">
+                <TransitioningContentControl.DataTemplates>
                     <DataTemplate DataType="vm:HomePageViewModel">
                         <views:HomePageView />
                     </DataTemplate>
@@ -109,14 +169,17 @@
                     <DataTemplate DataType="vm:WorkspaceDetailViewModel">
                         <views:WorkspaceDetailView />
                     </DataTemplate>
+                    <DataTemplate DataType="vm:SuggestionsPageViewModel">
+                        <views:SuggestionsPageView />
+                    </DataTemplate>
                     <DataTemplate DataType="vm:HistoryPageViewModel">
                         <views:HistoryPageView />
                     </DataTemplate>
                     <DataTemplate DataType="vm:SettingsPageViewModel">
                         <views:SettingsPageView />
                     </DataTemplate>
-                </ContentControl.DataTemplates>
-            </ContentControl>
+                </TransitioningContentControl.DataTemplates>
+            </TransitioningContentControl>
         </Grid>
     </Grid>
 </Window>

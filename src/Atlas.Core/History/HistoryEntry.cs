@@ -16,6 +16,9 @@ public enum HistoryAction
     VersionRestored,
     WorkspaceRestored,
     WorkspaceExported,
+
+    /// <summary>Created from an environment Atlas detected, at the user's request.</summary>
+    WorkspaceDetected,
 }
 
 public sealed record RestoreCounts(int Restored, int Missing, int Failed, int Skipped)

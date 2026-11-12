@@ -39,6 +39,23 @@ internal static class DateText
         return UiText.Format(Strings.DateAt, Day(local), Hour(local));
     }
 
+    /// <summary>"à 14:32", "hier à 09:05", "demain à 02:30" or "le 4 novembre 2026 à 10:05", to end a sentence.</summary>
+    public static string When(DateTimeOffset value, TimeProvider time)
+    {
+        var local = TimeZoneInfo.ConvertTime(value, time.LocalTimeZone);
+        var today = TimeZoneInfo.ConvertTime(time.GetUtcNow(), time.LocalTimeZone).Date;
+
+        if (local.Date == today)
+            return UiText.Format(Strings.WhenToday, Hour(local));
+
+        if (local.Date == today.AddDays(-1))
+            return UiText.Format(Strings.WhenYesterday, Hour(local));
+
+        return local.Date == today.AddDays(1)
+            ? UiText.Format(Strings.WhenTomorrow, Hour(local))
+            : UiText.Format(Strings.WhenOn, Day(local), Hour(local));
+    }
+
     public static string Created(DateTimeOffset value, TimeProvider time) =>
         UiText.Format(Strings.CreatedOn, Day(TimeZoneInfo.ConvertTime(value, time.LocalTimeZone)));
 

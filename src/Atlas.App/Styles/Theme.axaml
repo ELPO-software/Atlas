@@ -1,6 +1,7 @@
 <!--
-    The Atlas palette: the only place where colors are defined. Blue is reserved for the main action of a screen and
-    the navigation selection. Surfaces separate content by their fill, so most elements need no border.
+    The Atlas palette: the only place where colors are defined. Blue is reserved for the main action of a screen, the
+    navigation selection and what Atlas wants the user to notice. Surfaces separate content by their fill; a hairline
+    border only marks the edge of cards and of the sidebar, never carries meaning on its own.
 
     Text contrast is checked by ThemeTests: every pair used for reading stays at 4.5:1 or more.
 -->
@@ -10,12 +11,21 @@
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Dark">
             <SolidColorBrush x:Key="AtlasBackgroundBrush" Color="#090B10" />
-            <SolidColorBrush x:Key="AtlasSidebarBrush" Color="#0E1118" />
+            <SolidColorBrush x:Key="AtlasSidebarBrush" Color="#0C0F15" />
             <SolidColorBrush x:Key="AtlasSurfaceBrush" Color="#12151C" />
+            <SolidColorBrush x:Key="AtlasSurfaceRaisedBrush" Color="#161A22" />
             <SolidColorBrush x:Key="AtlasSurfaceHoverBrush" Color="#1A1E27" />
             <SolidColorBrush x:Key="AtlasSurfacePressedBrush" Color="#161922" />
+            <SolidColorBrush x:Key="AtlasBorderBrush" Color="#1F2430" />
             <SolidColorBrush x:Key="AtlasTextBrush" Color="#FFFFFF" />
             <SolidColorBrush x:Key="AtlasTextSecondaryBrush" Color="#858B98" />
+            <SolidColorBrush x:Key="AtlasAccentTextBrush" Color="#6EA8FF" />
+            <SolidColorBrush x:Key="AtlasAccentSubtleBrush" Color="#13213D" />
+            <SolidColorBrush x:Key="AtlasInfoSurfaceBrush" Color="#111D36" />
+            <SolidColorBrush x:Key="AtlasSuccessTextBrush" Color="#4CC38A" />
+            <SolidColorBrush x:Key="AtlasSuccessSurfaceBrush" Color="#0F2219" />
+            <SolidColorBrush x:Key="AtlasWarningTextBrush" Color="#E9B04F" />
+            <SolidColorBrush x:Key="AtlasWarningSurfaceBrush" Color="#2A2113" />
             <SolidColorBrush x:Key="AtlasErrorTextBrush" Color="#FF8585" />
             <SolidColorBrush x:Key="AtlasErrorSurfaceBrush" Color="#2A1A1E" />
 
@@ -41,10 +51,19 @@
             <SolidColorBrush x:Key="AtlasBackgroundBrush" Color="#FFFFFF" />
             <SolidColorBrush x:Key="AtlasSidebarBrush" Color="#F6F7F9" />
             <SolidColorBrush x:Key="AtlasSurfaceBrush" Color="#F6F7F9" />
+            <SolidColorBrush x:Key="AtlasSurfaceRaisedBrush" Color="#FFFFFF" />
             <SolidColorBrush x:Key="AtlasSurfaceHoverBrush" Color="#ECEEF2" />
             <SolidColorBrush x:Key="AtlasSurfacePressedBrush" Color="#E4E7EC" />
+            <SolidColorBrush x:Key="AtlasBorderBrush" Color="#E3E6EC" />
             <SolidColorBrush x:Key="AtlasTextBrush" Color="#090B10" />
             <SolidColorBrush x:Key="AtlasTextSecondaryBrush" Color="#5F6573" />
+            <SolidColorBrush x:Key="AtlasAccentTextBrush" Color="#1A56D6" />
+            <SolidColorBrush x:Key="AtlasAccentSubtleBrush" Color="#EAF1FF" />
+            <SolidColorBrush x:Key="AtlasInfoSurfaceBrush" Color="#EAF1FF" />
+            <SolidColorBrush x:Key="AtlasSuccessTextBrush" Color="#17713F" />
+            <SolidColorBrush x:Key="AtlasSuccessSurfaceBrush" Color="#E8F5EE" />
+            <SolidColorBrush x:Key="AtlasWarningTextBrush" Color="#7A4F00" />
+            <SolidColorBrush x:Key="AtlasWarningSurfaceBrush" Color="#FFF3DA" />
             <SolidColorBrush x:Key="AtlasErrorTextBrush" Color="#B52A25" />
             <SolidColorBrush x:Key="AtlasErrorSurfaceBrush" Color="#FBECEB" />
 
@@ -86,7 +105,27 @@
     <StreamGeometry x:Key="IconWorkspaces">M4 3.5H8A.5.5 0 0 1 8.5 4V8A.5.5 0 0 1 8 8.5H4A.5.5 0 0 1 3.5 8V4A.5.5 0 0 1 4 3.5ZM12 3.5H16A.5.5 0 0 1 16.5 4V8A.5.5 0 0 1 16 8.5H12A.5.5 0 0 1 11.5 8V4A.5.5 0 0 1 12 3.5ZM4 11.5H8A.5.5 0 0 1 8.5 12V16A.5.5 0 0 1 8 16.5H4A.5.5 0 0 1 3.5 16V12A.5.5 0 0 1 4 11.5ZM12 11.5H16A.5.5 0 0 1 16.5 12V16A.5.5 0 0 1 16 16.5H12A.5.5 0 0 1 11.5 16V12A.5.5 0 0 1 12 11.5Z</StreamGeometry>
     <StreamGeometry x:Key="IconSettings">M3 6H10.5M15.5 6H17M3 14H4.5M9.5 14H17M13 3.75A2.25 2.25 0 1 1 13 8.25 2.25 2.25 0 0 1 13 3.75ZM7 11.75A2.25 2.25 0 1 1 7 16.25 2.25 2.25 0 0 1 7 11.75Z</StreamGeometry>
     <StreamGeometry x:Key="IconHistory">M10 3.25A6.75 6.75 0 1 1 10 16.75 6.75 6.75 0 0 1 10 3.25ZM10 6.5V10L12.5 11.75</StreamGeometry>
+    <StreamGeometry x:Key="IconSuggestions">M10 2.75A5 5 0 0 0 7 11.75C7.6 12.2 8 12.9 8 13.6V14.25H12V13.6C12 12.9 12.4 12.2 13 11.75A5 5 0 0 0 10 2.75ZM8.25 17.25H11.75</StreamGeometry>
     <StreamGeometry x:Key="IconBack">M12 4.5 6.5 10 12 15.5</StreamGeometry>
+    <StreamGeometry x:Key="IconChevron">M8 4.5 13.5 10 8 15.5</StreamGeometry>
+    <StreamGeometry x:Key="IconApplication">M3.75 3.75H16.25A1 1 0 0 1 17.25 4.75V15.25A1 1 0 0 1 16.25 16.25H3.75A1 1 0 0 1 2.75 15.25V4.75A1 1 0 0 1 3.75 3.75ZM2.75 7.25H17.25M5.25 5.5H5.35M7.25 5.5H7.35</StreamGeometry>
+    <StreamGeometry x:Key="IconFile">M5.5 2.75H11.25L15.25 6.75V16.25A1 1 0 0 1 14.25 17.25H5.5A1 1 0 0 1 4.5 16.25V3.75A1 1 0 0 1 5.5 2.75ZM11.25 2.75V6.75H15.25</StreamGeometry>
+    <StreamGeometry x:Key="IconFolder">M2.75 5.5A1.75 1.75 0 0 1 4.5 3.75H7.75L9.5 5.75H15.5A1.75 1.75 0 0 1 17.25 7.5V14.5A1.75 1.75 0 0 1 15.5 16.25H4.5A1.75 1.75 0 0 1 2.75 14.5Z</StreamGeometry>
+    <StreamGeometry x:Key="IconLink">M8.5 11.5A3 3 0 0 0 12.75 11.5L15.25 9A3 3 0 0 0 11 4.75L10.25 5.5M11.5 8.5A3 3 0 0 0 7.25 8.5L4.75 11A3 3 0 0 0 9 15.25L9.75 14.5</StreamGeometry>
+    <StreamGeometry x:Key="IconUnknown">M10 3.25A6.75 6.75 0 1 1 10 16.75 6.75 6.75 0 0 1 10 3.25ZM7.9 8A2.1 2.1 0 1 1 10.75 10C10.25 10.25 10 10.75 10 11.25M10 13.75V13.85</StreamGeometry>
+    <StreamGeometry x:Key="IconEdit">M12.5 3.75 16.25 7.5 7.5 16.25H3.75V12.5ZM10.75 5.5 14.5 9.25</StreamGeometry>
+    <StreamGeometry x:Key="IconRemove">M5.75 5.75 14.25 14.25M14.25 5.75 5.75 14.25</StreamGeometry>
+    <StreamGeometry x:Key="IconPlay">M6.75 4.5 15 10 6.75 15.5Z</StreamGeometry>
+    <StreamGeometry x:Key="IconPlus">M10 4.25V15.75M4.25 10H15.75</StreamGeometry>
+    <StreamGeometry x:Key="IconImport">M10 3.5V12.5M6.5 9 10 12.5 13.5 9M4 16H16</StreamGeometry>
+    <StreamGeometry x:Key="IconExport">M10 12.5V3.5M6.5 7 10 3.5 13.5 7M4 16H16</StreamGeometry>
+    <StreamGeometry x:Key="IconSearch">M8.75 3.5A5.25 5.25 0 1 1 8.75 14 5.25 5.25 0 0 1 8.75 3.5ZM12.5 12.5 16.5 16.5</StreamGeometry>
+    <StreamGeometry x:Key="IconRefresh">M15.75 8.25A6 6 0 1 0 15.9 12M15.75 4.25V8.25H11.75</StreamGeometry>
+    <StreamGeometry x:Key="IconInfo">M10 2.75A7.25 7.25 0 1 1 10 17.25 7.25 7.25 0 0 1 10 2.75ZM10 9.25V13.75M10 6.5V6.6</StreamGeometry>
+    <StreamGeometry x:Key="IconWarning">M10 3.25 17.25 16.25H2.75ZM10 8.25V11.75M10 14V14.1</StreamGeometry>
+    <StreamGeometry x:Key="IconCheck">M4.5 10.5 8.25 14 15.5 6.25</StreamGeometry>
+    <StreamGeometry x:Key="IconNotes">M5 3.75H15A1.25 1.25 0 0 1 16.25 5V15A1.25 1.25 0 0 1 15 16.25H5A1.25 1.25 0 0 1 3.75 15V5A1.25 1.25 0 0 1 5 3.75ZM6.75 7.5H13.25M6.75 10.5H13.25M6.75 13.5H10.5</StreamGeometry>
+    <StreamGeometry x:Key="IconDetect">M10 2.75A7.25 7.25 0 1 1 10 17.25 7.25 7.25 0 0 1 10 2.75ZM10 6.25A3.75 3.75 0 1 1 10 13.75 3.75 3.75 0 0 1 10 6.25ZM10 9.75V10.25</StreamGeometry>
     <StreamGeometry x:Key="LogoGlyph">M8.5 25 16 7 23.5 25M11 19.5Q16 15.5 21 19.5</StreamGeometry>
 
 </ResourceDictionary>

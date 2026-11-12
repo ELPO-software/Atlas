@@ -12,6 +12,9 @@ public sealed class ResourceItemViewModel(
 
     public string Name => resource.DisplayName;
 
+    /// <summary>The type of the resource, which picks its icon.</summary>
+    public string Kind => resource.Kind.Value;
+
     public string Target { get; } = RestoreText.Target(resource);
 
     public bool NeedsApproval => resource.RequiresReview;

@@ -59,6 +59,9 @@ public sealed partial class AtlasApp : Application
         WatchForUnexpectedErrors(viewModel, logger);
 
         _ = viewModel.InitializeAsync();
+
+        // The detection starts only if the user allowed it, and waits a moment after the window opens.
+        _ = _services.GetRequiredService<SuggestionCenter>().StartAsync();
         return window;
     }
 
