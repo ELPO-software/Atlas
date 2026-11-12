@@ -19,13 +19,39 @@ public sealed class StorageAndLoggingTests : IDisposable
         Assert.Equal(Path.Combine(_folder.Path, "logs"), paths.LogsDirectory);
     }
 
-    [Fact]
-    public void AtlasDataPaths_ForCurrentUser_IsInTheLocalApplicationDataFolder()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void AtlasDataPaths_ByDefault_IsInTheLocalApplicationDataFolder(string? customDirectory)
     {
         var expected = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ELPO", "Atlas");
 
-        Assert.Equal(expected, AtlasDataPaths.ForCurrentUser().DataDirectory);
+        var paths = AtlasDataPaths.Resolve(customDirectory);
+
+        Assert.Equal(expected, paths.DataDirectory);
+        Assert.False(paths.IsCustom);
     }
+
+    [Fact]
+    public void AtlasDataPaths_UsesTheFolderNamedByTheVariable()
+    {
+        var custom = Path.Combine(_folder.Path, "données d'essai");
+
+        var paths = AtlasDataPaths.Resolve(custom);
+
+        Assert.Equal(custom, paths.DataDirectory);
+        Assert.True(paths.IsCustom);
+        Assert.Equal(Path.Combine(custom, "atlas.db"), paths.DatabasePath);
+    }
+
+    [Theory]
+    [InlineData("donnees")]
+    [InlineData(@"..\donnees")]
+    [InlineData(@"\donnees")]
+    [InlineData("C:donnees")]
+    public void AtlasDataPaths_RefusesAFolderThatIsNotAFullPath(string custom) =>
+        Assert.Throws<DirectoryNotFoundException>(() => AtlasDataPaths.Resolve(custom));
 
     [Fact]
     public void FileLogging_WritesToAFolderWithSpacesAndAccents()

@@ -25,7 +25,9 @@ internal static class AppStartup
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            return new StartupOutcome(null, UiText.Format(Strings.DataFolderUnavailableMessage, "%LOCALAPPDATA%"));
+            var custom = Environment.GetEnvironmentVariable(AtlasDataPaths.DirectoryVariable);
+            var location = string.IsNullOrWhiteSpace(custom) ? "%LOCALAPPDATA%" : custom;
+            return new StartupOutcome(null, UiText.Format(Strings.DataFolderUnavailableMessage, location));
         }
     }
 

@@ -17,8 +17,10 @@ namespace Atlas.App;
 
 public sealed partial class AtlasApp : Application
 {
-    private SingleInstanceGuard? _instanceGuard;
     private ServiceProvider? _services;
+
+    /// <summary>Set by <see cref="Program"/>, which owns it for the whole life of the process.</summary>
+    internal static SingleInstanceGuard? InstanceGuard { get; set; }
 
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
@@ -28,6 +30,10 @@ public sealed partial class AtlasApp : Application
         {
             desktop.Exit += (_, _) => ReleaseResources();
             desktop.MainWindow = CreateStartupWindow();
+
+            // Another start of Atlas brings this window forward, whichever it is.
+            if (InstanceGuard is { IsFirstInstance: true } guard)
+                guard.ListenForActivation(() => Dispatcher.UIThread.Post(() => WindowActivation.BringToFront(desktop.MainWindow)));
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -35,8 +41,8 @@ public sealed partial class AtlasApp : Application
 
     private Window CreateStartupWindow()
     {
-        _instanceGuard = new SingleInstanceGuard();
-        if (!_instanceGuard.IsFirstInstance)
+        // Only reached when the running Atlas could not be asked to come forward.
+        if (InstanceGuard is { IsFirstInstance: false })
             return new StartupNoticeWindow(Strings.AlreadyRunningTitle, Strings.AlreadyRunningMessage);
 
         var outcome = AppStartup.RunForCurrentUser();
@@ -95,9 +101,5 @@ public sealed partial class AtlasApp : Application
             logger.LogCritical(e.ExceptionObject as Exception, "Atlas is stopping after an unexpected error");
     }
 
-    private void ReleaseResources()
-    {
-        _services?.Dispose();
-        _instanceGuard?.Dispose();
-    }
+    private void ReleaseResources() => _services?.Dispose();
 }

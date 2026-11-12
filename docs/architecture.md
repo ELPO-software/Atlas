@@ -130,4 +130,4 @@ The `AtlasRefuseToolTelemetry` target in `Directory.Build.targets` fails the bui
 
 ## xUnit version
 
-`xunit.v3` is pinned to 3.2.2 because `Avalonia.Headless.XUnit` 12.1.5 is built against that version. Upgrade them together, along with the excluded telemetry package, whose version follows `xunit.v3`.
+`xunit.v3` is pinned to 3.2.2 because `Avalonia.Headless.XUnit` 12.1.6 is built against that version. Upgrade them together, along with the excluded telemetry package, whose version follows `xunit.v3`.

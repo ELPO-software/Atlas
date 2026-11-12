@@ -38,7 +38,7 @@ To uninstall, delete the executable or the extracted folder. For the executable,
 
 ## Building from source
 
-You need the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0), version 10.0.403 or later.
+You need the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0), version 10.0.404 or later.
 
 ```shell
 dotnet build Atlas.slnx
