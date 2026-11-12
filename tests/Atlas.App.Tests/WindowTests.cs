@@ -76,6 +76,7 @@ public sealed class WindowTests
         field.Text = "Données d'été";
 
         app.Window.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        await app.WaitUntilAsync(() => app.ViewModel.CurrentPage is WorkspaceDetailViewModel { IsLoaded: true });
         await app.SettleAsync();
 
         Assert.Equal("Données d'été", app.Find<SelectableTextBlock>("WorkspaceName").Text);
@@ -560,6 +561,7 @@ public sealed class WindowTests
         field.Focus();
         field.Text = "Études d'été";
         app.Window.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+        await app.WaitUntilAsync(() => app.ViewModel.CurrentPage is WorkspaceDetailViewModel { IsLoaded: true });
         await app.SettleAsync();
         var page = Assert.IsType<WorkspaceDetailViewModel>(app.ViewModel.CurrentPage);
         var id = (await app.Workspaces.ListAsync()).Single().Id;
@@ -733,16 +735,36 @@ public sealed class WindowTests
             return app;
         }
 
+        /// <summary>
+        /// Finds a control, waiting a moment for it if the page that holds it is still loading: a slower computer, such
+        /// as a build server, may need longer than a few frames.
+        /// </summary>
         public T Find<T>(string name)
-            where T : Control =>
-            Window.GetVisualDescendants().OfType<T>().SingleOrDefault(control => control.Name == name)
-            ?? throw new InvalidOperationException($"{typeof(T).Name} '{name}' is not on screen.");
+            where T : Control
+        {
+            var deadline = DateTime.UtcNow.AddSeconds(5);
+            while (true)
+            {
+                var control = Window.GetVisualDescendants().OfType<T>().SingleOrDefault(c => c.Name == name);
+                if (control is not null)
+                    return control;
+
+                if (DateTime.UtcNow > deadline)
+                    throw new InvalidOperationException($"{typeof(T).Name} '{name}' is not on screen.");
+
+                Dispatcher.UIThread.RunJobs();
+                Thread.Sleep(10);
+            }
+        }
 
         public void Click(string buttonName) => Find<Button>(buttonName).Command!.Execute(null);
 
         /// <summary>Lets database work finish and the interface catch up.</summary>
         public async Task SettleAsync()
         {
+            // A page loads from the database on another thread; a slow computer may need more than a few frames.
+            await WaitUntilAsync(() => ViewModel.Navigation.IsCompleted);
+
             for (var i = 0; i < 5; i++)
             {
                 Dispatcher.UIThread.RunJobs();
@@ -783,7 +805,20 @@ public sealed class WindowTests
 
             await SettleAsync();
             await Services.DisposeAsync();
-            Folder.Dispose();
+
+            // A database read started by the last page may still be finishing on another thread.
+            for (var attempt = 1; ; attempt++)
+            {
+                try
+                {
+                    Folder.Dispose();
+                    return;
+                }
+                catch (IOException) when (attempt < 50)
+                {
+                    await Task.Delay(100);
+                }
+            }
         }
     }
 }

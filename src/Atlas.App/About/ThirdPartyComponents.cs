@@ -18,6 +18,7 @@ public static class ThirdPartyComponents
         new("Avalonia", "MIT", ["Avalonia"], ["Avalonia.txt"]),
         new("CommunityToolkit.Mvvm", "MIT", ["CommunityToolkit.Mvvm"], ["CommunityToolkit.Mvvm.txt", "CommunityToolkit.Mvvm-third-party-notices.txt"]),
         new("HarfBuzzSharp", "MIT", ["HarfBuzzSharp"], ["SkiaSharp.txt", "SkiaSharp-third-party-notices.txt"]),
+        new("Inno Setup", "Inno Setup License", [], ["InnoSetup.txt"]),
         new("Inter", "OFL-1.1", ["Avalonia.Fonts.Inter"], ["Inter.txt"]),
         new("MicroCom.Runtime", "MIT", ["MicroCom.Runtime"], ["MicroCom.Runtime.txt"]),
         new("Microsoft.Data.Sqlite", "MIT", ["Microsoft.Data.Sqlite"], ["dotnet.txt"]),

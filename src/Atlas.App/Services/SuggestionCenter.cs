@@ -319,6 +319,11 @@ public sealed partial class SuggestionCenter : ObservableObject, IDisposable
         if (!shownOnDesktop)
             Announcement = proposal;
 
+        // The log names no path nor program: only how the user was told.
+        _logger.LogInformation(
+            "A {Kind} was announced {Channel}",
+            proposal.Proposal.Kind,
+            shownOnDesktop ? "by a Windows notification" : "in the window of Atlas");
         await _detection.MarkNotifiedAsync(proposal.Key);
     }
 

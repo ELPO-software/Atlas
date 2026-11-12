@@ -62,6 +62,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase, INavigator, IDi
 
     public bool HasUnsavedChanges => CurrentPage?.HasUnsavedChanges ?? false;
 
+    /// <summary>The navigation in progress, until the new page has loaded. Lets tests wait for it.</summary>
+    internal Task Navigation { get; private set; } = Task.CompletedTask;
+
     public bool HasSuggestionBadge => Suggestions.Count > 0;
 
     public string SuggestionBadgeText => Suggestions.Count > BadgeLimit ? $"{BadgeLimit}+" : Suggestions.Count.ToString(UiText.Culture);
@@ -181,7 +184,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase, INavigator, IDi
         }
     }
 
-    private async Task GoToAsync(PageViewModel page, AppSection section)
+    private Task GoToAsync(PageViewModel page, AppSection section) => Navigation = NavigateAsync(page, section);
+
+    private async Task NavigateAsync(PageViewModel page, AppSection section)
     {
         // A second click while the current page is still finishing its work must not start another departure.
         if (_isLeavingPage)

@@ -148,16 +148,14 @@ public sealed class WindowsWorkObserver(IApplicationCatalog catalog, ProjectLoca
         if (string.IsNullOrWhiteSpace(name) || ResourceRules.CheckTarget(ResourceKind.Application, program.Target) is not null)
             return null;
 
+        // Store applications, such as the Notepad of Windows 11, also receive the files they open on their command line.
         var items = new List<ObservedItem>();
-        if (program.ApplicationId is null)
+        var ownFolder = Path.GetDirectoryName(program.Image);
+        var roots = ownFolder is null ? excludedRoots : [.. excludedRoots, ownFolder];
+        foreach (var processId in program.ProcessIds)
         {
-            var ownFolder = Path.GetDirectoryName(program.Image);
-            var roots = ownFolder is null ? excludedRoots : [.. excludedRoots, ownFolder];
-            foreach (var processId in program.ProcessIds)
-            {
-                if (WindowsSession.CommandLine(processId) is { } arguments)
-                    items.AddRange(OpenItems.FromCommandLine(arguments, Exists, roots));
-            }
+            if (WindowsSession.CommandLine(processId) is { } arguments)
+                items.AddRange(OpenItems.FromCommandLine(arguments, Exists, roots));
         }
 
         if (CodeEditors.TryGetValue(fileName, out var editorFolder))

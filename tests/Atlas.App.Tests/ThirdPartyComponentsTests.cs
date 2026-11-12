@@ -34,6 +34,7 @@ public sealed class ThirdPartyComponentsTests
     [InlineData("Avalonia", "AvaloniaUI")]
     [InlineData("ANGLE", "Redistribution and use in source and binary forms")]
     [InlineData("Inter", "SIL OPEN FONT LICENSE")]
+    [InlineData("Inno Setup", "Jordan Russell")]
     [InlineData("Serilog", "Apache License")]
     [InlineData("SQLitePCLRaw", "Apache License")]
     [InlineData("SQLite", "May you do good and not evil")]
