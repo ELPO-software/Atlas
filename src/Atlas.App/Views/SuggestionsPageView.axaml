@@ -149,7 +149,8 @@
                                                                     <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
                                                                     <TextBlock Classes="caption"
                                                                                Text="{Binding Target}"
-                                                                               TextTrimming="PathSegmentEllipsis"
+                                                                               TextTrimming="LeadingCharacterEllipsis"
+                                                                               TextWrapping="NoWrap"
                                                                                ToolTip.Tip="{Binding Target}" />
                                                                 </StackPanel>
                                                                 <TextBlock Grid.Column="2" Classes="caption" VerticalAlignment="Center" Text="{Binding ReasonText}" />

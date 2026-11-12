@@ -43,16 +43,44 @@ Prepare a test folder with a text file, a subfolder whose name has spaces and ac
 | Escape in a confirmation | Cancels; the focus starts on the safe answer | 2026-11-08 |
 | Close the window right after typing notes | The notes are there after a restart | 2026-11-06 |
 | Light and dark themes, and following the system | Every page stays readable; the title bar follows on Windows 11 | 2026-11-06 |
-| Smallest window (800 × 520) | Nothing overlaps; long names wrap or end with an ellipsis | 2026-11-06 |
-| Start Atlas a second time | A message says it is already open; the data is untouched | 2026-11-08 |
+| Smallest window (860 × 560) | Nothing overlaps; long names wrap or end with an ellipsis; long paths are shortened in the middle | Not yet verified |
+| Start Atlas a second time, with the first one minimized | The first window comes back, in the size it had; the second start opens nothing | 2026-11-12, automated by `build/test-installer.ps1` for the handover |
+| Turn animations off in Windows, then change pages | Pages change without fading | Not yet verified |
 
-## Release archive
+## Environment detection
+
+Use a data folder of your own (`ATLAS_DATA_DIR`), and prepare a folder that is a Git repository with an `origin` remote on GitHub and a text file.
 
 | Check | Expected | Last verified |
 |---|---|---|
-| Run `./build/publish.ps1` | A single executable and an archive, each about 50 MB, with their SHA-256 checksums in `artifacts`; no `.pdb` file in the archive | 2026-11-08 |
-| Extract the archive to a folder whose name has spaces and accents, and run `Atlas.exe` with `dotnet` hidden from the environment | Atlas starts; its runtime is loaded from the extracted folder, not from an installed .NET | 2026-11-08 |
-| Run the single executable from a folder whose name has spaces and accents, with `dotnet` hidden from the environment | Atlas starts; its runtime runs from the executable, and its native libraries from a folder named after it in `%TEMP%\.net`, such as `%TEMP%\.net\Atlas-0.1.0-alpha.2-win-x64` | 2026-11-08 |
-| In the settings, choose **Voir la licence** for a component | Its full license text opens, also from the single executable | 2026-11-08 |
-| Open the settings | The version is 0.1.0-alpha.2; the licenses are listed | 2026-11-08 |
-| Run it on a Windows 10 computer | Atlas starts and restores; the title bar keeps the system color | Not yet verified |
+| First start | The home page invites to allow the detection; nothing is observed before | 2026-11-12 |
+| Allow it, then open a file of the repository in an application | The **Suggestions** page proposes the project as detected, with the application, the file, the folder, the solution and the repository address | 2026-11-12, the Atlas repository with an icon open in Paint |
+| Leave Atlas in the background, installed | After a second scan, a Windows notification proposes the project, with **Enregistrer**, **Plus tard** and **Ignorer** | 2026-11-12, installed for the current user; Windows accepted the notification two minutes later |
+| Choose **Enregistrer** in the notification | Atlas comes forward on the new workspace; the history says it came from a suggestion | Not yet verified on a real notification: the computer used had Do Not Disturb on; the choice itself is covered by automated tests |
+| Open only the repository folder in File Explorer | The proposal is marked **Probable · à vérifier**, and its notification offers **Vérifier** instead of **Enregistrer** | Not yet verified |
+| Keep Atlas in front | The proposal appears as a banner in Atlas, not as a notification | Covered by automated tests only |
+| Turn Do Not Disturb on in Windows | The notification goes to the notification center without a banner | 2026-11-12, notification delivered with Do Not Disturb on |
+| Close Atlas | Its notifications leave the notification center | 2026-11-12, notification center cleared by the same call |
+| Run a copy that was not installed | The settings say Windows notifications are reserved to an installed Atlas; proposals show in Atlas | 2026-11-12 |
+| **Oublier les observations** in the settings | After confirmation, the suggestions and the ignored list are empty; workspaces stay | Covered by automated tests only |
+
+## Installers
+
+| Check | Expected | Last verified |
+|---|---|---|
+| Run `./build/publish.ps1` | Two installers, two portable archives and `SHA256SUMS.txt` in `artifacts`; every binary of each copy is built for its processor | 2026-11-12 |
+| Install for the current user, start, update in place, uninstall | `build/test-installer.ps1 -Scope CurrentUser` passes; the data folder is unchanged | 2026-11-12, Windows 11 x64 |
+| The same for all users, and from an older version | `build/test-installer.ps1 -Scope AllUsers -OlderInstaller` passes | 2026-11-12, CI on Windows Server 2025 x64 and Windows 11 ARM64 |
+| Run the ARM64 installer on an x64 computer, and the reverse | It refuses to install and names the right download | 2026-11-12, both ways (x64 here, ARM64 in CI) |
+| Run the installer while Atlas is open | It asks to close Atlas first | 2026-11-12, refusal checked silently |
+| Install with the wizard, in light and dark Windows themes | The wizard follows the theme; the choice between all users and the current user is offered; Atlas starts at the end if asked | Not yet verified |
+| Look at **Applications installées** | ELPO Atlas, by ELPO software, with its icon and version | 2026-11-12, checked through the registry by the test script |
+| Run it on a Windows 10 computer | Atlas installs, starts and restores; the title bar keeps the system color | Not yet verified |
+
+## Portable archive
+
+| Check | Expected | Last verified |
+|---|---|---|
+| Extract the archive to a folder whose name has spaces and accents, and run `Atlas.exe` with `dotnet` hidden from the environment | Atlas starts; its runtime is loaded from the extracted folder, not from an installed .NET | 2026-11-12, `build/test-portable.ps1` on x64 and ARM64 |
+| In the settings, choose **Voir la licence** for a component | Its full license text opens | 2026-11-08 |
+| Open the settings | The version is 0.2.0-beta.1; the licenses are listed, Inno Setup among them | 2026-11-12 |

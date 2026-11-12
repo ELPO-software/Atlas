@@ -180,7 +180,8 @@
                                                             </StackPanel>
                                                             <TextBlock Classes="caption"
                                                                        Text="{Binding Target}"
-                                                                       TextTrimming="PathSegmentEllipsis"
+                                                                       TextTrimming="LeadingCharacterEllipsis"
+                                                                       TextWrapping="NoWrap"
                                                                        ToolTip.Tip="{Binding Target}" />
                                                         </StackPanel>
                                                         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">

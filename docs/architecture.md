@@ -6,7 +6,7 @@
 |---|---|---|
 | `Atlas.Core` | Models, business rules, validation, interfaces | Nothing |
 | `Atlas.Infrastructure` | SQLite, migrations, logging, data paths | `Atlas.Core` |
-| `Atlas.Platform` | Operating system integrations | `Atlas.Core` |
+| `Atlas.Platform` | Operating system integrations: opening resources, reading the session, notifications | `Atlas.Core` |
 | `Atlas.App` | Avalonia views, view models, composition | All of the above |
 
 `ArchitectureTests` fails the test run if one of these rules is broken.
@@ -15,7 +15,7 @@ Only `Atlas.App` knows Avalonia and only `Atlas.Infrastructure` knows SQLite. `A
 
 ## Storage
 
-Atlas keeps one SQLite file per user, in `%LOCALAPPDATA%\ELPO\Atlas\atlas.db`.
+Atlas keeps one SQLite file per user, in `%LOCALAPPDATA%\ELPO\Atlas\atlas.db`. The environment variable `ATLAS_DATA_DIR` names another folder, as a full path; tests and trials use it to stay away from real data.
 
 - **Dates** are stored as UTC text in the round-trip format, so sorting the text sorts the dates.
 - **Writes** run in a transaction: they apply completely or not at all.
@@ -52,7 +52,7 @@ Diagnostic logs stay on the computer, in `%LOCALAPPDATA%\ELPO\Atlas\logs`. A new
 
 ## Interface
 
-`MainWindowViewModel` owns the current page and implements `INavigator`. Each page is a `PageViewModel`, created for each visit, and `MainWindow` picks its view through data templates.
+`MainWindowViewModel` owns the current page, the banner that announces a suggestion, and the count of suggestions next to the navigation, and implements `INavigator`. Each page is a `PageViewModel`, created for each visit, and `MainWindow` picks its view through data templates.
 
 - **Leaving a page:** before a page is replaced or the window closes, `TryLeaveAsync` lets it finish its work. A page can refuse, which keeps the user on it. `WorkspaceDetailViewModel` uses this to store pending notes, or to ask before losing notes it cannot store.
 - **Notes** are saved one second after typing stops. Saves run one at a time, and text typed during a save is stored right after it. A failed save is reported, and the text stays on screen.
@@ -62,7 +62,7 @@ Diagnostic logs stay on the computer, in `%LOCALAPPDATA%\ELPO\Atlas\logs`. A new
 
 ### Theme
 
-`Styles/Theme.axaml` is the only place that defines colors, and `Styles/Controls.axaml` holds the text and control styles. Blue is reserved for the main action of a screen and the navigation selection. Surfaces are separated by their fill, not by borders.
+`Styles/Theme.axaml` is the only place that defines colors and icons, and `Styles/Controls.axaml` holds the text and control styles: panels, chips, information bars (information, success, warning, error), empty states, thin progress lines, icon tiles for each type of resource (`ResourceIcons`) and the footer band of dialogs. Blue is reserved for the main action of a screen, the navigation selection and what Atlas wants the user to notice. Surfaces are separated by their fill; a hairline border only marks the edge of panels and of the sidebar. A short fade separates pages, unless the user turned animations off in Windows (`SystemMotion`).
 
 `ThemeTests` reads the colors from the real theme and fails if text drops below 4.5:1 or a control boundary below 3:1. Add any new pair of colors to it.
 
@@ -111,9 +111,44 @@ A resource type is a text value (`ResourceKind`). Adding one does not change the
 - **`Atlas.Core`** contains no user-facing text. It reports problems as codes, which the interface turns into messages.
 - **Package versions** are declared once, in `Directory.Packages.props`.
 
+## Environment detection
+
+The detection proposes workspaces from what the user has open. It is split like the restoration, so that every decision can be tested without reading the real session.
+
+- **`IWorkObserver`** (Core) reads the session into a `WorkObservation`: the programs with a window and what they have open, the folders open in File Explorer, and the projects behind them. On Windows, `WindowsWorkObserver` (Platform) lists the windows of the session, reads each program's path and command line (`WindowsSession`), asks the shell for its File Explorer windows (`ExplorerWindows`), reads the recent folders of Visual Studio Code editors and the recent solutions of Visual Studio and keeps those whose name appears in a window title (`OpenItems`), and walks up from each location to the Git repository, solution or package manifest that holds it (`ProjectLocator`). It only reads, keeps paths that exist and leaves out system and program folders.
+- **`EnvironmentDetector`** (Core) turns an observation into `EnvironmentProposal`s: one per project, and one recurring context for what belongs to no project. It decides how sure it is: a project that a program has open is detected, a project only seen in File Explorer and every context are probable. Every resource goes through `ResourceRules`, so a proposal never holds what Atlas would refuse.
+- **`EnvironmentDetectionService`** (Core) keeps proposals and decisions through `IDetectionStore`, and decides what to show and what to announce: a context only once seen on two days, a project only once still there after 90 seconds, at most one announcement every 20 minutes, never twice the same, and never what a workspace already holds. "Later" lasts 8 hours; proposals nobody decided about are forgotten after 30 days. Saving goes through `WorkspaceService.CreateFromDetectionAsync`, with its own line of history.
+- **`SuggestionCenter`** (App) runs a scan every two minutes while Atlas is open and the user allowed it, and announces a proposal through `IDesktopNotifications` when Atlas is in the background, or through the banner of the main window. It applies the choice made in a notification, and removes every notification when Atlas closes.
+
+The settings `detection` (null until the user decides, then `on` or `off`) and `detection-notifications` are stored with the other settings. Proposals live in the `detected_environments` table (migration `0004_detection.sql`), with their resources as JSON.
+
+The shell's scripting objects (Shell.Application) are only used on `ShellApartment`, one long-lived single-threaded apartment: the shell may hand the same object to several threads, and a thread that ends would detach it for the others.
+
+## Notifications
+
+`WindowsNotifications` (Platform) shows Windows notifications through the Windows Runtime, declared by hand in `WinRtInterop.cs` from the Windows metadata, so that Atlas needs no extra library. The identifier of the activation handler is computed as the Windows Runtime specifies, and a test recomputes it.
+
+Windows attributes a notification to the Start menu entry that carries the application identity `ELPO.Atlas`, which the installer creates. `InstalledCopy` compares the folder of the running Atlas with the one the installer recorded: only the installed copy notifies and adopts that identity, at startup, before its first window. Windows keeps an identity it has seen, even after an uninstallation, so its mere availability does not prove anything.
+
+## Starting twice
+
+`SingleInstanceGuard` holds a name per data folder, and a name every running Atlas holds, which the installer waits for. A second start of Atlas signals the first one through a named event, hands it the right to come to the foreground, and ends. The first one restores its window if it was minimized and brings it forward.
+
 ## Release
 
-`build/publish.ps1` publishes Atlas for 64-bit Windows with its own .NET runtime, twice: as a single executable, and as a folder in a zip archive with `LICENSE`, `THIRD-PARTY-NOTICES.md` and the `licenses` folder. It writes both, with their SHA-256 checksums, to `artifacts`. The license texts of the `licenses` folder are also built into Atlas and shown from the settings, so that the single executable carries them too. The native debug symbols that SkiaSharp and HarfBuzz add to every publish, about 100 MB, are left out by the `AtlasLeaveSymbolsOutOfPublish` target of `Atlas.App.csproj`.
+`build/publish.ps1` publishes Atlas with its own .NET runtime for x64 and for ARM64, checks that every binary of each copy is built for its processor, and writes to `artifacts`:
+
+- `Atlas-Setup-x64.exe` and `Atlas-Setup-ARM64.exe`, built by Inno Setup 6.7 from `build/installer/Atlas.iss`;
+- `Atlas-Portable-x64.zip` and `Atlas-Portable-ARM64.zip`;
+- `SHA256SUMS.txt`.
+
+Each copy carries `LICENSE`, `THIRD-PARTY-NOTICES.md` and the `licenses` folder, whose texts are also built into Atlas and shown from the settings. The native debug symbols that SkiaSharp and HarfBuzz add to every publish, about 100 MB, are left out by the `AtlasLeaveSymbolsOutOfPublish` target of `Atlas.App.csproj`.
+
+The installer has one identity for both processors, so Windows holds one Atlas at a time. It installs for all users or for the current one, keeps that choice for updates, refuses to install on the other processor, waits while Atlas runs, asks before replacing a newer version, and never touches the data folder. Uninstalling also removes the notification settings Windows keeps for Atlas.
+
+`build/test-installer.ps1` installs, starts, updates and uninstalls an installer and checks what Windows shows at each step; `build/test-portable.ps1` checks a portable archive. Both refuse to run where Atlas is already installed or running, and accept a separate data folder.
+
+The CI workflow (`.github/workflows/ci.yml`) builds and tests on `windows-2025` (x64) and `windows-11-arm` (ARM64), builds the downloads with a pinned and checked Inno Setup, then runs both scripts on a computer of each processor, for all users and for one user, and checks that the installer of the other processor refuses to install. The downloads of a release are the ones this workflow built and tested.
 
 `ReleaseTests` checks that no Atlas assembly references a networking library, and that `THIRD-PARTY-NOTICES.md` names every component shown in the settings and links only to license files that exist.
 
